@@ -1206,15 +1206,14 @@ Favoritar, navegar para outra tela, voltar e confirmar que o favorito permanece.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): o campo `favoriteCaregiverIds` já existia em `Company` desde a
+> Etapa 3; aqui ele ganhou comportamento. `isFavorite`/`toggleFavorite` em
+> `src/services/caregivers.ts`, botão "Favoritar / Nos favoritos" no perfil do cuidador (tela 07),
+> coração no `CaregiverCard` e um filtro "Favoritos" na lista (tela 06). Na busca da Etapa 9 os
+> favoritos passaram a ser o **primeiro critério de ordenação**, antes de proximidade, histórico e
+> avaliação — que é o atalho para convidar mais rápido que o escopo pede.
 
 ---
 
@@ -1250,15 +1249,14 @@ Comparar números exibidos com contagem manual do dataset.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `src/services/metrics.ts` (`platformMetrics`) e a seção
+> "Números de uso" na área de administração: cadastros por situação (as 4 situações, separando
+> cuidadores de empresas) e atendimentos publicados, concluídos, cancelados, mais pendências na
+> fila, pacientes e avaliações. Tudo **derivado do estado**, como o comentário de
+> `src/mocks/dashboard.ts` já exigia — nenhum contador mockado que possa dessincronizar. As
+> métricas de sucesso do MVP continuam fora, conforme o "fora do escopo" desta etapa.
 
 ---
 
@@ -1292,15 +1290,24 @@ Alterar dados em várias telas, resetar, e conferir retorno ao estado inicial.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída — com a substituição de `window.storage` por `localStorage`
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): **o escopo original desta etapa está superado num ponto.** Ela
+> foi escrita na era do artifact e pedia `window.storage`, com o entregável "nenhuma tela usa
+> `localStorage`". No projeto real o `CLAUDE.md` §15 manda usar `localStorage`, e `window.storage`
+> nem existe fora do Claude.ai. A intenção da etapa — **uma camada única de acesso a dados, com
+> nenhuma tela falando direto com o navegador** — foi mantida e é o que foi entregue.
+>
+> `src/services/storage.ts` é agora o único módulo do projeto que menciona `localStorage`
+> (verificado por busca em todo o `src/`): estado da aplicação, sessão e reset. O
+> `SessionProvider`, que até então gravava a sessão por fora, passou a usar
+> `loadSession`/`saveSession`/`clearSession` desse módulo. As funções de estado seguem assíncronas
+> de propósito, para uma futura `ApiService` entrar no lugar sem as telas perceberem.
+>
+> Reset da demo (CLAUDE.md §16) em **Configurações**, dentro da área de administração — o plano
+> pedia "na área de administração" e o `CLAUDE.md` pedia "em Configurações"; a seção nova atende
+> aos dois. Pede confirmação antes de executar, restaura o seed, limpa a sessão e devolve o usuário
+> à tela de entrada, deixando o ambiente pronto para a próxima apresentação.
 
 ---
 
@@ -1333,12 +1340,27 @@ Inspeção visual em diferentes larguras.
 
 ### Status
 ```text
-[ ] Não iniciada
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): o que existe é uma moldura decorativa de celular fixa em 320px
-> (`ac-phone-frame`) e um layout de admin fixo — não há breakpoints (`@media`) nem teste real em
-> larguras variadas. Não satisfaz a exigência de mobile-first responsivo de verdade do `CLAUDE.md`
-> (seção 8). Fica para depois da reimplementação em Tailwind (Etapa 0 em diante).
+> Nota de execução (pós-Revisão 4): a moldura decorativa fixa de 320px descrita na auditoria não
+> existe mais — desde a Etapa 0 o projeto é Tailwind com breakpoints de verdade, e as telas foram
+> nascendo mobile-first. Esta etapa fez a varredura sistemática que faltava.
+>
+> Auditoria automatizada em **4 larguras (360, 430, 768 e 1280px) × 20 telas**, medindo
+> `scrollWidth > clientWidth` no documento e listando qualquer elemento que ultrapassasse a
+> viewport. Resultado inicial: **um problema real** — a área de administração estourava a 360px.
+> Ela é desenhada para desktop (DESIGN_SYSTEM.md §3), mas a sidebar fixa de 176px espremia o
+> conteúdo a ponto de os crachás vazarem e os botões saírem do card. Corrigido: no celular a
+> navegação do admin vira uma faixa horizontal rolável acima do conteúdo e volta a ser sidebar a
+> partir de `md:`; as linhas de cuidador/empresa ganharam `flex-wrap`.
+>
+> Depois da correção: **zero rolagem horizontal nas 4 larguras, em todas as 20 telas, e zero erros
+> de console**. Estados vazios já vinham tratados tela a tela nas etapas anteriores (fila vazia,
+> busca sem resultado, agenda sem atendimentos, relatório sem linhas, notificações vazias), assim
+> como os estados de carregamento. Outros ajustes de refinamento feitos no caminho: a faixa de
+> números do painel deixou de exibir uma célula cinza vazia no mobile, `Input` ganhou estado
+> `disabled` visível, os grupos de controles viraram `fieldset`/`legend`, e a barra inferior da
+> empresa ficou com 5 itens (6 não cabem), com Relatórios acessível por link no painel.
 
 ---
 
