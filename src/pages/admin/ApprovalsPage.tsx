@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Briefcase, Users, History, LogOut } from "lucide-react";
+import {
+  BarChart3,
+  Briefcase,
+  ClipboardList,
+  History,
+  LogOut,
+  RotateCcw,
+  Settings,
+  Users,
+} from "lucide-react";
 import { AppHeader } from "../../components/layout/AppHeader";
-import { Button, Card, Cracha, Modal } from "../../components/ui";
+import { Button, Card, Cracha, Modal, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
@@ -15,42 +24,25 @@ import {
   suspendCompany,
   reactivateCompany,
 } from "../../services/admin";
-import type { ApprovalStatus, Caregiver, CaregiverCategory, Company } from "../../types";
+import {
+  APPROVAL_STATUS_CLASS,
+  APPROVAL_STATUS_LABEL,
+  CATEGORY_CLASS,
+  CATEGORY_LABEL,
+} from "../../constants/caregiver";
+import { platformMetrics } from "../../services/metrics";
+import type { Caregiver, Company } from "../../types";
 
-type Section = "fila" | "cuidadores" | "empresas" | "atividade";
+type Section = "fila" | "cuidadores" | "empresas" | "numeros" | "atividade" | "config";
 
 const NAV_ITEMS: { key: Section; label: string; icon: typeof ClipboardList }[] = [
   { key: "fila", label: "Fila de aprovação", icon: ClipboardList },
   { key: "cuidadores", label: "Cuidadores", icon: Users },
   { key: "empresas", label: "Empresas", icon: Briefcase },
+  { key: "numeros", label: "Números de uso", icon: BarChart3 },
   { key: "atividade", label: "Atividade", icon: History },
+  { key: "config", label: "Configurações", icon: Settings },
 ];
-
-const CATEGORY_LABEL: Record<CaregiverCategory, string> = {
-  informal: "Informal",
-  tecnico: "Técnico",
-  superior: "Superior",
-};
-
-const CATEGORY_CLASS: Record<CaregiverCategory, string> = {
-  informal: "bg-cat-informal",
-  tecnico: "bg-cat-tecnico",
-  superior: "bg-cat-superior",
-};
-
-const STATUS_LABEL: Record<ApprovalStatus, string> = {
-  pending: "Em análise",
-  approved: "Aprovado",
-  rejected: "Recusado",
-  blocked: "Bloqueado",
-};
-
-const STATUS_CLASS: Record<ApprovalStatus, string> = {
-  pending: "bg-status-aberto",
-  approved: "bg-status-concluido",
-  rejected: "bg-status-cancelado",
-  blocked: "bg-status-bloqueado",
-};
 
 interface ReasonPrompt {
   title: string;
@@ -66,12 +58,13 @@ function EmptyState({ text }: { text: string }) {
 
 export function AdminApprovalsPage() {
   const { signOut } = useSession();
-  const { state, setState } = useAppState();
+  const { state, setState, reset } = useAppState();
   const navigate = useNavigate();
 
   const [section, setSection] = useState<Section>("fila");
   const [prompt, setPrompt] = useState<ReasonPrompt | null>(null);
   const [reason, setReason] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   if (!state) {
     return (
@@ -96,6 +89,7 @@ export function AdminApprovalsPage() {
     setReason("");
   };
 
+  const metrics = platformMetrics(state);
   const pendingCaregivers = state.caregivers.filter((c) => c.approvalStatus === "pending");
   const pendingCompanies = state.companies.filter((c) => c.approvalStatus === "pending");
 
@@ -218,7 +212,10 @@ export function AdminApprovalsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Cracha label={CATEGORY_LABEL[c.category]} className={CATEGORY_CLASS[c.category]} />
-                    <Cracha label={STATUS_LABEL[c.approvalStatus]} className={STATUS_CLASS[c.approvalStatus]} />
+                    <Cracha
+                      label={APPROVAL_STATUS_LABEL[c.approvalStatus]}
+                      className={APPROVAL_STATUS_CLASS[c.approvalStatus]}
+                    />
                     {c.approvalStatus === "approved" && (
                       <Button
                         variant="ghost"
@@ -264,7 +261,10 @@ export function AdminApprovalsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Cracha label={STATUS_LABEL[co.approvalStatus]} className={STATUS_CLASS[co.approvalStatus]} />
+                    <Cracha
+                      label={APPROVAL_STATUS_LABEL[co.approvalStatus]}
+                      className={APPROVAL_STATUS_CLASS[co.approvalStatus]}
+                    />
                     {co.approvalStatus === "approved" && (
                       <Button
                         variant="ghost"
@@ -298,6 +298,77 @@ export function AdminApprovalsPage() {
             </div>
           )}
 
+          {section === "numeros" && (
+            <div>
+              <h1 className="mb-1 font-display text-[19px] font-semibold">Números de uso</h1>
+              <p className="mb-5 text-[12.5px] text-ink/50">
+                Contagens derivadas do dataset atual — mudam conforme as ações da demonstração.
+              </p>
+
+              <h2 className="mb-2 text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+                Cadastros por situação
+              </h2>
+              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-linha bg-linha sm:grid-cols-4">
+                {(Object.keys(APPROVAL_STATUS_LABEL) as (keyof typeof APPROVAL_STATUS_LABEL)[]).map(
+                  (status) => (
+                    <div key={status} className="bg-surface-raised px-3.5 py-3">
+                      <div className="text-[10px] tracking-wide text-ink/40 uppercase">
+                        {APPROVAL_STATUS_LABEL[status]}
+                      </div>
+                      <div className="mt-1 font-mono text-[17px] leading-none">
+                        {metrics.caregivers[status] + metrics.companies[status]}
+                      </div>
+                      <div className="mt-1 text-[10.5px] text-ink/40">
+                        {metrics.caregivers[status]} cuidador(es) · {metrics.companies[status]}{" "}
+                        empresa(s)
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+
+              <h2 className="mt-6 mb-2 text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+                Atendimentos e plataforma
+              </h2>
+              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-linha bg-linha sm:grid-cols-3">
+                {[
+                  { label: "Publicados", value: metrics.publishedAttendances },
+                  { label: "Concluídos", value: metrics.completedAttendances },
+                  { label: "Cancelados", value: metrics.cancelledAttendances },
+                  { label: "Pendências na fila", value: metrics.pendingApprovals },
+                  { label: "Pacientes", value: metrics.patients },
+                  { label: "Avaliações", value: metrics.evaluations },
+                ].map((item) => (
+                  <div key={item.label} className="bg-surface-raised px-3.5 py-3">
+                    <div className="text-[10px] tracking-wide text-ink/40 uppercase">{item.label}</div>
+                    <div className="mt-1 font-mono text-[17px] leading-none">{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {section === "config" && (
+            <div>
+              <h1 className="mb-1 font-display text-[19px] font-semibold">Configurações</h1>
+              <p className="mb-5 text-[12.5px] text-ink/50">
+                Ajustes da demonstração.
+              </p>
+
+              <Card>
+                <p className="text-[13.5px] font-semibold">Restaurar dados da demonstração</p>
+                <p className="mt-1 text-[12.5px] text-ink/60">
+                  Apaga tudo o que foi feito durante a apresentação (atendimentos criados,
+                  aprovações, check-ins, avaliações, mensagens) e devolve o conjunto de dados
+                  inicial. Você será desconectado para começar do zero.
+                </p>
+                <Button variant="destructive" size="sm" className="mt-3" onClick={() => setResetting(true)}>
+                  <RotateCcw size={13} /> Restaurar dados
+                </Button>
+              </Card>
+            </div>
+          )}
+
           {section === "atividade" && (
             <div>
               <h1 className="mb-1 font-display text-[19px] font-semibold">Registro de atividade</h1>
@@ -318,10 +389,36 @@ export function AdminApprovalsPage() {
         </div>
       </div>
 
+      {resetting && (
+        <Modal title="Restaurar dados?" onClose={() => setResetting(false)}>
+          <p className="mb-4 text-[13px] text-ink/70">
+            Todas as ações feitas nesta demonstração serão apagadas e o conjunto de dados inicial
+            volta ao lugar. Não dá para desfazer.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setResetting(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={async () => {
+                setResetting(false);
+                await reset();
+                signOut();
+                navigate("/login");
+              }}
+            >
+              Restaurar dados
+            </Button>
+          </div>
+        </Modal>
+      )}
+
       {prompt && (
         <Modal title={prompt.title} onClose={() => setPrompt(null)}>
-          <textarea
-            className="mb-4 h-20 w-full rounded-[10px] border-[1.5px] border-linha bg-surface-raised p-2.5 text-[13px] text-ink outline-none transition-colors focus:border-accent"
+          <Textarea
+            className="mb-4 h-20"
             placeholder={prompt.placeholder}
             value={reason}
             onChange={(e) => setReason(e.target.value)}

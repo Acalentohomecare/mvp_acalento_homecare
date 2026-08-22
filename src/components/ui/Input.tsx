@@ -12,7 +12,7 @@ export function Input({ label, id, className = "", ...props }: InputProps) {
       )}
       <input
         id={id}
-        className={`w-full rounded-[10px] border-[1.5px] border-linha bg-surface-raised px-[11px] py-[9px] text-[13.5px] text-ink outline-none transition-colors focus:border-accent ${className}`}
+        className={`w-full rounded-[10px] border-[1.5px] border-linha bg-surface-raised px-[11px] py-[9px] text-[13.5px] text-ink outline-none transition-colors focus:border-accent disabled:cursor-not-allowed disabled:bg-linha/25 disabled:text-ink/45 ${className}`}
         {...props}
       />
     </label>

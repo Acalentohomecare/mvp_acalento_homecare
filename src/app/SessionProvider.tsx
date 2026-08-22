@@ -1,7 +1,6 @@
 import { createContext, useEffect, useState, type ReactNode } from "react";
 import type { Session } from "../types";
-
-const SESSION_KEY = "acalento:session:v1";
+import { clearSession, loadSession, saveSession } from "../services/storage";
 
 interface SessionContextValue {
   session: Session | null;
@@ -11,21 +10,12 @@ interface SessionContextValue {
 
 export const SessionContext = createContext<SessionContextValue | null>(null);
 
-function readSession(): Session | null {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
-  } catch {
-    return null;
-  }
-}
-
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(readSession);
+  const [session, setSession] = useState<Session | null>(loadSession);
 
   useEffect(() => {
-    if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    else localStorage.removeItem(SESSION_KEY);
+    if (session) saveSession(session);
+    else clearSession();
   }, [session]);
 
   return (

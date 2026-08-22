@@ -3,12 +3,14 @@ import type { Attendance } from "./attendance";
 import type { AuditLogEntry } from "./audit-log";
 import type { Caregiver } from "./caregiver";
 import type { Company } from "./company";
+import type { DashboardAlert } from "./dashboard";
 import type { Document } from "./document";
 import type { Evaluation } from "./evaluation";
 import type { Invitation } from "./invitation";
 import type { Message } from "./message";
 import type { Notification } from "./notification";
 import type { Patient } from "./patient";
+import type { AttendanceRecord } from "./record";
 import type { User } from "./user";
 
 /** Tudo que é mutável durante a demo — persistido como um único blob no localStorage. */
@@ -25,4 +27,6 @@ export interface AppState {
   messages: Message[];
   documents: Document[];
   auditLog: AuditLogEntry[];
+  dashboardAlerts: DashboardAlert[];
+  records: AttendanceRecord[];
 }

@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState, type ReactNode } from "react";
 import type { AppState } from "../types";
 import { loadAppState, resetAppState, saveAppState } from "../services/storage";
+import { syncAutomaticNotifications } from "../services/notifications";
 
 type StateUpdater = AppState | ((prev: AppState) => AppState);
 
@@ -16,7 +17,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [state, setStateRaw] = useState<AppState | null>(null);
 
   useEffect(() => {
-    loadAppState().then(setStateRaw);
+    // Lembretes e alerta de check-in dependem só do relógio — sincronizados uma vez ao abrir.
+    loadAppState().then((loaded) => {
+      const synced = syncAutomaticNotifications(loaded);
+      if (synced !== loaded) saveAppState(synced);
+      setStateRaw(synced);
+    });
   }, []);
 
   const setState = (updater: StateUpdater) => {

@@ -5,15 +5,10 @@ import { Button, Card, Input } from "../components/ui";
 import { useAppState } from "../hooks/useAppState";
 import { useSession } from "../hooks/useSession";
 import { registerCaregiver } from "../services/auth";
+import { CATEGORY_LABEL, CATEGORY_ORDER } from "../constants/caregiver";
 import type { CaregiverCategory } from "../types";
 
 type AccountType = "caregiver" | "company";
-
-const CATEGORY_LABEL: Record<CaregiverCategory, string> = {
-  informal: "Informal",
-  tecnico: "Técnico",
-  superior: "Superior",
-};
 
 export function RegisterPage() {
   const { state, setState } = useAppState();
@@ -86,7 +81,7 @@ export function RegisterPage() {
                 <div>
                   <p className="mb-2 text-[11.5px] font-semibold text-ink/60">Categoria</p>
                   <div className="flex flex-wrap gap-2">
-                    {(Object.keys(CATEGORY_LABEL) as CaregiverCategory[]).map((cat) => (
+                    {CATEGORY_ORDER.map((cat) => (
                       <Button
                         key={cat}
                         type="button"

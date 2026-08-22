@@ -16,6 +16,8 @@ export interface Caregiver {
   /** Só se aplica a categoria "tecnico" ou "superior" (ex.: "COREN 45231"). */
   councilRegistration?: string;
   councilRegistrationStatus?: ApprovalStatus;
+  /** Só se aplica a categoria "tecnico" ou "superior" (ex.: "Cuidados pós-cirúrgicos"). */
+  specialties?: string[];
   approvalStatus: ApprovalStatus;
   rejectionReason?: string;
   activityIds: string[];

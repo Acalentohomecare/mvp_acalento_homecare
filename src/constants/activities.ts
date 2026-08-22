@@ -19,7 +19,8 @@ export const ACTIVITIES: Activity[] = [
   { id: "plano_cuidado", name: "Plano de cuidado", minCategory: "superior" },
 ];
 
-const CATEGORY_RANK: Record<Activity["minCategory"], number> = {
+/** Hierarquia de formação: uma categoria executa tudo que as anteriores executam. */
+export const CATEGORY_RANK: Record<Activity["minCategory"], number> = {
   informal: 0,
   tecnico: 1,
   superior: 2,

@@ -584,15 +584,54 @@ Abrir cuidadores das três categorias e confirmar diferenças de campos exibidos
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): reimplementada na arquitetura real, em três telas.
+> **Tela 06** (`src/pages/company/CaregiversPage.tsx`, rota `/empresa/cuidadores`): lista com busca
+> por nome/bairro/especialidade e filtro por categoria, estado vazio tratado. **Tela 07**
+> (`src/pages/company/CaregiverProfilePage.tsx`, rota `/empresa/cuidadores/:caregiverId`): perfil
+> completo — apresentação, experiência, valor, média, registro no conselho + status,
+> especialidades, região, disponibilidade, atividades e as avaliações recebidas com comentário.
+> **Tela 17** (`src/pages/caregiver/ProfilePage.tsx`, rota `/cuidador/perfil`): o cuidador edita a
+> própria apresentação, experiência, cidade/bairros, valor, disponibilidade (dias/turnos) e
+> atividades; técnico/superior ganham também registro no conselho e especialidades.
+>
+> Regras centralizadas em `src/services/caregivers.ts` (CLAUDE.md §18 — nada de regra solta no
+> JSX): `searchableCaregivers` (R1), `isVerified` (selo depende do cadastro aprovado, não só da
+> flag), `caregiverRating` (R10 — média só a partir da 3ª avaliação **da empresa**),
+> `allowedActivities` (a lista de atividades do cuidador é limitada pela categoria dele — base da
+> R2), e `updateCaregiverProfile`, que aplica R3 (alterar o registro no conselho devolve
+> `councilRegistrationStatus` para `pending`) e R12 (toda alteração de cadastro vira
+> `AuditLogEntry`, visível na aba Atividade da Etapa 5).
+>
+> Decisões desta etapa (respondidas pelo usuário antes de implementar): (1) campo `specialties?:
+> string[]` **adicionado** a `Caregiver` e aos mocks de técnico/superior, já que a Etapa 9 cita
+> "especialidade" como filtro; (2) filtros da tela 06 ficam em **busca + categoria** — o conjunto
+> completo do CLAUDE.md §22 (turno, valor, avaliação, disponibilidade) é escopo da Etapa 9, que é
+> onde a busca passa a ser aplicada a um atendimento; (3) navegação por **links mínimos** nos
+> dashboards placeholder ("Cuidadores" na empresa, "Meu perfil" no cuidador), sem montar menu
+> apontando para telas inexistentes (CLAUDE.md §41).
+>
+> Novos componentes reutilizáveis: `Avatar` (iniciais, foto simulada) em `components/ui/` e
+> `CaregiverCard` em `components/shared/` — este último já preparado para a lista de compatíveis da
+> Etapa 9. Rótulos de categoria/status/dia/turno centralizados em `src/constants/caregiver.ts`,
+> eliminando a duplicação que existia entre `RegisterPage` e `ApprovalsPage` (ambas refatoradas
+> para importar de lá); `CATEGORY_RANK` passou a ser exportado de `constants/activities.ts` em vez
+> de duplicado. Formatação de moeda/nota em `src/utils/format.ts`.
+>
+> **Fronteira com a Etapa 9:** a lista da tela 06 aplica R1 (só aprovados), mas **não** aplica R3
+> como filtro — um técnico com registro em conferência continua listado, com o crachá "Em análise"
+> visível no perfil. Filtrar por isso é critério de aceite da Etapa 9, não desta.
+>
+> `npx tsc -b` sem erros; `npm run lint` sem novos avisos em `src/`. Validado no navegador
+> (Playwright headless, viewport mobile 430px, script descartável não commitado) com **29
+> verificações, todas passando e zero erros de console**: R1 lista só os 6 aprovados (Renata/Paulo
+> pendentes, Camila recusada, Ricardo bloqueado ficam de fora) e bloqueia o acesso por URL direta;
+> R10 mostra "4,7 (3)" para quem tem 3 avaliações e "Sem média pública" / "1 de 3" para a Beatriz;
+> os perfis das três categorias diferem nos campos certos (informal sem conselho/especialidades);
+> R2 limita as atividades editáveis (informal vê 5, técnico vê 8); R3 devolve o registro para "Em
+> análise" ao ser alterado; a edição persiste após reload (`localStorage`) e aparece para a
+> empresa; R12 registra as alterações na auditoria do admin.
 
 ---
 
@@ -624,15 +663,37 @@ Conferir números exibidos contra o dataset da Etapa 3.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `src/pages/company/DashboardPage.tsx` reescrita como a tela 04
+> real. **Decisão tomada com o usuário:** onde o plano pedia 3 seções e o `CLAUDE.md` §20 pede 9
+> itens, seguimos o `CLAUDE.md` (que sobrepõe o plano), mas com hierarquia em vez de sopa de cards
+> — uma faixa compacta de números com divisores de 1px (hoje, em aberto, pacientes, cuidadores
+> ativos, horas realizadas) e então as seções: Pendências, Atendimentos de hoje, Em aberto,
+> Próximos e Atividade recente. Ação principal única e evidente: "Novo atendimento".
+>
+> Tudo é **derivado** em `src/services/attendances.ts`, sem contador mockado que possa
+> dessincronizar: `todayAttendances`, `awaitingCaregiverAttendances`, `upcomingAttendances`,
+> `draftAttendances`, `applicationsToReview`, `pendingCheckins` (tolerância de 15 min, a mesma da
+> Etapa 12), `completedHours` (horas reais de check-in/check-out, não a duração prevista),
+> `activeCaregiverIds` e `recentActivity`. `companyAttendances`/`companyPatients` garantem o
+> isolamento de dados — a empresa só enxerga o que é dela. `recentActivity` é derivada dos próprios
+> atendimentos **de propósito**: usar o `auditLog` vazaria ações de outras empresas e cuidadores.
+>
+> Também nesta etapa: **navegação da empresa** (decisão do usuário) em
+> `src/layouts/CompanyLayout.tsx` — sidebar no desktop, barra inferior no mobile, contendo só os
+> destinos que existem de verdade (Início, Atendimentos, Cuidadores); os demais itens do
+> `CLAUDE.md` §11 entram junto com suas telas. As telas de cuidadores da Etapa 6 foram ajustadas
+> para não repetir o `AppHeader`, que agora é do layout. Criada
+> `src/pages/company/AttendancesPage.tsx` (lista com filtros por situação), destino da aba
+> Atendimentos e origem do "reaproveitar" da Etapa 8.
+>
+> **Lacuna da Etapa 3 fechada aqui:** `DASHBOARD_ALERTS` existia como mock mas nunca tinha sido
+> ligado ao `AppState` — agora é `state.dashboardAlerts`. Para que estados já salvos no
+> `localStorage` não quebrem ao ganhar uma coleção nova, `loadAppState` passou a mesclar o que foi
+> lido sobre o seed.
+>
+> Validado no navegador junto com a Etapa 8 — ver a nota da Etapa 8.
 
 ---
 
@@ -668,15 +729,44 @@ calculada em cada um.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `src/pages/company/NewAttendancePage.tsx` (rota
+> `/empresa/atendimentos/novo`) com todos os campos da seção 5.3 do documento: tipo (os 4 tipos,
+> com duração fixa nos plantões e editável nos demais), paciente, endereço, data/horário/duração,
+> repetição, atividades exigidas, valor, e as duas ações — **Publicar** (status `open`, "Em busca")
+> e **Salvar rascunho** (status `draft`). "Reaproveitar atendimento anterior" preenche o formulário
+> a partir dos 5 atendimentos mais recentes da empresa.
+>
+> **Decisão tomada com o usuário sobre pacientes:** o plano (baseado no `.docx`) tratava o paciente
+> como campo embutido, mas o `CLAUDE.md` §19/§21 pede "Selecionar/Cadastrar Paciente" e o modelo da
+> Etapa 3 já fez de `Patient` uma entidade. Resolvido no próprio formulário: seletor dos pacientes
+> da empresa **mais** um cadastro inline de paciente novo (nome, idade, responsável, mobilidade,
+> oxigênio, sonda, animais, observações). Escolher um paciente preenche o endereço automaticamente
+> e mostra o resumo clínico relevante. Uma tela de Pacientes completa (lista/busca/edição, §21)
+> continua não existindo — não é escopo de nenhuma etapa do plano e pode virar uma etapa própria se
+> o usuário quiser.
+>
+> Regras: a categoria exigida sai de `attendanceRequiredCategory`, que reusa `requiredCategory` das
+> constantes de atividades — nada de lógica nova duplicada. O formulário mostra o resultado ao vivo
+> num painel "Perfil necessário", que é o diferencial do produto ficando visível na apresentação.
+> **R11** implementada aqui (foi deixada em aberto na Etapa 5): empresa suspensa não vê o CTA, vê
+> um aviso no painel, é redirecionada se tentar a URL direta do formulário, e **mantém** o acesso
+> ao histórico. Novos componentes de design system: `Select` e `Textarea` (este último eliminou o
+> `<textarea>` estilizado à mão que já se repetia em 3 telas); `Input` ganhou estado `disabled`
+> visível; os grupos de controles viraram `fieldset`/`legend` (acessibilidade, §39).
+>
+> `npx tsc -b` sem erros; `npm run lint` sem novos avisos em `src/`. Validado no navegador
+> (Playwright, mobile 430px + desktop 1280px) com **38 verificações das Etapas 7 e 8, todas
+> passando e zero erros de console**: os 5 números do painel batem com o dataset (hoje 1, em aberto
+> 4, pacientes 6, cuidadores ativos 3, horas calculadas do check-in/out); as 4 pendências corretas
+> (candidatura + rascunho + 2 alertas); isolamento confirmado logando como a segunda empresa
+> (2 pacientes, 2 em aberto, nenhum dado da primeira). Na tela 05, o critério de aceite foi testado
+> passo a passo: só atividades informais ⇒ **Informal**; marcar sinais vitais ⇒ **Técnico**; marcar
+> fisioterapia ⇒ **Superior**; desmarcar volta para Informal. Publicar levou "Em aberto" de 4 para
+> 5 com o crachá "Em busca"; o rascunho apareceu no filtro Rascunhos; o cadastro inline levou os
+> pacientes de 6 para 7; o reaproveitar preencheu paciente e atividades. R11 verificada de ponta a
+> ponta suspendendo a empresa pela área do admin (Etapa 5) e conferindo o efeito imediato.
 
 ---
 
@@ -711,15 +801,19 @@ Repetir o teste da Etapa 8 e confirmar que a lista muda corretamente conforme a 
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `src/services/matching.ts` com `compatibleCaregivers`, que
+> aplica as três regras de elegibilidade de uma vez — R1 (cadastro aprovado), R2 (categoria do
+> cuidador ≥ categoria exigida pelas atividades) e R3 (técnico/superior só com registro no conselho
+> conferido) — e ordena por proximidade de bairro, histórico com a empresa e avaliação.
+> `src/pages/company/MatchingPage.tsx` (rota `/empresa/atendimentos/:attendanceId/cuidadores`)
+> mostra o perfil exigido em destaque, os filtros (busca por nome/bairro/especialidade, turno e
+> valor máximo), o link para o perfil completo da Etapa 6, o botão Convidar por cuidador e o
+> interruptor de publicação aberta. Ponto de entrada: ação "Buscar cuidadores" nos cards da lista
+> de atendimentos.
+>
+> Validado no navegador junto com a Etapa 10 — ver a nota da Etapa 10.
 
 ---
 
@@ -756,15 +850,39 @@ endereço fica visível só para ele.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): ciclo fechado em `src/services/invitations.ts` —
+> `sendInvitation`, `acceptInvitation`, `rejectInvitation`, `applyToOpenAttendance`,
+> `confirmApplication` e `cancelAttendance`, cada um cuidando das transições de status do
+> atendimento e das notificações (convite, candidatura, confirmação, cancelamento). Aceitar um
+> convite vira uma candidatura: quem decide continua sendo a empresa.
+>
+> Regras: **R4** em `conflictingAttendance` — bloqueia aceitar/candidatar-se a horário que se
+> sobrepõe a um atendimento já confirmado ou já aceito, com aviso dizendo qual é o conflito.
+> **R5** em `canSeeFullAddress` — antes da confirmação o cuidador vê só o bairro com um cadeado;
+> depois, o endereço completo. **R8/R12** em `cancelAttendance` — calcula a antecedência real,
+> marca quando é menor que 12h e grava no log de auditoria visível na área do admin.
+>
+> Telas: `src/pages/company/ApplicationsPage.tsx` (tela 08 — comparar interessados, confirmar um,
+> cancelar com motivo) e `src/pages/caregiver/InvitationsPage.tsx` (tela 10 — convites recebidos,
+> publicações abertas compatíveis e "confirmados para você", que é onde a R5 fica visível).
+> `AttendanceCard` ganhou um slot de ações para levar a essas telas.
+>
+> **Fora do que foi feito:** o "perguntar antes de decidir" citado no escopo é conversa por
+> mensagem — fica para a Etapa 15. O cancelamento está implementado do lado da empresa; o lado do
+> cuidador entra junto com a agenda dele (Etapa 11). A visualização em calendário é a Etapa 11.
+>
+> `npx tsc -b` sem erros; `npm run lint` sem novos avisos em `src/`. Validado no navegador
+> (Playwright, mobile 430px) com **28 verificações das Etapas 9 e 10, todas passando e zero erros
+> de console**. R2/R3 conferidas no atendimento at3 (exige superior): Sandra (informal) e Juliana
+> (técnica) somem, Paulo Ricci some por estar com o registro pendente, e Marcos Vidal aparece; no
+> at8 (informal) as três categorias aparecem e os cadastros bloqueado/recusado nunca entram (R1).
+> Fluxo completo percorrido de ponta a ponta: convidar → cuidadora aceita → empresa vê a
+> candidatura → confirma → status vira Confirmado e o endereço completo aparece só para ela. R4
+> provada publicando um atendimento no mesmo dia e horário de um já confirmado e tentando aceitar —
+> bloqueado com a mensagem do conflito. R8/R12 provadas cancelando com motivo e conferindo o
+> registro na auditoria do admin.
 
 ---
 
@@ -799,15 +917,25 @@ Conferir agenda de empresa e cuidador após confirmar um atendimento de teste.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `SchedulePage` (`src/pages/shared/`) serve os dois perfis —
+> escala da empresa em `/empresa/agenda` e agenda do cuidador em `/cuidador/agenda` — com
+> alternância dia/semana sobre `scheduleDays` e o status real de cada atendimento no crachá.
+> `AttendanceDetailPage` (`src/pages/shared/`) é a tela 11 e concentra o que as Etapas 12–15
+> acrescentam, adaptando-se ao perfil de quem abriu: a empresa vê tudo do atendimento; o cuidador
+> vê o mesmo mais os botões de check-in/out e o registro, e só enxerga o endereço completo se for
+> o confirmado (R5, reaproveitando `canSeeFullAddress` da Etapa 10). Acesso é verificado nos dois
+> sentidos — cuidador não abre atendimento que não é dele.
+>
+> Lembretes automáticos (véspera e 1h antes) ficam em `syncAutomaticNotifications`
+> (`src/services/notifications.ts`), com id derivado do atendimento para serem **idempotentes**;
+> rodam uma vez ao carregar o estado, no `AppStateProvider`. O painel do cuidador (tela 10) virou
+> real: próximo atendimento, convites, horas realizadas, avaliação e próximos compromissos. Também
+> foi criado `CaregiverLayout` (mesma navegação em sidebar/barra inferior da empresa) e a navegação
+> da empresa ganhou Escala, Relatórios e Avisos.
+>
+> Validado no navegador junto com as Etapas 12–16 — ver a nota da Etapa 16.
 
 ---
 
@@ -841,15 +969,16 @@ Tentar check-out sem check-in (deve bloquear); simular atraso e confirmar o aler
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `checkIn`/`checkOut`/`canCheckOut` em
+> `src/services/records.ts`. O check-in grava o horário e a localização simulada
+> (`"<bairro> (simulado)"`, sem GPS real) e leva o status para "Em andamento"; o check-out leva
+> para "Concluído". **R6** é o próprio `canCheckOut` — o botão de check-out nasce desabilitado e só
+> libera depois do check-in, com a explicação visível ao lado. O alerta de atraso é gerado por
+> `syncAutomaticNotifications` quando passam mais de 15 min do horário sem check-in, usando a mesma
+> constante `CHECKIN_TOLERANCE_MINUTES` que o painel da empresa (Etapa 7) já usava para contar
+> pendências — uma fonte só para a regra.
 
 ---
 
@@ -885,15 +1014,20 @@ observação.
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): **tipo novo** `AttendanceRecord` (`src/types/record.ts`) —
+> tarefas concluídas, observações, sinais vitais, fotos simuladas e `closedAt` — somado ao
+> `AppState` como `records`, com `src/mocks/records.ts` cobrindo os três atendimentos já encerrados
+> do dataset para o histórico não nascer vazio. A tela mostra as tarefas do próprio atendimento
+> como checkboxes, observações com data, até 3 fotos simuladas (só o rótulo, sem upload — §35) e
+> os sinais vitais **apenas quando o cuidador tem formação** (técnico/superior), como pede o
+> escopo.
+>
+> **R7** vive em `isRecordLocked`/`updateRecord`: o check-out grava `closedAt` e, a partir daí,
+> `updateRecord` recusa qualquer alteração — tarefas e sinais vitais ficam desabilitados, o botão
+> de anexar foto some, e a única porta que continua aberta é `addObservation`, que marca a entrada
+> com `afterCheckout: true` e a exibe como "acrescentada após o check-out".
 
 ---
 
@@ -927,15 +1061,17 @@ Avaliar um cuidador com menos de 3 avaliações (sem média visível) e outro co
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `src/services/evaluations.ts` com `canEvaluate` (**R9** — o
+> formulário só aparece com o atendimento concluído/avaliado; antes disso a seção explica que a
+> avaliação é liberada depois), `evaluationFor` (cada lado avalia uma vez só) e `createEvaluation`,
+> que registra a nota de 1 a 5 mais o comentário e move o atendimento para "Avaliado". Os dois
+> lados avaliam a partir da mesma tela de detalhe: a empresa avalia o cuidador, o cuidador avalia
+> a empresa. **R10** já estava implementada na Etapa 6 (`caregiverRating` só devolve média a partir
+> da 3ª avaliação da empresa) e continua sendo a única fonte da média — nada foi duplicado aqui.
+> `caregiverHistory` alimenta a nova seção "Histórico com a empresa" no perfil do cuidador
+> (tela 07), fechando a parte de histórico do escopo.
 
 ---
 
@@ -970,15 +1106,19 @@ Percorrer o fluxo completo e conferir se cada notificação aparece no momento c
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): a conversa (tela 14) fica dentro da tela de detalhe do
+> atendimento, como o escopo pede — vinculada a um atendimento, nunca solta.
+> `src/services/messages.ts` guarda a mensagem e dispara a notificação `new_message` para o outro
+> lado. Central de notificações em `src/pages/shared/NotificationsPage.tsx`, servindo os dois
+> perfis (`/empresa/notificacoes` e `/cuidador/notificacoes`), com não-lidas destacadas, contador
+> na navegação e "marcar todas como lidas".
+>
+> Os cinco gatilhos do escopo estão cobertos e cada um nasce no serviço que provoca o evento, não
+> na tela: convite e candidatura em `invitations.ts` (Etapa 10), confirmação e cancelamento no
+> mesmo lugar, lembrete e falta de check-in em `notifications.ts` (Etapas 11/12), nova mensagem em
+> `messages.ts`.
 
 ---
 
@@ -1011,15 +1151,29 @@ Conferir manualmente a soma de horas de um cuidador de teste contra o relatório
 
 ### Status
 ```text
-[~] Em andamento
+[x] Concluída
 ```
-> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
-> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
-> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
-> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
-> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
-> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
-> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
+> Nota de execução (pós-Revisão 4): `src/services/reports.ts` (`buildReport`, `reportTotals`,
+> `reportToCsv`) e `src/pages/company/ReportsPage.tsx` em `/empresa/relatorios`. As horas
+> realizadas saem **do check-in/check-out**, não da duração contratada — os dois números aparecem
+> lado a lado, que é exatamente a conferência manual que o cliente faz hoje na mão. Filtros por
+> período, cuidador e paciente; totais de atendimentos, horas previstas, horas realizadas e valor.
+> Exportação gera um CSV real (separador `;`, decimal com vírgula e BOM, para abrir certo no Excel
+> em português) via `Blob` — arquivo de verdade, nada simulado.
+>
+> `npx tsc -b` sem erros; `npm run lint` sem novos avisos em `src/`. Validado no navegador
+> (Playwright, mobile 430px) com **29 verificações cobrindo as Etapas 11 a 16, todas passando e
+> zero erros de console**. Fluxo percorrido de ponta a ponta em um atendimento real do dataset:
+> escala da empresa (dia/semana, status corretos) → detalhe → login do cuidador → **R6** (check-out
+> desabilitado, liberado só após o check-in) → check-in muda para "Em andamento" e grava a
+> localização simulada → registro com tarefa, foto e observação → check-out muda para "Concluído" e
+> **R7** trava tudo (tarefas desabilitadas, botão de foto some) deixando só a observação, que entra
+> marcada como posterior ao check-out → **R9** libera a avaliação dos dois lados → mensagem enviada
+> aparece na conversa e gera notificação para o outro perfil → lembrete automático visível na
+> central do cuidador → relatório com **a soma das linhas batendo com o total exibido** (72,0h
+> previstas contra 60,5h realizadas), filtro por cuidador funcionando e CSV baixado e lido de
+> volta com cabeçalho e linhas. Também verificado que um cuidador não abre o detalhe de atendimento
+> que não é dele.
 
 ---
 

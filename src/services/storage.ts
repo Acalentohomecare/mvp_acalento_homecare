@@ -1,17 +1,20 @@
-import type { AppState } from "../types";
+import type { AppState, Session } from "../types";
 import { seedAppState } from "../mocks/seed";
 
 const STORAGE_KEY = "acalento:app-state:v1";
+const SESSION_KEY = "acalento:session:v1";
 
 /**
- * Camada de persistência (CLAUDE.md §15/§19). Hoje é `localStorage`; assíncrona de propósito
- * para que uma futura `ApiService` substitua isto sem as telas saberem a diferença.
+ * Camada única de acesso a dados (CLAUDE.md §15/§19). Este é o **único** módulo do projeto que
+ * conhece `localStorage` — nenhuma tela fala com o navegador direto. As funções de estado são
+ * assíncronas de propósito, para que uma futura `ApiService` substitua isto sem as telas saberem.
  */
 export async function loadAppState(): Promise<AppState> {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
     try {
-      return JSON.parse(raw) as AppState;
+      // Mesclado sobre o seed: um estado salvo antes de uma coleção nova existir não quebra a demo.
+      return { ...seedAppState(), ...(JSON.parse(raw) as Partial<AppState>) };
     } catch {
       // JSON corrompido — cai para o seed abaixo.
     }
@@ -29,5 +32,25 @@ export async function saveAppState(state: AppState): Promise<void> {
 export async function resetAppState(): Promise<AppState> {
   const seed = seedAppState();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+  clearSession();
   return seed;
+}
+
+// ---------- Sessão simulada ----------
+
+export function loadSession(): Session | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as Session) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveSession(session: Session): void {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+export function clearSession(): void {
+  localStorage.removeItem(SESSION_KEY);
 }

@@ -1,6 +1,9 @@
+export { Avatar } from "./Avatar";
 export { Button } from "./Button";
 export { Card } from "./Card";
 export { Cracha } from "./Cracha";
 export { Input } from "./Input";
 export { Modal } from "./Modal";
+export { Select } from "./Select";
 export { Stepper } from "./Stepper";
+export { Textarea } from "./Textarea";
