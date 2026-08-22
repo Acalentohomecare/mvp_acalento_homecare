@@ -1,9 +1,15 @@
 # IMPLEMENTATION_PLAN.md — MVP Acalento Home Care
 
 > Plano oficial de execução do projeto. Versionado no repositório conforme regra do prompt.
-> Revisão 3 — Etapas 3 a 22 implementadas em bloco a pedido do usuário. Ver seção 6 (Log de
-> Decisões) para o que mudou em cada revisão, e `docs/DEMO_GUIDE.md` para o roteiro de
-> demonstração e o checklist de validação.
+> **Revisão 4 — auditoria de arquitetura.** O `CLAUDE.md` da raiz (regras vigentes do projeto)
+> exige um projeto npm real (Vite + React + TypeScript + Tailwind, `npm install`/`npm run dev`,
+> estrutura modular `src/`, persistência em `localStorage`). O que existe hoje é um artifact
+> React single-file (decisão da Revisão 1/3, tomada por limitação de ambiente, não por escolha de
+> produto) — **não é um projeto npm e não roda com `npm install`/`npm run dev`**. Os status das
+> etapas abaixo foram corrigidos para refletir isso, e uma nova **Etapa 0 — Bootstrap do Projeto
+> Real** foi inserida como pré-requisito. Ver `docs/PROJECT_AUDIT.md` para o detalhamento completo
+> da auditoria, e a seção 6 (Log de Decisões) para o registro da Revisão 4. `docs/DEMO_GUIDE.md`
+> continua valendo como roteiro de demonstração e checklist de regras de negócio.
 
 ---
 
@@ -198,7 +204,17 @@ Adicionais, por ser uma demo (não um produto real):
 
 ## 2. Decisões de Arquitetura
 
-### 2.1 Stack
+> **Nota (Revisão 4): as seções 2.1–2.3 abaixo estão superadas.** Foram escritas quando o
+> `CLAUDE.md` atual ainda não existia no repositório e o ambiente de desenvolvimento não tinha
+> acesso de rede para `npm install`. Hoje o `CLAUDE.md` exige explicitamente um projeto npm real
+> (React + TypeScript + Vite + Tailwind, `localStorage`, estrutura `src/` modular — seções 2, 4,
+> 12 e 15 do `CLAUDE.md`), o que substitui a decisão de "artifact single-file" abaixo. As seções
+> ficam mantidas como registro histórico de por que a decisão foi tomada naquele momento (regra do
+> projeto: preservar o histórico de decisões), mas **não descrevem mais a arquitetura-alvo**. A
+> arquitetura-alvo passa a ser a estrutura da Etapa 0 (seção 3) e da seção 12 do `CLAUDE.md`. Ver
+> `docs/PROJECT_AUDIT.md` para o detalhamento completo.
+
+### 2.1 Stack (histórico — ver nota acima)
 
 - Entregável final: **artifact React (JSX) single-file**, renderizado nativamente pelo Claude.ai.
 - Estado: `useState`/`useReducer` + Context API; navegação por estado interno (sem URL routing).
@@ -227,6 +243,57 @@ Cuidador).
 ---
 
 ## 3. Etapas
+
+## Etapa 0 — Bootstrap do Projeto Real (pré-requisito, adicionada na Revisão 4)
+
+### Objetivo
+Sair do artifact single-file e criar o projeto npm real exigido pelo `CLAUDE.md` (seção 2 e seção
+47, item 1), para que todas as etapas seguintes possam ser executadas e testadas de verdade.
+
+### Escopo
+- `npm create vite@latest` com template React + TypeScript.
+- Configurar Tailwind CSS (`tailwind.config.ts`, `postcss.config.js`, diretivas em `src/index.css`)
+  e portar os tokens de `docs/DESIGN_SYSTEM.md` (paleta, tipografia) para `theme.extend`.
+- Criar a estrutura de pastas da seção 12 do `CLAUDE.md`: `src/app`, `src/components/{ui,layout,shared}`,
+  `src/pages`, `src/layouts`, `src/features/*`, `src/mocks`, `src/services`, `src/hooks`,
+  `src/types`, `src/utils`, `src/constants`, `src/assets`.
+- Confirmar `npm install && npm run dev` funcionando localmente com uma tela mínima (placeholder).
+- Adicionar `.gitignore` (`node_modules`, `dist`, etc. — hoje ausente do repositório).
+
+### Fora do escopo
+Migrar telas/lógica de negócio (etapas seguintes). Esta etapa só cria o esqueleto executável.
+
+### Dependências
+Nenhuma — é pré-requisito de todas as demais.
+
+### Arquivos esperados
+`package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.js`,
+`.gitignore`, `src/main.tsx`, `src/App.tsx`, estrutura de pastas vazia conforme acima.
+
+### Entregáveis
+Projeto que abre no navegador via `npm run dev` mostrando uma tela mínima com os tokens de cor/
+tipografia do design system já aplicados via Tailwind.
+
+### Critérios de aceite
+`npm install` conclui sem erro; `npm run dev` sobe um servidor local; a tela mínima renderiza sem
+erros de console; a estrutura de pastas da seção 12 do `CLAUDE.md` existe.
+
+### Validação
+Rodar `npm install && npm run dev` do zero (clone limpo) e confirmar no navegador.
+
+### Status
+```text
+[x] Concluída
+```
+> Nota de execução: `npm install` concluído sem erro (React 19, Vite 8, TypeScript ~6, Tailwind 4,
+> `@tailwindcss/vite`, `lucide-react`). `npx tsc -b` sem erros. `npm run dev` sobe em
+> `http://localhost:5173/` (log: "VITE v8.2.2 ready"). Tela mínima renderizada e verificada via
+> screenshot real (Chrome headless/Playwright CLI) — título "Acalento" em Fraunces, badges de
+> categoria (informal/técnico/superior) e de status nas cores exatas do `DESIGN_SYSTEM.md`, texto
+> em Work Sans, horário em IBM Plex Mono. Console do navegador sem erros. Estrutura `src/`
+> completa (seção 12 do `CLAUDE.md`) criada. `.gitignore` adicionado (ignora `node_modules`).
+
+---
 
 ## Etapa 1 — Análise e Plano
 
@@ -259,6 +326,9 @@ Revisão humana antes de liberar a Etapa 2.
 ```text
 [x] Concluída (Revisão 2)
 ```
+> Nota de auditoria (Revisão 4): conteúdo de análise válido e reaproveitável. `MVP_Home_Care.docx`
+> não foi localizado no repositório — ver `docs/PROJECT_AUDIT.md` seção 2. Se o `.docx` reaparecer,
+> vale reconferir este documento diretamente contra ele.
 
 ---
 
@@ -295,6 +365,13 @@ Visualização do artifact com componentes-base.
 ```text
 [x] Concluída
 ```
+> Nota de execução (pós-Revisão 4): componentes-base reimplementados em `src/components/ui/`
+> (`Button`, `Input`, `Card`, `Cracha`, `Stepper`, `Modal`), em TypeScript + Tailwind, usando os
+> tokens definidos em `src/index.css` (`@theme`). Showcase em `src/App.tsx`. `npx tsc -b` sem
+> erros; testado no navegador (Chrome/Playwright) com screenshot dos 6 componentes e do modal
+> aberto — cores de categoria/status batendo com `docs/DESIGN_SYSTEM.md`, zero erros de console.
+> `componentes_base_design_system.jsx` (artifact antigo) mantido no repositório como referência
+> histórica, sem uso pelo projeto real.
 
 ---
 
@@ -332,6 +409,23 @@ Inspeção manual; checklist de "toda regra tem pelo menos um caso nos dados".
 ```text
 [x] Concluída
 ```
+> Nota de execução (pós-Revisão 4): reimplementada na arquitetura real. Tipos de domínio em
+> `src/types/` (User, Company, Caregiver, Patient, Attendance, Invitation, Application, Evaluation,
+> Notification, Message, Document, além de Activity/AuditLogEntry/DashboardAlert e os enums da
+> seção 17 do `CLAUDE.md`) — pré-requisito que o `CLAUDE.md` pede antes dos mocks. Dataset em
+> `src/mocks/` (um arquivo por domínio, seção 13 do `CLAUDE.md`), com **Paciente agora uma
+> entidade própria** (decisão do usuário: CLAUDE.md §21 prevalece sobre a leitura anterior do
+> `.docx`, que o tratava como campo embutido no Atendimento — Attendance passou a referenciar
+> `patientId`). Dataset atende aos mínimos do `CLAUDE.md` §13: 1 admin, 2 empresas, 10 cuidadores
+> (3 categorias, com pendente/recusado/bloqueado representados), 8 pacientes, 15 atendimentos
+> (todos os 9 status do ciclo de vida representados pelo menos uma vez), 12 avaliações (cg1/cg4/cg5
+> com 3+ — média visível, R10; cg2 com 1 só — média ainda oculta), 12 notificações (6 tipos
+> oficiais do `CLAUDE.md` §32 cobertos), 8 mensagens, convites, candidaturas, documentos simulados
+> e log de auditoria (R12). Validado com `npx tsc -b` (sem erros) e um script de integridade
+> referencial (checagem de todos os ids cruzados entre coleções + compatibilidade categoria
+> mínima × categoria do cuidador confirmado) — passou 100%, depois removido por ser só uma
+> ferramenta de verificação, não parte do app. `app_acalento_homecare.jsx` mantido como referência
+> do formato/volume de dados original.
 
 ---
 
@@ -371,6 +465,22 @@ acesso quando não aprovado.
 ```text
 [x] Concluída
 ```
+> Nota de execução (pós-Revisão 4): reimplementada com **React Router** (decisão tomada com o
+> usuário — URLs reais em vez de navegação por estado interno do artifact antigo, já que agora é
+> um app de verdade). Camada de persistência `src/services/storage.ts` (localStorage, assíncrona
+> de propósito para trocar por API depois — CLAUDE.md §14/§15), `src/services/auth.ts`
+> (login + cadastro simulado de cuidador), `AppStateProvider`/`SessionProvider` (Context API,
+> sessão persistida separadamente do estado de negócio) e `ProtectedRoute` aplicando R1 (cuidador
+> não aprovado é redirecionado para a tela de aguardando aprovação). Telas: `/login` (form real de
+> e-mail/senha + atalhos das 3 contas oficiais do CLAUDE.md §10), `/cadastro` (wizard de 3 passos,
+> cuidador com fluxo completo incl. e-mail/senha reais para login futuro; empresa segue simulada
+> com aviso, como já decidido), `/cuidador/aguardando-aprovacao`. Dashboards de empresa/cuidador/
+> admin são placeholders mínimos nesta etapa (conteúdo real é escopo das próximas etapas — R41: não
+> criar telas incompletas só para preencher menu). Testado de ponta a ponta no navegador
+> (Chrome/Playwright): as 3 contas de demo logam certo, login inválido mostra erro, rota protegida
+> sem sessão redireciona pro login, cadastro de cuidador cria conta e cai em "aguardando aprovação",
+> **sessão sobrevive a um reload da página** (prova real de que `localStorage` funciona, diferente
+> do artifact antigo). Zero erros de console em todo o fluxo.
 
 ---
 
@@ -408,6 +518,36 @@ com motivo visível ao usuário.
 ```text
 [x] Concluída
 ```
+> Nota de execução (pós-Revisão 4): reimplementada na arquitetura real. `src/services/admin.ts`
+> centraliza as regras (`approveCaregiver`/`rejectCaregiver`/`blockCaregiver`/`reactivateCaregiver`
+> e os equivalentes de empresa), seguindo o mesmo padrão de `auth.ts` — função pura
+> `(state, ...) => nextState`, sem mutação — e sempre grava um `AuditLogEntry` (R12) e, para
+> cuidador, uma `Notification` do tipo `approval`. `src/pages/admin/ApprovalsPage.tsx` (rota
+> `/admin`, já existente desde a Etapa 4) ganhou o layout desktop com sidebar previsto no
+> `DESIGN_SYSTEM.md` §3, com 4 seções: Fila de aprovação (cuidadores/empresas com
+> `approvalStatus: "pending"`, aprovar direto ou recusar com motivo obrigatório num modal),
+> Cuidadores (lista completa — bloquear/reativar/reconsiderar conforme o status atual),
+> Empresas (lista completa — suspender/reativar, R11) e Atividade (o log de auditoria,
+> mais recente primeiro, timestamp em `font-mono`). Recusa e bloqueio usam o mesmo `Modal` do
+> design system com um motivo obrigatório (cai para um texto padrão se deixado em branco).
+> Token de cor novo `--color-status-bloqueado` (`#4A2A24`) criado e documentado no
+> `DESIGN_SYSTEM.md` para diferenciar visualmente "bloqueado" (ação administrativa sobre um
+> cadastro já aprovado) de "recusado" (decisão pontual no cadastro) — `Cracha` reaproveitada, sem
+> componente novo. `PendingApprovalPage.tsx` (Etapa 4) ajustada para diferenciar as duas
+> mensagens ("Cadastro recusado" vs. "Acesso bloqueado"), já que antes tratava as duas como uma
+> só. `ProtectedRoute` não ganhou um portão equivalente para Empresa: R11 diz explicitamente que a
+> empresa suspensa **mantém acesso ao histórico**, então não é um redirecionamento forçado como o
+> do cuidador — o efeito de "não publica novos atendimentos" fica para a Etapa 8, quando a tela de
+> publicação existir de verdade. `npx tsc -b` sem erros. Testado de ponta a ponta no navegador via
+> um driver Playwright headless (script descartável, não commitado): login como
+> `admin@demo.com`, fila mostrando os dois cuidadores pendentes do dataset (Renata Alves,
+> Paulo Ricci), recusa com motivo → cuidador sai da fila e aparece em Cuidadores com crachá
+> "Recusado"; aprovação do outro → crachá "Aprovado"; bloqueio/reativação de um cuidador aprovado
+> e de uma empresa aprovada; log de atividade refletindo as 6 ações, mais recente primeiro. Fluxo
+> completo de efeito imediato no acesso (R1) validado registrando dois cuidadores novos via
+> `/cadastro`: o aprovado consegue entrar em `/cuidador` no login seguinte, o recusado é
+> redirecionado para `/cuidador/aguardando-aprovacao` mostrando exatamente o motivo digitado pelo
+> administrador. Zero erros de console em todo o fluxo.
 
 ---
 
@@ -444,8 +584,15 @@ Abrir cuidadores das três categorias e confirmar diferenças de campos exibidos
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -477,8 +624,15 @@ Conferir números exibidos contra o dataset da Etapa 3.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -514,8 +668,15 @@ calculada em cada um.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -550,8 +711,15 @@ Repetir o teste da Etapa 8 e confirmar que a lista muda corretamente conforme a 
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -588,8 +756,15 @@ endereço fica visível só para ele.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -624,8 +799,15 @@ Conferir agenda de empresa e cuidador após confirmar um atendimento de teste.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -659,8 +841,15 @@ Tentar check-out sem check-in (deve bloquear); simular atraso e confirmar o aler
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -696,8 +885,15 @@ observação.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -731,8 +927,15 @@ Avaliar um cuidador com menos de 3 avaliações (sem média visível) e outro co
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -767,8 +970,15 @@ Percorrer o fluxo completo e conferir se cada notificação aparece no momento c
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -801,8 +1011,15 @@ Conferir manualmente a soma de horas de um cuidador de teste contra o relatório
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -835,8 +1052,15 @@ Favoritar, navegar para outra tela, voltar e confirmar que o favorito permanece.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -872,8 +1096,15 @@ Comparar números exibidos com contagem manual do dataset.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -907,8 +1138,15 @@ Alterar dados em várias telas, resetar, e conferir retorno ao estado inicial.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): lógica de negócio e UX prototipadas em `app_acalento_homecare.jsx`
+> (artifact single-file) e revisadas por leitura de código, mas nunca executadas nem testadas em
+> navegador (ambiente não tinha projeto npm rodando — ver `docs/PROJECT_AUDIT.md`). Além disso, a
+> implementação usa `window.storage` (API inexistente fora do ambiente de artifacts do Claude.ai,
+> precisa virar `localStorage`), CSS customizado (precisa virar Tailwind) e não está em TypeScript
+> nem na estrutura modular `src/` exigida pelo `CLAUDE.md`. Fica `[~]` até ser reimplementada e
+> testada dentro do projeto real (Etapa 0+) — a lógica/UX servem de referência direta para isso.
 
 ---
 
@@ -941,8 +1179,12 @@ Inspeção visual em diferentes larguras.
 
 ### Status
 ```text
-[x] Concluída
+[ ] Não iniciada
 ```
+> Nota de auditoria (Revisão 4): o que existe é uma moldura decorativa de celular fixa em 320px
+> (`ac-phone-frame`) e um layout de admin fixo — não há breakpoints (`@media`) nem teste real em
+> larguras variadas. Não satisfaz a exigência de mobile-first responsivo de verdade do `CLAUDE.md`
+> (seção 8). Fica para depois da reimplementação em Tailwind (Etapa 0 em diante).
 
 ---
 
@@ -976,8 +1218,12 @@ Execução completa do checklist, do zero, por quem for apresentar a demo.
 
 ### Status
 ```text
-[x] Concluída
+[!] Precisa de correção
 ```
+> Nota de auditoria (Revisão 4): o próprio `docs/DEMO_GUIDE.md` (seção 3, nota final) registra que
+> a validação foi feita "por revisão cuidadosa do código e checagem de balanceamento sintático",
+> não por execução real em navegador — porque não havia ambiente para rodar o app. Precisa ser
+> refeita como testes manuais reais assim que o projeto rodar via `npm run dev` (Etapa 0+).
 
 ---
 
@@ -1014,15 +1260,20 @@ Leitura crítica simulando quem nunca viu o produto.
 
 ### Status
 ```text
-[x] Concluída
+[~] Em andamento
 ```
+> Nota de auditoria (Revisão 4): `docs/DEMO_GUIDE.md` é um bom roteiro comercial e continua válido
+> como conteúdo, mas descreve como abrir "o artifact `app_acalento_homecare.jsx`" em vez de rodar
+> a aplicação real via `npm run dev`. Precisa de um ajuste de redação depois que o projeto real
+> existir (Etapa 0+), sem precisar reescrever o roteiro em si.
 
 ---
 
 ## 4. Resumo de Dependências (visão macro)
 
 ```
-Etapa 1 (Análise)
+Etapa 0 (Bootstrap do Projeto Real) — pré-requisito de tudo abaixo (Revisão 4)
+  → Etapa 1 (Análise)
   → Etapa 2 (Design System) ─┐
   → Etapa 3 (Dados Mockados) ─┼→ Etapa 4 (Navegação/Cadastro/Auth simulados)
                                     → Etapa 5 (Aprovação — Admin)
@@ -1044,21 +1295,29 @@ Etapa 1 (Análise)
   Etapas 1–20 → Etapa 21 (Validação) → Etapa 22 (Preparação para apresentação)
 ```
 
-**Total de etapas: 22** (Etapa 1 concluída — Revisão 2).
+**Total de etapas: 23** (Etapa 0 adicionada na Revisão 4, pré-requisito; Etapa 1 concluída —
+Revisão 2; status de execução das Etapas 1–22 corrigido na Revisão 4 — ver seção 6 e
+`docs/PROJECT_AUDIT.md`).
 
 ---
 
 ## 5. Escopo delimitado da demo (confirmação do gate)
 
-- [x] `IMPLEMENTATION_PLAN.md` existe e reflete o `MVP_Home_Care.docx`.
-- [x] Todas as 22 etapas documentadas (objetivo, escopo, fora do escopo, dependências, arquivos
+Este gate cobre a **completude do planejamento** (o plano documenta todas as etapas necessárias),
+que é diferente da **completude de execução** (quantas etapas de fato rodam e foram testadas —
+ver os status corrigidos na seção 3 e o resumo em `docs/PROJECT_AUDIT.md`).
+
+- [x] `IMPLEMENTATION_PLAN.md` existe e reflete o `MVP_Home_Care.docx` (documento não localizado no
+      repositório nesta auditoria — ver `docs/PROJECT_AUDIT.md` seção 2).
+- [x] Todas as 23 etapas documentadas (objetivo, escopo, fora do escopo, dependências, arquivos
       esperados, entregáveis, critérios de aceite, validação, status).
 - [x] Dependências entre etapas explícitas (seção 4).
 - [x] Critérios de aceite ligados às regras R1–R12 do documento real.
 - [x] Escopo da demo delimitado (seções 1.10 e 1.11).
-- [x] Ordem de implementação definida (Etapas 2 → 22).
+- [x] Ordem de implementação definida (Etapa 0 → Etapa 22).
 
-**PLANEJAMENTO CONCLUÍDO (Revisão 2).**
+**PLANEJAMENTO CONCLUÍDO (Revisão 2). EXECUÇÃO PENDENTE DE CORREÇÃO ARQUITETURAL (Revisão 4) —
+ver Etapa 0.**
 
 ---
 
@@ -1079,3 +1338,7 @@ Etapa 1 (Análise)
 | Revisão 3 | Compatibilidade de busca (R2/R3) passou a exigir também que o cuidador tenha as atividades específicas do atendimento na sua lista de atividades, não só a categoria mínima | Sem esse refinamento, um fisioterapeuta apareceria como compatível para uma visita de enfermagem — a categoria sozinha não garante a especialidade certa | Etapa 9 |
 | Revisão 3 | Validação do fluxo completo (Etapa 21) foi feita por revisão de código e checagem de balanceamento sintático, não por execução real em navegador | Ambiente sem acesso à internet para instalar um bundler/navegador de teste (mesma limitação da seção 2.2) | Etapa 21 — recomenda-se que o usuário percorra o roteiro do `DEMO_GUIDE.md` ao abrir o artifact |
 | Revisão 3 | Cadastro completo (passo a passo) implementado só para o perfil Cuidador; cadastro de nova Empresa é simulado com uma mensagem | Cuidador é o fluxo mais demonstrado comercialmente; ver `DEMO_GUIDE.md` seção 4 para a lista completa de simplificações assumidas | Etapa 4 |
+| Revisão 4 (auditoria) | Adicionada Etapa 0 — Bootstrap do Projeto Real (Vite + React + TypeScript + Tailwind, `npm install`/`npm run dev`, estrutura `src/`) | `CLAUDE.md` (não versionado até esta rodada) exige explicitamente projeto npm real executável localmente — a decisão de artifact single-file das Revisões 1/3 foi tomada por limitação do ambiente de então, não por escolha de produto, e hoje contradiz a regra 2 do `CLAUDE.md` | Nova Etapa 0; todas as demais passam a depender dela |
+| Revisão 4 (auditoria) | Status de execução das Etapas 1–22 corrigido: Etapa 1 mantida `[x]` (conteúdo); Etapa 2 rebaixada a `[!]` (doc válido, implementação em CSS não-Tailwind); Etapas 3–19 rebaixadas a `[~]` (lógica/UX prototipadas, nunca executadas em navegador, arquitetura a ser substituída); Etapa 20 rebaixada a `[ ]` (responsividade real nunca implementada, só moldura decorativa); Etapa 21 rebaixada a `[!]` (validação foi só leitura de código, por admissão do próprio `DEMO_GUIDE.md`); Etapa 22 rebaixada a `[~]` (guia bom, mas descreve abrir "o artifact" em vez de `npm run dev`) | Nenhuma etapa rodou de fato em um projeto executável — não existia `package.json`. A regra de conclusão exige implementada + executando + testada + validada + critérios atendidos, não só "código escrito" | Etapas 1–22 |
+| Revisão 4 (auditoria) | `window.storage` (usado em `app_acalento_homecare.jsx`) identificado como API específica do ambiente de artifacts do Claude.ai, não uma API de navegador padrão — precisa virar `localStorage` na reimplementação, conforme já era a orientação do `CLAUDE.md` seção 15 | Rodando fora do ambiente de artifacts (ex.: em um navegador comum via Vite), `window.storage` é `undefined` e o app quebraria ao tentar persistir | Etapa 19 (Persistência), Etapa 0 |
+| Revisão 4 (auditoria) | Confirmado que a implementação atual usa 0 classes Tailwind, apesar da seção 2.1 deste documento afirmar "Tailwind (classes core)" — todo o CSS é customizado via `<style>{STYLE}</style>` com prefixo `ac-*` | Levantamento direto no código (`grep` por classes Tailwind retornou 0 ocorrências em ambos os arquivos `.jsx`) | Etapa 2, Etapa 0, seção 2.1 (mantida como registro histórico da intenção original, não da realidade entregue) |

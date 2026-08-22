@@ -23,11 +23,16 @@ mvp_acalento_homecare/
 
 ## Como usar
 
-Os arquivos `.jsx` são artifacts React de arquivo único, feitos para rodar no ambiente de
-artifacts do Claude.ai (sem necessidade de build local — ver `docs/IMPLEMENTATION_PLAN.md`,
-seção 2, para o porquê dessa decisão de arquitetura).
+**Estado atual (ver `docs/PROJECT_AUDIT.md`):** este repositório ainda não é um projeto npm
+executável. Os arquivos `.jsx` (`app_acalento_homecare.jsx`, `componentes_base_design_system.jsx`)
+foram construídos como artifacts React de arquivo único para o ambiente de artifacts do Claude.ai,
+e não rodam com `npm install` / `npm run dev` como o `CLAUDE.md` deste projeto exige. Eles servem
+hoje como **protótipo de referência** (lógica de negócio, UX e fluxos já validados) para a
+reimplementação em Vite + React + TypeScript + Tailwind, prevista como **Etapa 0** em
+`docs/IMPLEMENTATION_PLAN.md`.
 
-Para a demo completa, use `app_acalento_homecare.jsx` e siga o roteiro em `docs/DEMO_GUIDE.md`.
+Enquanto a Etapa 0 não é feita, a forma de "usar" o projeto é abrir `app_acalento_homecare.jsx`
+no ambiente de artifacts do Claude.ai e seguir o roteiro em `docs/DEMO_GUIDE.md`.
 
 ## Origem
 

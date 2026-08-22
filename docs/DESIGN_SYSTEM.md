@@ -49,6 +49,19 @@ stepper, que reduz a dependência de cor pura para comunicar estado)
 | Concluído | `#6B8F71` |
 | Cancelado | `#B24C3A` |
 
+### Cores de status de cadastro (Etapa 5 — aprovação de empresa/cuidador)
+
+Reaproveita as cores acima (mesmo significado) e soma uma cor nova só para "bloqueado", que
+precisa ser visualmente distinta de "recusado" (uma recusa é uma decisão pontual no cadastro;
+um bloqueio é uma ação administrativa posterior, sobre um cadastro já aprovado — R11/R12).
+
+| Status de cadastro | Token | Hex |
+|---|---|---|
+| Em análise | `--status-aberto` | `#E8A33D` |
+| Aprovado | `--status-concluido` | `#6B8F71` |
+| Recusado | `--status-cancelado` | `#B24C3A` |
+| Bloqueado | `--status-bloqueado` (novo) | `#4A2A24` |
+
 ---
 
 ## 2. Tipografia
