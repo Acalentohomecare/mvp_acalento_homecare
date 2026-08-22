@@ -104,14 +104,16 @@ export function AdminApprovalsPage() {
         }
       />
 
-      <div className="mx-auto flex max-w-5xl gap-8 px-6 py-8">
-        <nav className="w-44 shrink-0 space-y-1">
+      {/* A administração é desenhada para desktop (DESIGN_SYSTEM.md §3); no celular a navegação
+          vira uma faixa rolável em cima do conteúdo em vez de espremer a coluna. */}
+      <div className="mx-auto flex max-w-5xl flex-col gap-5 px-6 py-8 md:flex-row md:gap-8">
+        <nav className="-mx-6 flex gap-1 overflow-x-auto px-6 pb-1 md:mx-0 md:w-44 md:shrink-0 md:flex-col md:overflow-visible md:px-0 md:pb-0">
           {NAV_ITEMS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               type="button"
               onClick={() => setSection(key)}
-              className={`flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-[13px] font-medium transition-colors duration-200 ease-out ${
+              className={`flex shrink-0 items-center gap-2 rounded-[10px] px-3 py-2 text-left text-[13px] font-medium whitespace-nowrap transition-colors duration-200 ease-out md:w-full ${
                 section === key ? "bg-ink text-surface" : "text-ink/60 hover:bg-linha/50"
               }`}
             >
@@ -134,7 +136,7 @@ export function AdminApprovalsPage() {
 
               {pendingCaregivers.map((c) => (
                 <Card key={c.id} className="mb-3">
-                  <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <div className="text-[13.5px] font-semibold">{c.name}</div>
                       <div className="mt-0.5 text-[11.5px] text-ink/50">
@@ -168,7 +170,7 @@ export function AdminApprovalsPage() {
 
               {pendingCompanies.map((co) => (
                 <Card key={co.id} className="mb-3">
-                  <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <div className="text-[13.5px] font-semibold">{co.name}</div>
                       <div className="mt-0.5 text-[11.5px] text-ink/50">
@@ -205,7 +207,7 @@ export function AdminApprovalsPage() {
             <div>
               <h1 className="mb-5 font-display text-[19px] font-semibold">Cuidadores</h1>
               {state.caregivers.map((c: Caregiver) => (
-                <Card key={c.id} className="mb-3 flex items-center justify-between gap-3">
+                <Card key={c.id} className="mb-3 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="text-[13.5px] font-semibold">{c.name}</div>
                     <div className="mt-0.5 text-[11.5px] text-ink/50">{c.city}</div>
@@ -253,7 +255,7 @@ export function AdminApprovalsPage() {
             <div>
               <h1 className="mb-5 font-display text-[19px] font-semibold">Empresas</h1>
               {state.companies.map((co: Company) => (
-                <Card key={co.id} className="mb-3 flex items-center justify-between gap-3">
+                <Card key={co.id} className="mb-3 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="text-[13.5px] font-semibold">{co.name}</div>
                     <div className="mt-0.5 text-[11.5px] text-ink/50">
