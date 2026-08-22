@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/*
+  Tokens do design system (docs/DESIGN_SYSTEM.md, seções 1 e 2).
+  Cada `--color-*` e `--font-*` abaixo vira automaticamente uma utilidade Tailwind
+  (ex.: --color-accent -> bg-accent / text-accent / border-accent).
+*/
+@theme {
+  --color-ink: #16241f;
+  --color-surface: #f5f6f2;
+  --color-surface-raised: #ffffff;
+  --color-accent: #e8a33d;
+  --color-accent-ink: #7a5419;
+  --color-linha: #dcdfd6;
+
+  --color-cat-informal: #6b8f71;
+  --color-cat-tecnico: #3e7cb1;
+  --color-cat-superior: #a6672b;
+
+  --color-status-aberto: #e8a33d;
+  --color-status-confirmado: #3e7cb1;
+  --color-status-andamento: #2a9d8f;
+  --color-status-concluido: #6b8f71;
+  --color-status-cancelado: #b24c3a;
+  --color-status-bloqueado: #4a2a24;
+
+  --font-display: "Fraunces", serif;
+  --font-sans: "Work Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+body {
+  @apply bg-surface text-ink font-sans antialiased;
+}
