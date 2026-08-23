@@ -161,8 +161,12 @@ export function RegisterPage() {
           )}
         </Card>
 
-        <div className="mt-4 text-center text-note text-ink-subtle">
-          <Link to="/login" className="underline">
+        <div className="mt-4 text-center text-note">
+          {/* Sozinho na linha, não dentro de frase: alvo cheio, não link de texto. */}
+          <Link
+            to="/login"
+            className="inline-flex min-h-11 items-center justify-center rounded-control px-3 text-ink-subtle underline transition-colors duration-150 ease-out hover:text-ink"
+          >
             Voltar à entrada
           </Link>
         </div>

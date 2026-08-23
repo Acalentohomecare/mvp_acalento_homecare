@@ -117,47 +117,155 @@
   --shadow-overlay: 0 24px 48px -12px rgb(32 35 33 / 0.3);
 
   /*
-    Inter é a família de interface. A Work Sans saiu porque é uma grotesca de origem editorial:
-    boa em texto corrido, mas com x-height baixa e formas abertas que a 12–14px — o tamanho em
-    que este produto vive — perdem definição na tela do celular. A Inter foi desenhada para
-    interface exatamente nessa faixa, tem x-height alta e dígitos tabulares, e é a preferência
-    nº 1 do CLAUDE.md §6.
+    ---------------------------------------------------------------- tipografia
 
-    A IBM Plex Mono fica porque tem um papel que só ela cumpre: horário de check-in/check-out,
-    horas fechadas, valores e documentos. Número que serve de prova não usa a fonte do texto.
+    **Uma família só: DM Sans**, servida do próprio projeto (`public/fonts/`).
+
+    A escolha veio da marca, não de preferência. O símbolo do logo é feito de
+    círculos e cápsulas, e "ACALENTO" é uma capitular geométrica de bojos
+    redondos. A DM Sans é uma geométrica de baixo contraste com bojo
+    praticamente circular — o mesmo esqueleto do símbolo, na mesma temperatura
+    calma. Foi comparada lado a lado com Plus Jakarta Sans e Manrope no mesmo
+    conteúdo real: a Jakarta é mais estreita e comprime "R$ 180" e os carimbos
+    de hora; a Manrope é mais larga e faz o texto denso ocupar mais linha. A DM
+    Sans ficou melhor nos dois pontos que este produto mais usa — número e
+    texto curto de card.
+
+    A Inter saiu. É uma neo-grotesca: bojos ovais, aberturas fechadas, desenho
+    de sistema operacional. Legibilidade excelente e nenhuma relação com um logo
+    circular — e é a face que quase toda interface gerada por IA usa, o que
+    trabalha contra um produto que precisa parecer específico numa reunião.
+
+    A IBM Plex Mono saiu junto, e essa é a decisão que exige justificativa,
+    porque a versão anterior desta página a defendia: "número que serve de prova
+    não usa a fonte do texto". O objetivo continua válido; o meio é que era
+    caro. O trabalho real da mono era **alinhar coluna**, e isso quem faz é
+    `tabular-nums`. O que sobrava era timbre — uma slab-grotesca da IBM dentro
+    de um ambiente geométrico e verde, em horário, valor, data e contador, ou
+    seja, em quase toda a interface. O papel virou o utilitário `.numero`.
+
+    Três pesos, nenhum acima de 600: 400 corpo, 500 rótulo e ênfase, 600 título.
+    `font-bold` não existe neste produto.
   */
   --font-sans:
-    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    sans-serif;
-  --font-mono:
-    "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", "Cascadia Mono", Menlo, monospace;
+    "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
 
   /*
-    Escala por papel, não por pixel. Cada papel traz o seu próprio line-height e tracking.
+    Escala por papel, não por pixel — e **responsiva nos dois sentidos**.
 
-    O piso é 12px (--text-meta). Nada menor: o cuidador lê no celular em deslocamento e o cliente
-    lê numa tela grande do outro lado da sala de reunião.
+    O display cresce com a tela, como se espera. Já `--note` e `--meta` fazem o
+    contrário: são **maiores no celular** e apertam no desktop. É o inverso de
+    "encolher tudo proporcionalmente", e é o que a leitura pede — 12px de
+    carimbo de hora na mão de quem anda entre atendimentos é pequeno demais,
+    enquanto no monitor a densidade vale mais. A troca acontece em `md`, o mesmo
+    ponto em que o layout troca de cromo (seção 11).
   */
-  --text-meta: 0.75rem; /* 12px — carimbo de data/hora, contagens, apoio terciário */
+  --text-meta: 0.8125rem; /* 13px no celular — carimbo, contagem, apoio terciário */
   --text-meta--line-height: 1.4;
 
-  --text-label: 0.8125rem; /* 13px — rótulo de campo, título de seção, botão pequeno */
+  --text-label: 0.8125rem; /* 13px — rótulo de campo e botão pequeno */
   --text-label--line-height: 1.35;
+  --text-label--font-weight: 500;
 
-  --text-note: 0.875rem; /* 14px — texto denso dentro de card, lista, botão */
+  --text-dado: 0.75rem; /* 12px — rótulo de dado: bloco de número, cabeçalho de tabela */
+  --text-dado--line-height: 1.3;
+  --text-dado--letter-spacing: 0.045em;
+  --text-dado--font-weight: 600;
+
+  --text-note: 0.9375rem; /* 15px no celular — texto denso de card, lista, botão */
   --text-note--line-height: 1.5;
 
   --text-body: 1rem; /* 16px — leitura corrente e todo campo de formulário */
   --text-body--line-height: 1.55;
+  --text-body--letter-spacing: -0.002em;
 
-  --text-title: 1.125rem; /* 18px — nome de paciente/cuidador, título de card e de modal */
-  --text-title--line-height: 1.35;
+  --text-heading: 0.9375rem; /* 15px — título de seção, em caixa normal */
+  --text-heading--line-height: 1.35;
+  --text-heading--letter-spacing: -0.006em;
+  --text-heading--font-weight: 600;
+
+  --text-title: 1.1875rem; /* 19px — nome de paciente/cuidador, título de card e de modal */
+  --text-title--line-height: 1.3;
   --text-title--letter-spacing: -0.014em;
+  --text-title--font-weight: 600;
 
-  /* 26px no celular, 32px a partir de ~740px: a única voz grande do produto. */
-  --text-display: clamp(1.625rem, 1.35rem + 1.35vw, 2rem);
-  --text-display--line-height: 1.15;
-  --text-display--letter-spacing: -0.028em;
+  /* 28px no celular, 34px a partir de ~1180px: a única voz grande do produto.
+     Não passa disso — título de produto não é título de landing page. */
+  --text-display: clamp(1.75rem, 1.5rem + 1.05vw, 2.125rem);
+  --text-display--line-height: 1.14;
+  --text-display--letter-spacing: -0.022em;
+  --text-display--font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ família */
+/*
+  Servida do projeto, não de CDN. O `PRODUCT.md` diz que a demonstração roda
+  "sem rede"; com a fonte vindo do Google, uma reunião com wi-fi ruim perdia a
+  tipografia inteira e caía no fallback do sistema. `unicode-range` faz o
+  navegador baixar só o subconjunto que a página usa — latin-ext nunca desce
+  numa demo em português.
+*/
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dm-sans-400-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dm-sans-400-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/dm-sans-500-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/dm-sans-500-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/dm-sans-600-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/dm-sans-600-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/*
+  A virada de densidade. Só dois papéis mudam de tamanho, e mudam para baixo:
+  no desktop o apoio aperta porque a tela comporta mais informação por linha.
+  Tudo o mais é estável de 320px a 4K — escala que dança a cada breakpoint é o
+  que faz uma tela parecer de um produto e a seguinte de outro.
+*/
+@media (min-width: 48rem) {
+  :root {
+    --text-note: 0.875rem; /* 14px */
+    --text-meta: 0.75rem; /* 12px */
+  }
 }
 
 body {
@@ -165,14 +273,31 @@ body {
   /* Base herdável: sem isto, todo texto sem utilidade de tamanho fica sem entrelinha definida. */
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
+  letter-spacing: var(--text-body--letter-spacing);
 }
 
 /*
-  Número em coluna precisa alinhar. A Inter traz dígitos tabulares; ligamos por padrão, porque
-  quase todo número deste produto (horas, valores, contagens) aparece em lista ou tabela.
+  `.numero` — o papel que a IBM Plex Mono ocupava.
+
+  Onde entra: horário de check-in e check-out, horas fechadas, valor, data,
+  documento, contador. Ou seja, número que o produto precisa **provar** (o
+  princípio 3 do PRODUCT.md: número só existe com prova atrás).
+
+  Faz três coisas que texto corrido não deve fazer:
+  1. `tabular-nums` — todo dígito com a mesma largura, então coluna de valor e
+     de hora alinha sozinha. Era o trabalho real da mono.
+  2. tracking levemente negativo — algarismo tabular nasce largo; sem apertar,
+     "24/08/2026" fica frouxo ao lado do texto.
+  3. peso 500 — separa o dado do texto que o cerca sem precisar de outra cor.
+
+  O `tabular-nums` deixou de ser global de propósito: em frase, algarismo
+  tabular abre buracos ("8 anos de experiência"), e prosa quer figura
+  proporcional. Alinhamento é característica de tabela, não de parágrafo.
 */
-:where(body) {
+@utility numero {
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.006em;
+  font-weight: 500;
 }
 
 /* Medida de leitura para texto corrido (bio, observações, estados vazios). */

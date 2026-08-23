@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BadgeCheck, Heart, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea } from "../../components/ui";
+import { BadgeCheck, Heart, Star } from "lucide-react";
+import { Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import {
   APPROVAL_STATUS_CLASS,
@@ -39,7 +39,7 @@ import { PAGE_WORK } from "../../components/layout/page";
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-5">
-      <h2 className="mb-2 text-body font-semibold text-ink">{title}</h2>
+      <h2 className="mb-2 text-heading text-ink">{title}</h2>
       {children}
     </section>
   );
@@ -116,17 +116,12 @@ export function CompanyCaregiverProfilePage() {
   return (
     <div className={PAGE_WORK}>
       <div>
-        <Link
-          to="/empresa/cuidadores"
-          className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
-        >
-          <ArrowLeft size={14} /> Cuidadores
-        </Link>
+        <VoltarLink to="/empresa/cuidadores">Cuidadores</VoltarLink>
 
         <div className="mt-4 flex items-start gap-3.5">
           <Avatar name={caregiver.name} size={56} />
           <div className="min-w-0 flex-1">
-            <h1 className="text-display font-semibold">{caregiver.name}</h1>
+            <h1 className="text-display">{caregiver.name}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Cracha
                 label={CATEGORY_LABEL[caregiver.category]}
@@ -203,21 +198,21 @@ export function CompanyCaregiverProfilePage() {
 
         <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           <Card>
-            <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Experiência</div>
-            <div className="mt-1 font-mono text-body">{caregiver.experienceYears} anos</div>
+            <div className="text-dado text-ink-muted uppercase">Experiência</div>
+            <div className="mt-1 numero text-body">{caregiver.experienceYears} anos</div>
           </Card>
           <Card>
-            <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Por plantão</div>
-            <div className="mt-1 font-mono text-body">{formatCurrency(caregiver.shiftRate)}</div>
+            <div className="text-dado text-ink-muted uppercase">Por plantão</div>
+            <div className="mt-1 numero text-body">{formatCurrency(caregiver.shiftRate)}</div>
           </Card>
           <Card>
-            <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Avaliação</div>
+            <div className="text-dado text-ink-muted uppercase">Avaliação</div>
             {rating.average === null ? (
               <div className="mt-1 text-note text-ink-subtle">
                 {rating.count} de {MIN_EVALUATIONS_FOR_PUBLIC_AVERAGE}
               </div>
             ) : (
-              <div className="mt-1 flex items-center gap-1 font-mono text-body">
+              <div className="mt-1 flex items-center gap-1 numero text-body">
                 <Star size={13} className="fill-rating text-rating" />
                 {formatRating(rating.average)}
               </div>
@@ -225,10 +220,18 @@ export function CompanyCaregiverProfilePage() {
           </Card>
         </div>
 
+        {/*
+          A partir de `lg` o perfil se divide em quem a pessoa **é** — credencial, região,
+          disponibilidade, o que realiza — e o que ela **já fez com esta empresa** — histórico e
+          avaliações. É a leitura que a coordenadora faz antes de convidar, e as duas metades
+          cabem lado a lado sem rolagem.
+        */}
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8">
+        <div className="min-w-0">
         {needsCouncil && (
           <Section title="Registro no conselho de classe">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-note">
+              <span className="numero text-note">
                 {caregiver.councilRegistration ?? "Não informado"}
               </span>
               {caregiver.councilRegistrationStatus && (
@@ -271,6 +274,9 @@ export function CompanyCaregiverProfilePage() {
           </ul>
         </Section>
 
+        </div>
+
+        <div className="min-w-0">
         <Section title={`Histórico com a empresa (${history.length})`}>
           {history.length === 0 ? (
             <p className="text-note text-ink-subtle">Nenhum atendimento com esta empresa ainda.</p>
@@ -281,7 +287,7 @@ export function CompanyCaregiverProfilePage() {
                   key={a.id}
                   className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2"
                 >
-                  <span className="font-mono text-note text-ink-muted">
+                  <span className="numero text-note text-ink-muted">
                     {a.startDate.split("-").reverse().join("/")}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-note">
@@ -312,7 +318,7 @@ export function CompanyCaregiverProfilePage() {
                         className={i < e.rating ? "fill-rating text-rating" : "text-linha"}
                       />
                     ))}
-                    <span className="ml-1 font-mono text-meta text-ink-subtle">
+                    <span className="ml-1 numero text-meta text-ink-subtle">
                       {new Date(e.createdAt).toLocaleDateString("pt-BR")}
                     </span>
                   </div>
@@ -322,6 +328,8 @@ export function CompanyCaregiverProfilePage() {
             </div>
           )}
         </Section>
+        </div>
+        </div>
       </div>
 
       {prompt && (

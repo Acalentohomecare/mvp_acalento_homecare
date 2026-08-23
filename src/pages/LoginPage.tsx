@@ -94,7 +94,7 @@ export function LoginPage() {
         </div>
 
         <div className="mt-8">
-          <p className="mb-2 text-label font-semibold tracking-wide text-ink-subtle uppercase">
+          <p className="mb-2 text-heading text-ink-muted">
             Contas de demonstração
           </p>
           <div className="flex flex-col gap-1.5">
@@ -103,9 +103,12 @@ export function LoginPage() {
                 key={acc.email}
                 type="button"
                 onClick={() => attempt(acc.email, "123456")}
-                className="rounded-control border border-linha bg-surface-raised px-3 py-2 text-left text-note text-ink-muted shadow-card transition-colors duration-150 hover:border-accent/45 hover:bg-accent-soft/40"
+                className="flex min-h-11 flex-col justify-center rounded-control border border-linha bg-surface-raised px-3 py-2 text-left shadow-card transition-colors duration-150 hover:border-accent/45 hover:bg-accent-soft/40"
               >
-                <span className="font-semibold text-ink">{acc.label}</span> — {acc.email}
+                {/* Rótulo em cima, endereço embaixo: dois papéis tipográficos em vez de uma
+                    linha só costurada por travessão. */}
+                <span className="text-note font-semibold text-ink">{acc.label}</span>
+                <span className="text-meta text-ink-subtle">{acc.email}</span>
               </button>
             ))}
           </div>

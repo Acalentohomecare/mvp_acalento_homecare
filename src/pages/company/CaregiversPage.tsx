@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Search } from "lucide-react";
 import { CaregiverCard } from "../../components/shared/CaregiverCard";
-import { Button, Card, Chip, Cracha, Modal, TelaCarregando, Textarea } from "../../components/ui";
+import { Button, Card, Chip, Cracha, FilterRow, Modal, TelaCarregando, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { useToast } from "../../hooks/useToast";
@@ -24,7 +24,7 @@ import {
   rosterStatus,
 } from "../../services/roster";
 import type { CaregiverCategory } from "../../types";
-import { PAGE_LIST } from "../../components/layout/page";
+import { LIST_GRID, PAGE_LIST } from "../../components/layout/page";
 
 type CategoryFilter = CaregiverCategory | "all";
 type Tab = "quadro" | "analise" | "inativos";
@@ -98,29 +98,31 @@ export function CompanyCaregiversPage() {
 
   return (
     <div className={PAGE_LIST}>
-      <h1 className="text-display font-semibold">Cuidadores</h1>
+      <h1 className="text-display">Cuidadores</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">
         Só quem está no seu quadro aparece na busca e pode ser convidado para um plantão.
       </p>
 
-      <div className="mt-5 flex flex-wrap gap-1.5">
+      <FilterRow className="mt-5">
         {tabs.map((t) => (
           <Chip key={t.key} selecionado={tab === t.key} onClick={() => setTab(t.key)}>
             {t.label}
             {t.count > 0 && (
               <span
-                className={`font-mono text-meta ${tab === t.key ? "text-accent-ink-muted" : "text-ink-subtle"}`}
+                className={`numero text-meta ${tab === t.key ? "text-accent-ink-muted" : "text-ink-subtle"}`}
               >
                 {t.count}
               </span>
             )}
           </Chip>
         ))}
-      </div>
+      </FilterRow>
 
       {tab === "quadro" && (
         <>
-          <label className="mt-5 flex items-center gap-2 rounded-control border-[1.5px] border-linha-strong bg-surface-raised px-3 py-2 transition-colors focus-within:border-accent">
+          {/* O campo não acompanha a largura da lista: uma caixa de busca de 1150px não ajuda
+              ninguém a digitar "Centro" e ainda desalinha a página. */}
+          <label className="mt-5 flex min-h-11 items-center gap-2 rounded-control border-[1.5px] border-linha-strong bg-surface-raised px-3 py-2 transition-colors focus-within:border-accent lg:max-w-md">
             <Search size={15} className="shrink-0 text-ink-subtle" />
             <span className="sr-only">Buscar cuidador</span>
             <input
@@ -132,7 +134,7 @@ export function CompanyCaregiversPage() {
             />
           </label>
 
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <FilterRow className="mt-3">
             {filters.map((f) => (
               <Chip
                 key={f.key}
@@ -145,7 +147,7 @@ export function CompanyCaregiversPage() {
             <Chip selecionado={favoritesOnly} onClick={() => setFavoritesOnly((v) => !v)}>
               <Heart size={12} className={favoritesOnly ? "fill-surface" : ""} /> Favoritos
             </Chip>
-          </div>
+          </FilterRow>
 
           <p className="mt-5 mb-2.5 text-note text-ink-subtle">
             {visible.length} {visible.length === 1 ? "cuidador no quadro" : "cuidadores no quadro"}
@@ -156,7 +158,7 @@ export function CompanyCaregiversPage() {
               Nenhum cuidador encontrado com esses critérios.
             </p>
           ) : (
-            <div className="flex flex-col gap-2.5">
+            <div className={LIST_GRID}>
               {visible.map((c) => (
                 <CaregiverCard
                   key={c.id}
@@ -184,7 +186,7 @@ export function CompanyCaregiversPage() {
               Quando um cuidador criar cadastro, ele aparece aqui para conferência.
             </p>
           ) : (
-            <div className="flex flex-col gap-2.5">
+            <div className={LIST_GRID}>
               {queue.map((c) => (
                 <Card key={c.id}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
@@ -241,11 +243,11 @@ export function CompanyCaregiversPage() {
               Ninguém recusado ou bloqueado.
             </p>
           ) : (
-            <div className="flex flex-col gap-2.5">
+            <div className={LIST_GRID}>
               {inactive.map((c) => (
                 <Card key={c.id} className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-title font-semibold">{c.name}</div>
+                    <div className="text-title">{c.name}</div>
                     <div className="mt-0.5 text-note text-ink-subtle">{c.city}</div>
                   </div>
                   <div className="flex items-center gap-2">

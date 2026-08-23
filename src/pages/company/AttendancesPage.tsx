@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { ButtonLink, Chip, TelaCarregando } from "../../components/ui";
+import { ButtonLink, Chip, FilterRow, TelaCarregando } from "../../components/ui";
 import { AttendanceCard } from "../../components/shared/AttendanceCard";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
@@ -11,10 +11,11 @@ import {
 } from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
 import type { Attendance } from "../../types";
-import { PAGE_LIST } from "../../components/layout/page";
+import { LIST_GRID, PAGE_LIST } from "../../components/layout/page";
 
+/* Ação secundária do card. 44px no dedo, densidade de volta onde o ponteiro é preciso. */
 const ACTION_CLASS =
-  "rounded-control border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent";
+  "inline-flex min-h-11 items-center rounded-control border border-linha px-3 text-label font-semibold transition-colors duration-150 ease-out hover:border-accent pointer-fine:min-h-8 pointer-fine:px-2.5";
 
 type Filter = "all" | "awaiting" | "scheduled" | "done" | "draft";
 
@@ -76,7 +77,7 @@ export function CompanyAttendancesPage() {
     <div className={PAGE_LIST}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-display font-semibold">Atendimentos</h1>
+          <h1 className="text-display">Atendimentos</h1>
           <p className="prosa mt-1 text-body text-ink-subtle">
             Todo o histórico da {company?.name ?? "empresa"}.
           </p>
@@ -86,13 +87,13 @@ export function CompanyAttendancesPage() {
         </ButtonLink>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-1.5">
+      <FilterRow className="mt-5">
         {FILTERS.map((f) => (
           <Chip key={f.key} selecionado={filter === f.key} onClick={() => setFilter(f.key)}>
             {f.label}
           </Chip>
         ))}
-      </div>
+      </FilterRow>
 
       <p className="mt-5 mb-2.5 text-note text-ink-subtle">
         {visible.length} {visible.length === 1 ? "atendimento" : "atendimentos"}
@@ -103,7 +104,7 @@ export function CompanyAttendancesPage() {
           Nenhum atendimento {filter === "all" ? "cadastrado" : "nesse filtro"}.
         </p>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className={LIST_GRID}>
           {visible.map((a) => {
             const applications = state.applications.filter((ap) => ap.attendanceId === a.id).length;
             return (

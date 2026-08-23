@@ -1213,20 +1213,76 @@ O produto é decidido no celular. A coordenadora remaneja plantão em pé, no co
 o cuidador faz check-in na porta da casa do paciente, muitas vezes sob sol. **Toda decisão visual
 começa em 390px e só depois ganha o que sobra em tela grande.**
 
+Mobile first não é mobile só. A coordenação também trabalha sentada, num monitor, e a apresentação
+comercial acontece numa tela grande do outro lado de uma sala — o `PRODUCT.md` (princípio 5) trata
+os dois contextos como simultâneos. O que o desktop ganha está em [Largura de página](#largura-de-página);
+o que ele **não** ganha é alvo de toque menor por ser largo (ver [Alvo de toque](#alvo-de-toque--44px)).
+
 ### Breakpoints — dois, e só
 
 | Prefixo | A partir de | O que muda |
 |---|---|---|
 | *(sem prefixo)* | 0 | **O padrão.** É a versão celular. Escreva esta primeiro, sempre. |
 | `sm:` | 640px | Grade de campo curto passa de 2 para 3 colunas. Nada além disso. |
-| `md:` | 768px | A troca de layout: barra lateral aparece, cabeçalho e barra de abas do celular somem. |
+| `md:` | 768px | A troca de cromo: barra lateral aparece, cabeçalho e barra de abas do celular somem. |
+| `lg:` | 1024px | A troca de layout: as telas de trabalho ganham a segunda coluna. |
+| `xl:` | 1280px | Densidade: lista de registro passa a duas colunas. |
 
-Não use `lg:` nem `xl:`. A coluna de leitura trava em `max-w-2xl` (672px) e não cresce mais — em
-monitor de 27" o produto fica centralizado, e isso é intencional: linha de 1400px de largura não
-se lê.
+### Largura de página
+
+Não existe uma largura para tudo. Existe uma por trabalho, e as três moram em
+[`src/components/layout/page.ts`](../src/components/layout/page.ts). **Nenhuma tela escreve
+`max-w-*` própria.**
+
+| Constante | Celular | `lg` | `xl` | Para quê |
+|---|---|---|---|---|
+| `PAGE_FORM` | 672px | 672px | 672px | Entrada, cadastro, configurações, perfil. Não estica: linha longa atrapalha formulário. |
+| `PAGE_LIST` | 672px | 896px | 1152px | Lista de registro. Com `LIST_GRID`, vira duas colunas em `xl`. |
+| `PAGE_WORK` | 672px | 1152px | 1152px | Painel e detalhe longo — as telas que ganham coluna de apoio. |
+
+**A segunda coluna é conteúdo, não sobra.** Onde ela existe, ela responde a uma pergunta que a
+coluna principal não responde:
+
+| Tela | Coluna larga | Coluna de apoio |
+|---|---|---|
+| Início (empresa) | a fila de plantões | **Pendências**, fixa na rolagem — o que espera decisão |
+| Novo atendimento | o formulário | **Resumo** com o perfil exigido, que muda enquanto se marcam atividades |
+| Detalhe do atendimento | o registro | avaliação e conversa |
+| Perfil do cuidador | quem a pessoa é | o que ela já fez com esta empresa |
+
+**Formulário não se parte em duas colunas.** O caminho de preenchimento é linear; o que vai ao lado
+dele é conteúdo derivado (um resumo), nunca metade dos campos.
+
+**A ordem escrita é a ordem do celular.** Onde o desktop precisa de outra ordem, a peça é colocada
+por `col-start`/`row-start` — nunca reescrevendo o documento e consertando o celular depois.
 
 **Nunca escreva o caso desktop primeiro e conserte depois com `max-md:`.** A ordem da declaração
 é a ordem da prioridade, e ela precisa ser legível no `className`.
+
+### O celular não recebe a mesma tela, recebe a mesma tarefa
+
+Encolher o desktop não é adaptar. Cada uma destas peças existe porque o padrão do desktop estava
+errado em tela pequena — e nenhuma delas remove função.
+
+| Peça | Celular | `md` e acima | Por quê |
+|---|---|---|---|
+| **Navegação** | 4 abas + sino + folha "Mais" | barra lateral com os 7 destinos | Sete destinos não cabem numa barra de abas; a versão anterior escondia dois deles em lugares sem nome |
+| `<FilterRow>` | fila que rola na horizontal | quebra em linhas | Três abas + cinco categorias viravam quatro linhas de controle antes do primeiro registro |
+| `<StatStrip>` | fila de cartões que rola | faixa emendada | Cinco números em duas colunas comiam ~190px do topo do painel |
+| `MOBILE_ACTION_BAR` | barra fixa acima das abas | linha de botões no fluxo | A ação decisiva não pode morar no fim de uma tela longa |
+| Relatório de horas | um cartão por registro | tabela de 6 colunas | Rolar na horizontal escondia justamente a coluna que responde à pergunta da tela |
+| Filtros do relatório | recolhidos atrás de "Filtros" | sempre abertos | Quatro campos empilhados empurravam o relatório para fora da tela |
+
+**A navegação do celular é uma escolha editorial, não um recorte.** A barra leva as telas abertas
+durante a operação. Notificação vira **sino no cabeçalho com contagem** — é onde a pessoa procura,
+e o número também vai no rótulo acessível, porque um ponto colorido não diz quantos nem diz nada a
+quem não distingue a cor. O que sobra vai para a folha **"Mais"**, que é o mesmo `<Modal>` (já é
+folha inferior no celular). "Sair" mora lá: usar área nobre de todas as telas para uma ação de uma
+vez por sessão é troca ruim.
+
+**Nada é escondido por ser secundário — é reposicionado por ser secundário.** Relatórios e
+Configurações não estavam na barra antes desta revisão; estavam numa engrenagem sem rótulo e num
+link no pé do painel. A folha "Mais" é mais descoberta do que os dois.
 
 ### Alvo de toque — 44px
 
@@ -1237,17 +1293,35 @@ era otimismo.
 | Elemento | Celular | Desktop | |
 |---|---|---|---|
 | `<Button size="md">` | 44px | 44px | ✅ `min-h-11` |
-| `<Button size="sm">` | 44px | 36px | ✅ `min-h-11 md:min-h-9` |
-| `<Chip>` | 44px | 32px | ✅ `min-h-11 md:min-h-8` |
+| `<Button size="sm">` | 44px | 36px | ✅ `min-h-11 pointer-fine:min-h-9` |
+| `<Chip>` | 44px | 32px | ✅ `min-h-11 pointer-fine:min-h-8` |
+| `<Check>` (linha inteira) | 44px | 25px | ✅ `min-h-11 pointer-fine:min-h-0` |
+| Estrela de avaliação | 44px | 28px | ✅ `size-11 pointer-fine:size-7` |
+| `<VoltarLink>` | 44px | justo | ✅ `min-h-11 px-2 -ml-2 pointer-fine:*` |
+| Ação do card de atendimento | 44px | 32px | ✅ `min-h-11 pointer-fine:min-h-8` |
+| Campo (`field.ts`) | 44px | 44px | ✅ `min-h-11` — media 43px por arredondamento |
+| Sino / "Mais" do cabeçalho | 44px | — | ✅ `size-11` |
+| Linha da folha "Mais" | 48px | — | ✅ `min-h-12` |
 | Campo (`Input`/`Select`/`Textarea`) | ~44px | ~44px | ✅ vem do `text-body` |
 | Aba da barra inferior | ~59px | — | ✅ |
 | Fechar do `<Modal>` | 44px | 44px | ✅ `size-11 -m-2.5` |
 | Dispensar do `<Toast>` | 44px | 44px | ✅ `size-11 -m-2` |
 | Item da barra lateral | — | ~37px | ✅ desktop, ponteiro |
 
-**O padrão dos elementos que encolhem no desktop** (`min-h-11 md:min-h-9`) não é inconsistência: o
-polegar precisa do alvo, o ponteiro não, e uma fila de controles gordos no desktop desperdiça a
-densidade que a coordenadora quer numa tela de quinze plantões.
+**A régua é o ponteiro, não a largura.** Os elementos que encolhem usam `pointer-fine:`, e isso é
+uma correção: com `md:`, um tablet em paisagem e um notebook com tela sensível passam de 768px e
+recebiam alvo de 32–36px, sendo que continuam sendo dedo. Largura de tela nunca disse método de
+entrada.
+
+Não é inconsistência que o alvo mude: o polegar precisa dele, o ponteiro não, e uma fila de
+controles gordos no desktop desperdiça a densidade que a coordenadora quer numa tela de quinze
+plantões. Medido: 1440px com mouse → linha de 25px, chip de 35px; 390px e **1024px** com toque →
+44px nos dois.
+
+**Medição completa.** Varredura de todo elemento focalizável em 16 rotas a 390px com toque: de
+**37 alvos abaixo de 44px para 1**. O que sobra é o link "Criar cadastro" dentro da frase "Ainda
+não tem conta?" — a WCAG 2.5.8 isenta explicitamente link embutido em bloco de texto, e aumentá-lo
+quebraria a linha.
 
 **A saída quando o visual não pode crescer:** aumente a área, não o desenho. Margem negativa
 (`size-11 -m-2.5`) expande o alvo sem engordar o ícone — é o que o ✕ do modal e do toast fazem.
@@ -1386,6 +1460,81 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 9 — e o celular deixou de ser o desktop encolhido (agosto/2026)
+
+A revisão 8 deu layout ao desktop. Esta faz o caminho oposto: cada tela foi analisada em 390px e
+adaptada ao gesto, não reduzida. Nenhuma regra de negócio mudou e nenhuma função saiu.
+
+- **A barra de abas passou a ser editorial.** Levava cinco itens, e dois destinos ficavam fora da
+  navegação — Configurações era uma engrenagem sem rótulo e Relatórios um link no pé do painel.
+  Agora são **quatro abas** (as telas da operação), **sino com contagem** no cabeçalho e uma folha
+  **"Mais"** com o resto. Alvo por aba subiu de 20% para 25% da largura, e "Sair" desocupou o
+  cabeçalho de todas as telas.
+- **O contador de avisos virou número nos dois perfis.** A empresa não tinha nenhum; o cuidador
+  tinha um ponto vermelho que não dizia quantos e sumia para quem não distingue a cor. O número
+  entra também no `aria-label`.
+- **`<FilterRow>` nasceu.** No celular a fila de filtros rola na horizontal e sangra até a borda;
+  a partir de `md` volta a quebrar em linhas. Em Cuidadores isso devolveu duas linhas de altura
+  antes do primeiro registro.
+- **`<StatStrip>` nasceu.** Cinco números em duas colunas ocupavam três linhas no topo do painel e
+  empurravam "Pendências" — o que pede ação — para baixo da dobra. Viraram uma fila que rola, com
+  `snap`, e nada foi escondido.
+- **`MOBILE_ACTION_BAR` nasceu.** "Fazer check-in" ficava depois do endereço, do paciente e do
+  cuidador; "Publicar atendimento" depois de onze atividades. Agora flutuam acima da barra de
+  abas. É **um elemento só**, não uma cópia: `md:static` desfaz o estado flutuante.
+- **O relatório de horas tem duas formas.** No celular, um cartão por registro, com
+  previsto/realizado como par — que é a leitura da tela; a tabela de seis colunas obrigava a
+  arrastar na horizontal justamente até a coluna que responde à pergunta. A partir de `md`,
+  tabela, que é mais rápida de varrer quando há largura.
+- **Os filtros do relatório recolhem no celular** atrás de um botão que diz quantos estão ativos.
+  Quem abre a tela quer primeiro ver as horas.
+- **`<VoltarLink>` e `<Check>` nasceram** de código copiado em seis e três telas. Os dois estavam
+  abaixo do alvo mínimo em todas as cópias.
+- **O atalho de Relatórios no pé do painel saiu**: existia porque Relatórios não tinha casa na
+  navegação do celular. Agora tem.
+- **Medição, não impressão:** varredura de todo elemento focalizável em 16 rotas a 390px com
+  toque — de **37 alvos abaixo de 44px para 1**, e esse 1 é o link dentro de frase que a WCAG
+  2.5.8 isenta. Somado a: 16 rotas × 5 larguras sem estouro horizontal, e contraste computado
+  sobre o DOM com 0 falhas.
+
+### Revisão 8 — o desktop deixou de ser o celular esticado (agosto/2026)
+
+- **A regra "não use `lg:` nem `xl:`" caiu, e ela era desta página.** A intenção — não deixar a
+  linha de leitura crescer sem limite — continua certa, mas a conclusão era grande demais: as 19
+  telas travavam em 672px e **não existia uma única utilidade `lg:` no código**. Acima de 768px o
+  produto não mudava, então um monitor de 27" recebia a coluna do celular com o resto vazio, e a
+  apresentação comercial acontece justamente numa tela grande.
+- **Três larguras por trabalho** (`PAGE_FORM`, `PAGE_LIST`, `PAGE_WORK`) em
+  `src/components/layout/page.ts`, no mesmo espírito de `field.ts` e `button-classes.ts`: nenhuma
+  tela escreve `max-w-*` própria. Formulário continua sem esticar — isso não mudou.
+- **Quatro telas ganharam segunda coluna**, e em todas ela responde a uma pergunta que a coluna
+  principal não responde: Pendências fixa ao lado da fila no Início; Resumo com o perfil exigido ao
+  lado do formulário de novo atendimento; avaliação e conversa ao lado do registro; histórico ao
+  lado da credencial no perfil do cuidador.
+- **O resumo do novo atendimento é a mudança que mais vale na apresentação.** O perfil exigido pela
+  regra de formação mudava dentro do fluxo do formulário e saía do enquadramento; agora ele fica
+  fixo ao lado enquanto as atividades são marcadas — a regra agindo à vista de quem assiste.
+- **Formulário não foi partido em duas colunas.** O que vai ao lado é conteúdo derivado. Partir os
+  campos quebraria o caminho de preenchimento, que é linear de propósito.
+- **A ordem do celular ficou intacta.** Onde o desktop precisa de outra ordem — Pendências à
+  direita mas primeiro no telefone — a peça é colocada por `col-start`/`row-start`, e o documento
+  continua escrito na ordem do celular.
+- **Alvo de toque passou a ser por ponteiro, não por largura** (`pointer-fine:` no lugar de `md:`).
+  Era um erro silencioso: tablet em paisagem e notebook com tela sensível passam de 768px, e
+  recebiam alvo de 32–36px sendo dedo. Medido depois: 1440px com mouse → 25px de linha e 35px de
+  chip; 390px **e 1024px** com toque → 44px nos dois.
+- **`<Check>` nasceu** (`ui/Check.tsx`), unificando a caixa de marcação que estava copiada em três
+  telas sempre como `size-4` numa linha de ~24px. Marcar tarefa concluída na casa do paciente é a
+  interação mais repetida do cuidador no celular e estava com metade do alvo mínimo.
+- **A estrela de avaliação virou alvo de verdade** (era o menor da aplicação: 16px, sem `className`
+  nenhum) e ganhou semântica de `radiogroup`; em leitura, a nota agora também sai em texto para
+  leitor de tela.
+- **A tabela do relatório cabe inteira a partir de `lg`** e, onde ainda rola, virou região
+  alcançável por teclado — quem navega por teclado não chegava às colunas de horas e valor.
+- **Verificação:** 16 rotas × 5 larguras (320, 390, 820, 1180, 1728) — **nenhum estouro
+  horizontal**; contraste computado sobre o DOM renderizado — **0 falhas**; a coluna fixa do Início
+  confirmada grudando em 24px e permanecendo através da rolagem.
 
 ### Revisão 7 — de volta ao verde da marca, e o degrau de texto virou token (agosto/2026)
 

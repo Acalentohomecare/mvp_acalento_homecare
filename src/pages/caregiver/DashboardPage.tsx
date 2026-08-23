@@ -8,7 +8,8 @@ import { completedHours, todayISO } from "../../services/attendances";
 import { caregiverRating } from "../../services/caregivers";
 import { caregiverInvitations } from "../../services/invitations";
 import { formatCurrency, formatRating } from "../../utils/format";
-import { PAGE_WORK } from "../../components/layout/page";
+import { PAGE_LIST } from "../../components/layout/page";
+import { StatStrip } from "../../components/shared/StatStrip";
 
 export function CaregiverDashboardPage() {
   const { session } = useSession();
@@ -33,32 +34,37 @@ export function CaregiverDashboardPage() {
   const patientName = (id: string) => state.patients.find((p) => p.id === id)?.name ?? "Paciente";
 
   return (
-    <div className={PAGE_WORK}>
-      <h1 className="text-display font-semibold">Início</h1>
+    <div className={PAGE_LIST}>
+      <h1 className="text-display">Início</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">{caregiver?.name}</p>
 
-      <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-linha bg-linha shadow-card sm:grid-cols-3">
-        {[
+      <StatStrip
+        items={[
           { label: "Convites", value: String(invitations.length) },
           { label: "Horas realizadas", value: `${Math.round(completedHours(mine))}h` },
           {
             label: "Avaliação",
-            value: rating.average === null ? `${rating.count}/3` : formatRating(rating.average),
+            value:
+              rating.average === null ? (
+                `${rating.count}/3`
+              ) : (
+                <>
+                  <Star size={13} aria-hidden="true" className="fill-rating text-rating" />
+                  {formatRating(rating.average)}
+                </>
+              ),
           },
-        ].map((item) => (
-          <div key={item.label} className="flex h-full flex-col justify-between gap-2 bg-surface-raised px-3.5 py-3 last:col-span-2 sm:last:col-span-1">
-            <div className="text-meta font-medium tracking-wide text-ink-subtle uppercase">{item.label}</div>
-            <div className="mt-1 flex items-center gap-1 font-mono text-title leading-none font-medium text-accent">
-              {item.label === "Avaliação" && rating.average !== null && (
-                <Star size={13} className="fill-rating text-rating" />
-              )}
-              {item.value}
-            </div>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
-      <h2 className="mt-7 mb-2.5 text-label font-semibold tracking-wide text-ink-subtle uppercase">
+      {/*
+        O cuidador abre isto no celular, entre um atendimento e outro, e por isso a tela é curta
+        de propósito. No desktop as duas listas ficam lado a lado em vez de esticarem: o próximo
+        atendimento continua sendo o item grande, e a agenda à frente deixa de exigir rolagem.
+      */}
+      <div className="mt-7 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
+      <div className="min-w-0">
+      <h2 className="mb-2.5 text-heading text-ink">
         Próximo atendimento
       </h2>
       {!next ? (
@@ -70,9 +76,9 @@ export function CaregiverDashboardPage() {
           <Card className="transition-[border-color,box-shadow] duration-150 ease-out hover:border-accent/45 hover:shadow-raised">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-title font-semibold">{patientName(next.patientId)}</div>
+                <div className="text-title">{patientName(next.patientId)}</div>
                 <div className="mt-0.5 text-note text-ink-subtle">
-                  {ATTENDANCE_TYPE_LABEL[next.type]} · {next.durationHours}h
+                  {ATTENDANCE_TYPE_LABEL[next.type]} ·&nbsp;{next.durationHours}h
                 </div>
               </div>
               <Cracha
@@ -81,17 +87,20 @@ export function CaregiverDashboardPage() {
               />
             </div>
             <div className="mt-2 flex flex-wrap gap-x-4 text-note text-ink-muted">
-              <span className="font-mono">
-                {next.startDate.split("-").reverse().join("/")} · {next.startTime}
+              <span className="numero">
+                {next.startDate.split("-").reverse().join("/")} ·&nbsp;{next.startTime}
               </span>
               <span>{next.neighborhood}</span>
-              <span className="font-mono text-ink-muted">{formatCurrency(next.value)}</span>
+              <span className="numero text-ink-muted">{formatCurrency(next.value)}</span>
             </div>
           </Card>
         </Link>
       )}
 
-      <h2 className="mt-7 mb-2.5 text-label font-semibold tracking-wide text-ink-subtle uppercase">
+      </div>
+
+      <div className="min-w-0">
+      <h2 className="mt-7 mb-2.5 text-heading text-ink lg:mt-0">
         Próximos compromissos ({Math.max(upcoming.length - 1, 0)})
       </h2>
       {upcoming.length <= 1 ? (
@@ -106,15 +115,18 @@ export function CaregiverDashboardPage() {
               to={`/cuidador/atendimentos/${a.id}`}
               className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2.5 shadow-card transition-colors duration-150 ease-out hover:border-accent/45"
             >
-              <span className="font-mono text-note text-ink-muted">
+              <span className="numero text-note text-ink-muted">
                 {a.startDate.split("-").reverse().slice(0, 2).join("/")}
               </span>
               <span className="min-w-0 flex-1 truncate text-note">{patientName(a.patientId)}</span>
-              <span className="font-mono text-note text-ink-subtle">{a.startTime}</span>
+              <span className="numero text-note text-ink-subtle">{a.startTime}</span>
             </Link>
           ))}
         </div>
       )}
+
+      </div>
+      </div>
 
       {invitations.length > 0 && (
         <ButtonLink to="/cuidador/convites" className="mt-6">

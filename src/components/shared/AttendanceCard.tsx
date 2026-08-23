@@ -32,9 +32,9 @@ export function AttendanceCard({
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-title font-semibold">{patientName}</div>
+          <div className="text-title">{patientName}</div>
           <div className="mt-0.5 text-note text-ink-subtle">
-            {ATTENDANCE_TYPE_LABEL[attendance.type]} · {attendance.durationHours}h
+            {ATTENDANCE_TYPE_LABEL[attendance.type]} ·&nbsp;{attendance.durationHours}h
           </div>
         </div>
         <Cracha
@@ -46,17 +46,17 @@ export function AttendanceCard({
       <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-note text-ink-muted">
         <span className="inline-flex items-center gap-1">
           <CalendarDays size={12} className="text-ink-subtle" />
-          <span className="font-mono">{formatDate(attendance.startDate)}</span>
+          <span className="numero">{formatDate(attendance.startDate)}</span>
         </span>
         <span className="inline-flex items-center gap-1">
           <Clock size={12} className="text-ink-subtle" />
-          <span className="font-mono">{attendance.startTime}</span>
+          <span className="numero">{attendance.startTime}</span>
         </span>
         <span className="inline-flex items-center gap-1">
           <MapPin size={12} className="text-ink-subtle" />
           {attendance.neighborhood}
         </span>
-        <span className="ml-auto font-mono text-ink-muted">{formatCurrency(attendance.value)}</span>
+        <span className="ml-auto numero text-ink-muted">{formatCurrency(attendance.value)}</span>
       </div>
 
       <div className="mt-2 inline-flex items-center gap-1 text-note">

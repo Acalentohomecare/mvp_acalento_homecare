@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { FileText, Plus } from "lucide-react";
-import { ButtonLink, TelaCarregando } from "../../components/ui";
+import { Plus } from "lucide-react";
+import { ButtonLink, PRODUTO_NOME, TelaCarregando } from "../../components/ui";
 import { AttendanceCard } from "../../components/shared/AttendanceCard";
+import { StatStrip } from "../../components/shared/StatStrip";
 import { rosterQueue } from "../../services/roster";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
@@ -25,17 +25,20 @@ function Section({
   title,
   count,
   children,
+  className = "",
 }: {
   title: string;
   count?: number;
   children: ReactNode;
+  /** No desktop a grade é que separa as seções, então quem entra nela zera o `mt`. */
+  className?: string;
 }) {
   return (
-    <section className="mt-7">
-      <h2 className="mb-2.5 flex items-center gap-2 text-label font-semibold tracking-wide text-ink-subtle uppercase">
+    <section className={`mt-7 ${className}`}>
+      <h2 className="mb-2.5 flex items-center gap-2 text-heading text-ink">
         {title}
         {count !== undefined && count > 0 && (
-          <span className="rounded-full bg-surface-sunken px-1.5 py-0.5 font-mono text-meta leading-none text-ink-muted">
+          <span className="rounded-full bg-surface-sunken px-1.5 py-0.5 numero text-meta leading-none text-ink-muted">
             {count}
           </span>
         )}
@@ -116,118 +119,127 @@ export function CompanyDashboardPage() {
     <div className={PAGE_WORK}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-display font-semibold">Início</h1>
+          <h1 className="text-display">Início</h1>
+          {company?.name !== PRODUTO_NOME && (
           <p className="prosa mt-1 text-body text-ink-subtle">{company?.name}</p>
+        )}
         </div>
         <ButtonLink to="/empresa/atendimentos/novo">
           <Plus size={15} /> Novo atendimento
         </ButtonLink>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-linha bg-linha shadow-card sm:grid-cols-5">
-        {numbers.map((n) => (
-          <div
-            key={n.label}
-            className="flex h-full flex-col justify-between gap-2 bg-surface-raised px-3.5 py-3 last:col-span-2 sm:last:col-span-1"
-          >
-            <div className="text-meta font-medium tracking-wide text-ink-subtle uppercase">{n.label}</div>
-            <div className="mt-1 font-mono text-title leading-none font-medium text-accent">{n.value}</div>
-          </div>
-        ))}
+      <StatStrip items={numbers} />
+
+      {/*
+        A grade de trabalho do desktop, e ela tem só duas peças: a **fila** na coluna larga e as
+        **pendências** numa coluna de apoio que acompanha a rolagem. Pendência é o que espera uma
+        decisão da coordenadora; deixá-la fixa enquanto a fila rola é a diferença entre lembrar e
+        não lembrar dela.
+
+        A colocação é explícita (`col-start` / `row-start`) e não por ordem de escrita, porque no
+        celular a ordem certa é outra — pendência primeiro, fila depois. Sem grade, o documento já
+        sai nessa ordem, e é por isso que Pendências vem escrita antes da fila mesmo aparecendo à
+        direita no desktop.
+
+        "Atividade recente" não entra na coluna de apoio: ela é o fim da leitura da operação (hoje
+        → em aberto → à frente → o que acabou de acontecer) e fica no pé da coluna larga. Na
+        coluna de apoio ela abriria um vão que nenhuma regra de conteúdo determina — só a
+        aritmética de linhas da grade.
+      */}
+      <div className="mt-7 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-x-8">
+        <Section
+          title="Pendências"
+          count={pendencies.length}
+          className="lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1 lg:mt-0"
+        >
+          {pendencies.length === 0 ? (
+            <Empty text="Nada pendente no momento." />
+          ) : (
+            <ul className="flex flex-col gap-1.5">
+              {pendencies.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-start gap-2.5 rounded-control border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink-muted shadow-card"
+                >
+                  <span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-status-aberto" />
+                  {p.text}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+
+        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <Section title="Atendimentos de hoje" count={today.length} className="lg:mt-0">
+            {today.length === 0 ? (
+              <Empty text="Nenhum atendimento agendado para hoje." />
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {today.map((a) => (
+                  <AttendanceCard
+                    key={a.id}
+                    attendance={a}
+                    patientName={patientName(a.patientId)}
+                    caregiverName={caregiverName(a.confirmedCaregiverId)}
+                  />
+                ))}
+              </div>
+            )}
+          </Section>
+
+          <Section title="Em aberto — aguardando cuidador" count={awaiting.length}>
+            {awaiting.length === 0 ? (
+              <Empty text="Nenhum atendimento aguardando cuidador." />
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {awaiting.map((a) => (
+                  <AttendanceCard
+                    key={a.id}
+                    attendance={a}
+                    patientName={patientName(a.patientId)}
+                    caregiverName={caregiverName(a.confirmedCaregiverId)}
+                  />
+                ))}
+              </div>
+            )}
+          </Section>
+
+          <Section title="Próximos atendimentos" count={upcoming.length}>
+            {upcoming.length === 0 ? (
+              <Empty text="Nenhum atendimento confirmado à frente." />
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {upcoming.slice(0, 4).map((a) => (
+                  <AttendanceCard
+                    key={a.id}
+                    attendance={a}
+                    patientName={patientName(a.patientId)}
+                    caregiverName={caregiverName(a.confirmedCaregiverId)}
+                  />
+                ))}
+              </div>
+            )}
+          </Section>
+
+          <Section title="Atividade recente">
+            {activity.length === 0 ? (
+              <Empty text="Sem movimentação registrada." />
+            ) : (
+              <ul>
+                {activity.map((entry) => (
+                  <li key={entry.id} className="border-b border-linha py-2.5 last:border-0">
+                    <p className="text-body text-ink-muted">{entry.text}</p>
+                    <p className="mt-0.5 numero text-meta text-ink-subtle">
+                      {new Date(entry.at).toLocaleString("pt-BR")}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+        </div>
       </div>
-
-      <Section title="Pendências" count={pendencies.length}>
-        {pendencies.length === 0 ? (
-          <Empty text="Nada pendente no momento." />
-        ) : (
-          <ul className="flex flex-col gap-1.5">
-            {pendencies.map((p) => (
-              <li
-                key={p.id}
-                className="flex items-start gap-2.5 rounded-control border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink-muted shadow-card"
-              >
-                <span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-status-aberto" />
-                {p.text}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-
-      <Section title="Atendimentos de hoje" count={today.length}>
-        {today.length === 0 ? (
-          <Empty text="Nenhum atendimento agendado para hoje." />
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            {today.map((a) => (
-              <AttendanceCard
-                key={a.id}
-                attendance={a}
-                patientName={patientName(a.patientId)}
-                caregiverName={caregiverName(a.confirmedCaregiverId)}
-              />
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <Section title="Em aberto — aguardando cuidador" count={awaiting.length}>
-        {awaiting.length === 0 ? (
-          <Empty text="Nenhum atendimento aguardando cuidador." />
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            {awaiting.map((a) => (
-              <AttendanceCard
-                key={a.id}
-                attendance={a}
-                patientName={patientName(a.patientId)}
-                caregiverName={caregiverName(a.confirmedCaregiverId)}
-              />
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <Section title="Próximos atendimentos" count={upcoming.length}>
-        {upcoming.length === 0 ? (
-          <Empty text="Nenhum atendimento confirmado à frente." />
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            {upcoming.slice(0, 4).map((a) => (
-              <AttendanceCard
-                key={a.id}
-                attendance={a}
-                patientName={patientName(a.patientId)}
-                caregiverName={caregiverName(a.confirmedCaregiverId)}
-              />
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <Link
-        to="/empresa/relatorios"
-        className="mt-7 inline-flex items-center gap-2 rounded-control border border-linha bg-surface-raised px-4 py-2.5 text-note font-semibold shadow-card transition-colors duration-150 ease-out hover:border-accent/45 md:hidden"
-      >
-        <FileText size={15} /> Relatório de horas
-      </Link>
-
-      <Section title="Atividade recente">
-        {activity.length === 0 ? (
-          <Empty text="Sem movimentação registrada." />
-        ) : (
-          <ul>
-            {activity.map((entry) => (
-              <li key={entry.id} className="border-b border-linha py-2.5 last:border-0">
-                <p className="text-body text-ink-muted">{entry.text}</p>
-                <p className="mt-0.5 font-mono text-meta text-ink-subtle">
-                  {new Date(entry.at).toLocaleString("pt-BR")}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
     </div>
   );
 }

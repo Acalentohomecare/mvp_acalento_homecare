@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, Info } from "lucide-react";
-import { Aviso, Button, Card, Chip, Cracha, Input, Select, TelaCarregando, Textarea } from "../../components/ui";
+import { useNavigate } from "react-router-dom";
+import { Copy, Info } from "lucide-react";
+import { Aviso, Button, Card, Check, Chip, Cracha, Input, Select, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { useToast } from "../../hooks/useToast";
@@ -22,7 +22,7 @@ import {
 import { companyPatients, createPatient, splitAddress } from "../../services/patients";
 import { formatCurrency } from "../../utils/format";
 import type { AttendanceType } from "../../types";
-import { PAGE_WORK } from "../../components/layout/page";
+import { MOBILE_ACTION_BAR, MOBILE_ACTION_SPACER, PAGE_WORK } from "../../components/layout/page";
 
 const NEW_PATIENT = "__new__";
 
@@ -30,26 +30,19 @@ const NEW_PATIENT = "__new__";
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <fieldset>
-      <legend className="mb-1 block text-label font-medium text-ink-muted">{label}</legend>
+      <legend className="mb-1 block text-label text-ink-muted">{label}</legend>
       {children}
     </fieldset>
   );
 }
 
-function Check({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: () => void;
-}) {
+/** Linha do resumo lateral: termo à esquerda, valor à direita. */
+function Resumo({ termo, children }: { termo: string; children: ReactNode }) {
   return (
-    <label className="flex items-center gap-2 text-body text-ink-muted">
-      <input type="checkbox" className="size-4 accent-accent" checked={checked} onChange={onChange} />
-      {label}
-    </label>
+    <div className="flex justify-between gap-4">
+      <dt className="shrink-0 text-ink-subtle">{termo}</dt>
+      <dd className="min-w-0 truncate text-right font-medium text-ink">{children}</dd>
+    </div>
   );
 }
 
@@ -204,18 +197,22 @@ export function NewAttendancePage() {
 
   return (
     <div className={PAGE_WORK}>
-      <Link
-        to="/empresa"
-        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={14} /> Início
-      </Link>
+      <VoltarLink to="/empresa">Início</VoltarLink>
 
-      <h1 className="mt-3 text-display font-semibold">Novo atendimento</h1>
+      <h1 className="mt-3 text-display">Novo atendimento</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">
         As atividades marcadas definem sozinhas o perfil profissional exigido.
       </p>
 
+      {/*
+        No desktop o formulário ganha um resumo ao lado. Não é o formulário partido em duas
+        colunas — isso quebraria o caminho de preenchimento; é conteúdo derivado, que só existe
+        aqui: o que vai ser publicado, e principalmente o **perfil exigido**, que muda enquanto
+        as atividades são marcadas. Numa apresentação, é a regra agindo à vista de quem assiste,
+        sem ninguém precisar rolar a tela para mostrá-la.
+      */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
+      <div className="min-w-0">
       {previous.length > 0 && (
         <Card className="mt-5">
           <div className="mb-2 flex items-center gap-1.5 text-note font-semibold text-ink-muted">
@@ -362,7 +359,8 @@ export function NewAttendancePage() {
         </div>
 
         <Field label="Atividades exigidas">
-          <div className="flex flex-col gap-1.5">
+          {/* Onze itens em coluna única viram rolagem à toa quando há largura de sobra. */}
+          <div className="flex flex-col gap-1.5 lg:grid lg:grid-cols-2 lg:gap-x-6">
             {ACTIVITIES.map((activity) => (
               <Check
                 key={activity.id}
@@ -380,7 +378,7 @@ export function NewAttendancePage() {
           </div>
         </Field>
 
-        <Card className="flex flex-wrap items-center gap-2.5">
+        <Card className="flex flex-wrap items-center gap-2.5 lg:hidden">
           <span className="text-note text-ink-muted">Perfil necessário:</span>
           <Cracha label={CATEGORY_LABEL[category]} className={CATEGORY_CLASS[category]} />
           <span className="text-note text-ink-subtle">
@@ -402,15 +400,83 @@ export function NewAttendancePage() {
 
         {error && <Aviso>{error}</Aviso>}
 
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit" variant="primary" onClick={(e) => submit(e, true)}>
+        {/*
+          Onze atividades acima destes botões: no celular, "Publicar" ficava a uma rolagem
+          inteira de distância da última decisão tomada. A barra fixa encurta isso para um toque
+          e ainda serve de âncora — a pessoa sabe onde a ação está sem procurar.
+        */}
+        <div className={`${MOBILE_ACTION_BAR} md:flex-wrap`}>
+          <Button
+            type="submit"
+            variant="primary"
+            className="flex-1 md:flex-none"
+            onClick={(e) => submit(e, true)}
+          >
             Publicar atendimento
           </Button>
-          <Button type="button" variant="ghost" onClick={(e) => submit(e, false)}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="shrink-0"
+            onClick={(e) => submit(e, false)}
+          >
             Salvar rascunho
           </Button>
         </div>
+        <div aria-hidden="true" className={MOBILE_ACTION_SPACER} />
       </form>
+      </div>
+
+      <aside className="mt-5 hidden lg:sticky lg:top-6 lg:block">
+        <Card>
+          <h2 className="text-heading text-ink">
+            Resumo
+          </h2>
+
+          <dl className="mt-3 flex flex-col gap-2 text-note">
+            <Resumo termo="Paciente">
+              {isNewPatient ? pName.trim() || "Novo paciente" : (selectedPatient?.name ?? "—")}
+            </Resumo>
+            <Resumo termo="Tipo">{ATTENDANCE_TYPE_LABEL[type]}</Resumo>
+            <Resumo termo="Quando">
+              <span className="numero">
+                {startDate ? startDate.split("-").reverse().join("/") : "—"} {startTime}
+              </span>
+            </Resumo>
+            <Resumo termo="Duração">
+              <span className="numero">{durationHours}h</span>
+            </Resumo>
+            <Resumo termo="Bairro">{neighborhood.trim() || "—"}</Resumo>
+            <Resumo termo="Atividades">
+              {activityIds.length === 0
+                ? "nenhuma marcada"
+                : `${activityIds.length} ${activityIds.length === 1 ? "marcada" : "marcadas"}`}
+            </Resumo>
+            <Resumo termo="Valor">
+              <span className="numero">{Number(value) ? formatCurrency(Number(value)) : "—"}</span>
+            </Resumo>
+          </dl>
+
+          {/* A regra agindo. É o que esta tela existe para mostrar, então fica destacada do resto
+              do resumo por uma divisória, não por mais uma caixa. */}
+          <div className="mt-3.5 border-t border-linha pt-3.5">
+            <p className="text-heading text-ink">
+              Perfil necessário
+            </p>
+            <div className="mt-2">
+              <Cracha label={CATEGORY_LABEL[category]} className={CATEGORY_CLASS[category]} />
+            </div>
+            <p className="mt-2 text-note text-ink-muted">
+              {activityIds.length === 0
+                ? "Marque as atividades para o sistema definir o perfil."
+                : category === "informal"
+                  ? "Nenhuma atividade exige formação — cuidador informal pode atender."
+                  : `As atividades marcadas exigem formação de nível ${CATEGORY_LABEL[category].toLowerCase()}.`}
+            </p>
+          </div>
+        </Card>
+      </aside>
+      </div>
     </div>
   );
 }

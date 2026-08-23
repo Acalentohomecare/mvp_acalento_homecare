@@ -41,9 +41,10 @@ export function Chip({
     <button
       type="button"
       aria-pressed={selecionado}
-      /* min-h-11 é o alvo de toque de 44px (seção 11); a partir de `md` o ponteiro é preciso e
-         o chip volta a encolher, senão uma fila de filtros vira uma barra de botões gordos. */
-      className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-note font-semibold transition-colors duration-150 ease-out md:min-h-8 md:px-3 ${
+      /* min-h-11 é o alvo de toque de 44px (seção 11); onde o ponteiro é preciso o chip volta a
+         encolher, senão uma fila de filtros vira uma barra de botões gordos. A régua é o ponteiro
+         e não a largura: tablet largo continua sendo dedo. */
+      className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-note font-semibold whitespace-nowrap transition-colors duration-150 ease-out pointer-fine:min-h-8 pointer-fine:px-3 ${
         selecionado ? SELECIONADO[modo] : INATIVO
       } ${className}`}
       {...props}

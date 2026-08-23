@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Lock, LogIn, LogOut, MapPin, Send, Star } from "lucide-react";
-import { Button, Card, Cracha, Input, TelaCarregando, Textarea } from "../../components/ui";
+import { useParams } from "react-router-dom";
+import { Camera, Lock, LogIn, LogOut, MapPin, Send, Star } from "lucide-react";
+import { Button, Card, Check, Cracha, Input, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL, ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
@@ -19,25 +19,60 @@ import {
   updateRecord,
 } from "../../services/records";
 import { canEvaluate, createEvaluation, evaluationFor } from "../../services/evaluations";
-import { PAGE_WORK } from "../../components/layout/page";
+import { MOBILE_ACTION_BAR, MOBILE_ACTION_SPACER, PAGE_WORK } from "../../components/layout/page";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-6">
-      <h2 className="mb-2.5 text-body font-semibold text-ink">{title}</h2>
+      <h2 className="mb-2.5 text-heading text-ink">{title}</h2>
       {children}
     </section>
   );
 }
 
-function Stars({ value, onChange }: { value: number; onChange?: (v: 1 | 2 | 3 | 4 | 5) => void }) {
+/**
+ * Nota de 1 a 5 (docs/DESIGN_SYSTEM.md, seção 11).
+ *
+ * Em leitura, as cinco estrelas são decoração para quem enxerga e nada para quem não enxerga —
+ * por isso a nota também sai em texto, escondido visualmente.
+ *
+ * Em edição, cada estrela é um alvo de 44px **por ponteiro, não por largura de tela**: quem
+ * avalia num tablet de 1024px continua tocando com o dedo. Onde existe ponteiro fino, a fila
+ * volta a encolher, senão cinco quadrados de 44px viram uma barra dentro de um card.
+ */
+function Stars({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange?: (v: 1 | 2 | 3 | 4 | 5) => void;
+}) {
   return (
-    <div className="flex items-center gap-1">
+    <div
+      className="flex items-center gap-0 pointer-fine:gap-1"
+      role={onChange ? "radiogroup" : undefined}
+      aria-label={onChange ? "Nota de 1 a 5" : undefined}
+    >
+      {!onChange && <span className="sr-only">{value} de 5</span>}
       {([1, 2, 3, 4, 5] as const).map((n) => {
         const filled = n <= value;
-        const icon = <Star size={16} className={filled ? "fill-rating text-rating" : "text-linha-strong"} />;
+        const icon = (
+          <Star
+            size={16}
+            aria-hidden="true"
+            className={filled ? "fill-rating text-rating" : "text-linha-strong"}
+          />
+        );
         return onChange ? (
-          <button key={n} type="button" aria-label={`${n} estrela${n > 1 ? "s" : ""}`} onClick={() => onChange(n)}>
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={n === value}
+            aria-label={`${n} estrela${n > 1 ? "s" : ""}`}
+            onClick={() => onChange(n)}
+            className="inline-flex size-11 items-center justify-center rounded-control transition-colors duration-150 ease-out hover:bg-surface-sunken pointer-fine:size-7"
+          >
             {icon}
           </button>
         ) : (
@@ -92,19 +127,14 @@ export function AttendanceDetailPage() {
 
   return (
     <div className={PAGE_WORK}>
-      <Link
-        to={backTo}
-        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={14} /> Agenda
-      </Link>
+      <VoltarLink to={backTo}>Agenda</VoltarLink>
 
       <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-display font-semibold">{patient?.name}</h1>
+          <h1 className="text-display">{patient?.name}</h1>
           <p className="prosa mt-1 text-body text-ink-subtle">
-            {ATTENDANCE_TYPE_LABEL[attendance.type]} · {attendance.durationHours}h ·{" "}
-            <span className="font-mono">
+            {ATTENDANCE_TYPE_LABEL[attendance.type]} ·&nbsp;{attendance.durationHours}h ·{" "}
+            <span className="numero">
               {attendance.startDate.split("-").reverse().join("/")} {attendance.startTime}
             </span>
           </p>
@@ -115,6 +145,16 @@ export function AttendanceDetailPage() {
         />
       </div>
 
+      {/*
+        No desktop a tela se divide em duas leituras: à esquerda **o registro** — onde é, quem é,
+        quando entrou, o que foi feito —, à direita **a troca** — a avaliação e a conversa. As duas
+        colunas são longas, e lado a lado cabem juntas na altura de uma tela.
+
+        A ordem escrita já é a ordem do celular, então abaixo de `lg` as duas divisões apenas
+        empilham e nada muda para o cuidador, que é quem abre isto na rua.
+      */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-8">
+      <div className="min-w-0">
       <Section title="Endereço">
         <p className="inline-flex items-start gap-1.5 text-body text-ink-muted">
           {showAddress ? (
@@ -153,23 +193,29 @@ export function AttendanceDetailPage() {
         <Card>
           <div className="grid grid-cols-2 gap-3 text-note">
             <div>
-              <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Check-in</div>
-              <div className="mt-1 font-mono">{time(attendance.checkinAt)}</div>
+              <div className="text-dado text-ink-muted uppercase">Check-in</div>
+              <div className="mt-1 numero">{time(attendance.checkinAt)}</div>
               {attendance.checkinLocation && (
                 <div className="mt-0.5 text-meta text-ink-subtle">{attendance.checkinLocation}</div>
               )}
             </div>
             <div>
-              <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Check-out</div>
-              <div className="mt-1 font-mono">{time(attendance.checkoutAt)}</div>
+              <div className="text-dado text-ink-muted uppercase">Check-out</div>
+              <div className="mt-1 numero">{time(attendance.checkoutAt)}</div>
             </div>
           </div>
 
+          {/*
+            No celular esta linha sai do card e vira a barra fixa acima da barra de abas: quem
+            está na porta do paciente não deve rolar a tela para achar o check-in. A partir de
+            `md` ela volta para dentro do card, onde os carimbos de hora estão.
+          */}
           {role === "caregiver" && attendance.status !== "cancelled" && (
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className={`${MOBILE_ACTION_BAR} md:mt-3 md:flex-wrap`}>
               <Button
                 size="sm"
                 variant="primary"
+                className="flex-1 md:flex-none"
                 disabled={Boolean(attendance.checkinAt)}
                 onClick={() => setState((s) => checkIn(s, attendance))}
               >
@@ -178,6 +224,7 @@ export function AttendanceDetailPage() {
               <Button
                 size="sm"
                 variant="secondary"
+                className="flex-1 md:flex-none"
                 disabled={!canCheckOut(attendance)}
                 onClick={() => setState((s) => checkOut(s, attendance))}
               >
@@ -209,24 +256,21 @@ export function AttendanceDetailPage() {
               if (!activity) return null;
               const done = record.completedActivityIds.includes(id);
               return (
-                <label key={id} className="flex items-center gap-2 text-body text-ink-muted">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-accent"
-                    checked={done}
-                    disabled={role !== "caregiver" || locked}
-                    onChange={() =>
-                      setState((s) =>
-                        updateRecord(s, attendance.id, {
-                          completedActivityIds: done
-                            ? record.completedActivityIds.filter((x) => x !== id)
-                            : [...record.completedActivityIds, id],
-                        }),
-                      )
-                    }
-                  />
-                  {activity.name}
-                </label>
+                <Check
+                  key={id}
+                  label={activity.name}
+                  checked={done}
+                  disabled={role !== "caregiver" || locked}
+                  onChange={() =>
+                    setState((s) =>
+                      updateRecord(s, attendance.id, {
+                        completedActivityIds: done
+                          ? record.completedActivityIds.filter((x) => x !== id)
+                          : [...record.completedActivityIds, id],
+                      }),
+                    )
+                  }
+                />
               );
             })}
           </div>
@@ -300,7 +344,7 @@ export function AttendanceDetailPage() {
                 {record.observations.map((o) => (
                   <li key={o.id} className="border-b border-linha pb-2 last:border-0">
                     <p className="text-body text-ink-muted">{o.text}</p>
-                    <p className="mt-0.5 font-mono text-meta text-ink-subtle">
+                    <p className="mt-0.5 numero text-meta text-ink-subtle">
                       {new Date(o.createdAt).toLocaleString("pt-BR")}
                       {o.afterCheckout && " · acrescentada após o check-out"}
                     </p>
@@ -334,6 +378,9 @@ export function AttendanceDetailPage() {
         </Card>
       </Section>
 
+      </div>
+
+      <div className="min-w-0">
       {/* ---------- Etapa 14: avaliação ---------- */}
       <Section title="Avaliação">
         {!canEvaluate(attendance) ? (
@@ -389,7 +436,7 @@ export function AttendanceDetailPage() {
               >
                 {m.text}
                 <div
-                  className={`mt-1 font-mono text-meta ${m.from === role ? "text-accent-ink-muted" : "text-ink-subtle"}`}
+                  className={`mt-1 numero text-meta ${m.from === role ? "text-accent-ink-muted" : "text-ink-subtle"}`}
                 >
                   {new Date(m.createdAt).toLocaleString("pt-BR")}
                 </div>
@@ -418,9 +465,16 @@ export function AttendanceDetailPage() {
         </div>
       </Section>
 
+      </div>
+      </div>
+
       <p className="mt-6 text-meta text-ink-subtle">
         Atividades exigidas: {activityNames(attendance.activityIds).join(", ")}
       </p>
+
+      {role === "caregiver" && attendance.status !== "cancelled" && (
+        <div aria-hidden="true" className={MOBILE_ACTION_SPACER} />
+      )}
     </div>
   );
 }

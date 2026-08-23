@@ -3,11 +3,11 @@ import type { Company } from "../types";
 export const COMPANIES: Company[] = [
   {
     id: "co1",
-    name: "Home Care Vida Plena",
+    name: "Acalento Gestão",
     cnpj: "12.345.678/0001-90",
     city: "Cidade Média - Centro",
     phone: "(11) 99999-0000",
-    email: "contato@vidaplena.com.br",
+    email: "contato@acalento.com.br",
     favoriteCaregiverIds: ["cg1", "cg8"],
   },
   {

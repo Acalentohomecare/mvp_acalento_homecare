@@ -172,7 +172,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
         </div>
 
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-linha px-5 pt-3 pb-2.5 md:pt-5">
-          <span id={tituloId} className="text-title font-semibold">
+          <span id={tituloId} className="text-title">
             {title}
           </span>
           {/* -m-2.5 devolve a área de toque de 44px sem engordar o ícone (seção 11). */}

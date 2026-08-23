@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Lock, MapPin } from "lucide-react";
-import { Aviso, Button, Card, Cracha, TelaCarregando } from "../../components/ui";
+import { Lock, MapPin } from "lucide-react";
+import { Aviso, Button, Card, Cracha, TelaCarregando, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL, ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
@@ -20,7 +19,7 @@ import {
 import { compatibleCaregivers } from "../../services/matching";
 import { formatCurrency } from "../../utils/format";
 import type { Attendance } from "../../types";
-import { PAGE_LIST } from "../../components/layout/page";
+import { LIST_GRID, PAGE_LIST } from "../../components/layout/page";
 
 function Section({ title, count, children }: { title: string; count: number; children: ReactNode }) {
   return (
@@ -66,9 +65,9 @@ export function CaregiverInvitationsPage() {
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-title font-semibold">{patientName(a.patientId)}</div>
+          <div className="text-title">{patientName(a.patientId)}</div>
           <div className="mt-0.5 text-note text-ink-subtle">
-            {ATTENDANCE_TYPE_LABEL[a.type]} · {a.durationHours}h
+            {ATTENDANCE_TYPE_LABEL[a.type]} ·&nbsp;{a.durationHours}h
           </div>
         </div>
         <Cracha
@@ -77,10 +76,10 @@ export function CaregiverInvitationsPage() {
         />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-note text-ink-muted">
-        <span className="font-mono">
-          {day(a)} · {a.startTime}
+        <span className="numero">
+          {day(a)} ·&nbsp;{a.startTime}
         </span>
-        <span className="font-mono text-ink-muted">{formatCurrency(a.value)}</span>
+        <span className="numero text-ink-muted">{formatCurrency(a.value)}</span>
       </div>
       <div className="mt-1.5 inline-flex items-start gap-1.5 text-note">
         {canSeeFullAddress(a, caregiverId) ? (
@@ -104,14 +103,9 @@ export function CaregiverInvitationsPage() {
 
   return (
     <div className={PAGE_LIST}>
-      <Link
-        to="/cuidador"
-        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={14} /> Início
-      </Link>
+      <VoltarLink to="/cuidador">Início</VoltarLink>
 
-      <h1 className="mt-3 text-display font-semibold">Convites</h1>
+      <h1 className="mt-3 text-display">Convites</h1>
 
       {error && <Aviso className="mt-3">{error}</Aviso>}
 
@@ -119,7 +113,7 @@ export function CaregiverInvitationsPage() {
         {invitations.length === 0 ? (
           <Empty text="Nenhum convite no momento." />
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className={LIST_GRID}>
             {invitations.map((invitation) => {
               const attendance = attendanceById(state, invitation.attendanceId);
               if (!attendance) return null;
@@ -161,7 +155,7 @@ export function CaregiverInvitationsPage() {
         {opportunities.length === 0 ? (
           <Empty text="Nenhuma publicação aberta compatível." />
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className={LIST_GRID}>
             {opportunities.map((a) => (
               <Card key={a.id}>
                 {summary(a)}
@@ -188,7 +182,7 @@ export function CaregiverInvitationsPage() {
         {confirmed.length === 0 ? (
           <Empty text="Nenhum atendimento confirmado." />
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className={LIST_GRID}>
             {confirmed.map((a) => (
               <Card key={a.id}>
                 {summary(a)}

@@ -9,7 +9,7 @@ import { isoDate } from "../utils/date";
  * empresas: é o cadastro que a demonstração aprova ao vivo.
  */
 export const CAREGIVER_LINKS: CaregiverLink[] = [
-  // Home Care Vida Plena (co1) — empresa usada na apresentação.
+  // Acalento Gestão (co1) — empresa usada na apresentação.
   { id: "lk1", companyId: "co1", caregiverId: "cg1", status: "approved", decidedAt: isoDate(-30) },
   { id: "lk2", companyId: "co1", caregiverId: "cg2", status: "approved", decidedAt: isoDate(-25) },
   { id: "lk3", companyId: "co1", caregiverId: "cg4", status: "approved", decidedAt: isoDate(-40) },

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BadgeCheck, Check, Heart, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Input, Select, TelaCarregando } from "../../components/ui";
+import { BadgeCheck, Check, Heart, Star } from "lucide-react";
+import { Avatar, Button, Card, Cracha, Input, Select, TelaCarregando, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { CATEGORY_CLASS, CATEGORY_LABEL, SHIFT_LABEL, SHIFT_ORDER } from "../../constants/caregiver";
@@ -16,7 +16,7 @@ import {
 } from "../../services/invitations";
 import { formatCurrency, formatRating } from "../../utils/format";
 import type { Shift } from "../../types";
-import { PAGE_LIST } from "../../components/layout/page";
+import { LIST_GRID, PAGE_LIST } from "../../components/layout/page";
 
 export function MatchingPage() {
   const { attendanceId } = useParams();
@@ -51,14 +51,9 @@ export function MatchingPage() {
 
   return (
     <div className={PAGE_LIST}>
-      <Link
-        to="/empresa/atendimentos"
-        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={14} /> Atendimentos
-      </Link>
+      <VoltarLink to="/empresa/atendimentos">Atendimentos</VoltarLink>
 
-      <h1 className="mt-3 text-display font-semibold">Cuidadores compatíveis</h1>
+      <h1 className="mt-3 text-display">Cuidadores compatíveis</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">
         {patient?.name} · {attendance.startDate.split("-").reverse().join("/")} às{" "}
         {attendance.startTime} · {attendance.neighborhood}
@@ -125,7 +120,7 @@ export function MatchingPage() {
           Nenhum cuidador compatível com esses critérios.
         </p>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className={LIST_GRID}>
           {matches.map((c) => {
             const rating = caregiverRating(state.evaluations, c.id);
             const invited = invitedIds.includes(c.id);
@@ -134,7 +129,7 @@ export function MatchingPage() {
                 <Avatar name={c.name} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-title font-semibold">{c.name}</span>
+                    <span className="text-title">{c.name}</span>
                     {isFavorite(state, session?.companyId, c.id) && (
                       <Heart size={13} className="fill-accent text-accent" aria-label="Favorito" />
                     )}
@@ -157,7 +152,7 @@ export function MatchingPage() {
                         {formatRating(rating.average)}
                       </span>
                     )}
-                    <span className="font-mono text-note text-ink-muted">
+                    <span className="numero text-note text-ink-muted">
                       {formatCurrency(c.shiftRate)}
                     </span>
                   </div>

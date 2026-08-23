@@ -33,7 +33,7 @@ export function NotificationsPage() {
     <div className={PAGE_LIST}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-display font-semibold">Notificações</h1>
+          <h1 className="text-display">Notificações</h1>
           <p className="prosa mt-1 text-body text-ink-subtle">
             {unread === 0 ? "Tudo lido." : `${unread} não ${unread === 1 ? "lida" : "lidas"}.`}
           </p>
@@ -61,7 +61,7 @@ export function NotificationsPage() {
               <Bell size={14} className={`mt-0.5 shrink-0 ${n.read ? "text-ink-subtle" : "text-accent"}`} />
               <div className="min-w-0">
                 <p className="text-body text-ink-muted">{n.text}</p>
-                <p className="mt-0.5 font-mono text-meta text-ink-subtle">
+                <p className="mt-0.5 numero text-meta text-ink-subtle">
                   {TYPE_LABEL[n.type]} · {new Date(n.createdAt).toLocaleString("pt-BR")}
                 </p>
               </div>

@@ -14,7 +14,7 @@ npm start
 
 A aplicação abre na tela de **Entrada**, com dois atalhos de conta:
 
-- **Empresa** (`empresa@demo.com`) → Home Care Vida Plena, o perfil que conduz a apresentação.
+- **Empresa** (`empresa@demo.com`) → Acalento Gestão, o perfil que conduz a apresentação.
 - **Cuidador** (`cuidador@demo.com`) → Sandra Oliveira (informal). Também dá para entrar como
   Beatriz, Marcos (fisioterapeuta), Juliana (técnica de enfermagem), Fernando ou Débora.
 

@@ -23,12 +23,16 @@ export const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 /**
- * O piso de 44px vale no celular, onde o alvo é o polegar (seção 11). No desktop o ponteiro é
- * preciso e a densidade importa mais, então a partir de `md` o botão pequeno volta a encolher.
+ * O piso de 44px vale onde o alvo é o polegar (seção 11). Onde o ponteiro é preciso, a densidade
+ * importa mais e o botão pequeno volta a encolher.
+ *
+ * A régua é `pointer-fine`, não `md`. Largura de tela não diz método de entrada: um tablet em
+ * paisagem e um notebook com tela sensível passam de 768px e continuam sendo dedo — com a régua
+ * antiga, os dois recebiam alvo de 36px.
  */
 export const SIZE_CLASSES: Record<ButtonSize, string> = {
   md: "min-h-11 px-4 py-2.5 text-note",
-  sm: "min-h-11 px-3 py-1.5 text-label md:min-h-9 md:px-2.5",
+  sm: "min-h-11 px-3 py-1.5 text-label pointer-fine:min-h-9 pointer-fine:px-2.5",
 };
 
 export const BUTTON_BASE_CLASS =

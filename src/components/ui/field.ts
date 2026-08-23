@@ -3,7 +3,7 @@
  * compartilham a mesma moldura: antes cada um repetia a string de classes e qualquer ajuste
  * precisava ser feito em três lugares — foi assim que o `focus` acabou diferente entre eles.
  */
-export const FIELD_LABEL_CLASS = "mb-1.5 block text-label font-medium text-ink-muted";
+export const FIELD_LABEL_CLASS = "mb-1.5 block text-label text-ink-muted";
 
 /*
  * `text-body` (16px) não é escolha estética: abaixo de 16px o Safari do iPhone dá zoom sozinho
@@ -17,7 +17,7 @@ export const FIELD_LABEL_CLASS = "mb-1.5 block text-label font-medium text-ink-m
  * WCAG 1.4.11 cobra 3:1 disso. Os 1,5px ficam; agora sobre uma linha que se enxerga.
  */
 export const FIELD_CLASS =
-  "w-full rounded-control border-[1.5px] border-linha-strong bg-surface-raised px-3 py-2 text-body text-ink outline-none transition-colors duration-150 placeholder:text-ink-subtle hover:border-ink-subtle focus:border-accent disabled:cursor-not-allowed disabled:border-linha disabled:bg-surface-sunken disabled:text-ink-subtle/70";
+  "w-full min-h-11 rounded-control border-[1.5px] border-linha-strong bg-surface-raised px-3 py-2 text-body text-ink outline-none transition-colors duration-150 placeholder:text-ink-subtle hover:border-ink-subtle focus:border-accent disabled:cursor-not-allowed disabled:border-linha disabled:bg-surface-sunken disabled:text-ink-subtle/70";
 
 /**
  * Campo que falhou na validação. A borda muda **e** a mensagem aparece embaixo — cor sozinha não

@@ -13,6 +13,13 @@
  * fica em 3,0:1 sobre branco e não sustenta uma palavra.
  */
 
+/**
+ * O nome do produto, em um lugar só. Os cabeçalhos comparam contra ele: quando a empresa da
+ * sessão se chama igual ao produto, mostrar os dois é repetir a mesma palavra em dois níveis de
+ * hierarquia — o segundo deixa de informar e só ocupa linha.
+ */
+export const PRODUTO_NOME = "Acalento Gestão";
+
 interface LogoMarkProps {
   /** Lado do símbolo em px. */
   size?: number;

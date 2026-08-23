@@ -135,8 +135,8 @@ function categoriaExigida(atividadesIds) {
 
 function seedData() {
   const empresa = {
-    id: "emp1", nome: "Home Care Vida Plena", cnpj: "12.345.678/0001-90",
-    cidade: "Cidade Média - Centro", telefone: "(11) 99999-0000", email: "contato@vidaplena.com.br",
+    id: "emp1", nome: "Acalento Gestão", cnpj: "12.345.678/0001-90",
+    cidade: "Cidade Média - Centro", telefone: "(11) 99999-0000", email: "contato@acalento.com.br",
     status: "aprovado", favoritos: ["c1", "c4"],
   };
 

@@ -5,7 +5,7 @@ import type { User } from "../types";
  * documentados; as demais contas de cuidador existem para explorar as diferentes categorias.
  */
 export const USERS: User[] = [
-  { id: "us1", name: "Home Care Vida Plena", email: "empresa@demo.com", password: "123456", role: "company", companyId: "co1" },
+  { id: "us1", name: "Acalento Gestão", email: "empresa@demo.com", password: "123456", role: "company", companyId: "co1" },
   { id: "us2", name: "Cuidar Bem Serviços de Home Care", email: "empresa2@demo.com", password: "123456", role: "company", companyId: "co2" },
   { id: "us3", name: "Sandra Oliveira", email: "cuidador@demo.com", password: "123456", role: "caregiver", caregiverId: "cg1" },
   { id: "us4", name: "Beatriz Nunes", email: "beatriz@demo.com", password: "123456", role: "caregiver", caregiverId: "cg2" },

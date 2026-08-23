@@ -30,7 +30,7 @@ export function SchedulePage() {
 
   return (
     <div className={PAGE_LIST}>
-      <h1 className="text-display font-semibold">
+      <h1 className="text-display">
         {isCompany ? "Escala" : "Minha agenda"}
       </h1>
       <p className="prosa mt-1 text-body text-ink-subtle">
@@ -52,7 +52,7 @@ export function SchedulePage() {
           return (
             <div key={day.date}>
               <div className="mb-2 flex items-baseline gap-2 border-b border-linha pb-1.5">
-                <span className="font-mono text-note font-semibold">
+                <span className="numero text-note font-semibold">
                   {dayNumber}/{month}
                 </span>
                 <span className="text-note text-ink-subtle">{weekday}</span>
@@ -71,7 +71,7 @@ export function SchedulePage() {
                         to={`${base}/${a.id}`}
                         className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2.5 transition-colors duration-150 ease-out hover:border-accent"
                       >
-                        <span className="font-mono text-note text-ink-muted">{a.startTime}</span>
+                        <span className="numero text-note text-ink-muted">{a.startTime}</span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-note font-semibold">
                             {patient?.name}

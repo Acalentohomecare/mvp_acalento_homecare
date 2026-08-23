@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RotateCcw } from "lucide-react";
-import { Button, Card, Modal, TelaCarregando } from "../../components/ui";
+import { Button, Card, Modal, PRODUTO_NOME, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { companyAuditLog } from "../../services/roster";
@@ -27,18 +27,20 @@ export function CompanySettingsPage() {
 
   return (
     <div className={PAGE_FORM}>
-      <h1 className="text-display font-semibold">Configurações</h1>
-      <p className="prosa mt-1 text-body text-ink-subtle">{company?.name}</p>
+      <h1 className="text-display">Configurações</h1>
+      {company?.name !== PRODUTO_NOME && (
+          <p className="prosa mt-1 text-body text-ink-subtle">{company?.name}</p>
+        )}
 
       <section className="mt-7">
-        <h2 className="mb-2.5 text-body font-semibold text-ink">
+        <h2 className="mb-2.5 text-heading text-ink">
           Dados da empresa
         </h2>
         <Card>
           <dl className="flex flex-col gap-2 text-note">
             <div className="flex justify-between gap-4">
               <dt className="text-ink-subtle">CNPJ</dt>
-              <dd className="font-mono text-note">{company?.cnpj}</dd>
+              <dd className="numero text-note">{company?.cnpj}</dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-ink-subtle">Cidade</dt>
@@ -46,7 +48,7 @@ export function CompanySettingsPage() {
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-ink-subtle">Telefone</dt>
-              <dd className="font-mono text-note">{company?.phone}</dd>
+              <dd className="numero text-note">{company?.phone}</dd>
             </div>
             <div className="flex min-w-0 justify-between gap-4">
               <dt className="text-ink-subtle">E-mail</dt>
@@ -57,7 +59,7 @@ export function CompanySettingsPage() {
       </section>
 
       <section className="mt-7">
-        <h2 className="mb-1 text-body font-semibold text-ink">
+        <h2 className="mb-1 text-heading text-ink">
           Registro de atividade
         </h2>
         <p className="mb-2.5 text-note text-ink-subtle">
@@ -72,7 +74,7 @@ export function CompanySettingsPage() {
             {log.map((entry) => (
               <li key={entry.id} className="border-b border-linha py-2.5 text-note last:border-0">
                 <span className="font-semibold">{entry.action}</span> — {entry.detail}
-                <div className="mt-0.5 font-mono text-meta text-ink-subtle">
+                <div className="mt-0.5 numero text-meta text-ink-subtle">
                   {entry.actor} · {new Date(entry.createdAt).toLocaleString("pt-BR")}
                 </div>
               </li>
@@ -82,11 +84,11 @@ export function CompanySettingsPage() {
       </section>
 
       <section className="mt-7">
-        <h2 className="mb-2.5 text-body font-semibold text-ink">
+        <h2 className="mb-2.5 text-heading text-ink">
           Demonstração
         </h2>
         <Card>
-          <p className="text-title font-semibold">Restaurar dados da demonstração</p>
+          <p className="text-title">Restaurar dados da demonstração</p>
           <p className="mt-1 text-note text-ink-muted">
             Apaga tudo o que foi feito durante a apresentação (atendimentos criados, aprovações de
             cuidadores, check-ins, avaliações, mensagens) e devolve o conjunto de dados inicial.

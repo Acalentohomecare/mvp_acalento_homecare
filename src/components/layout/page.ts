@@ -43,3 +43,21 @@ export const WORK_ASIDE = "mt-7 lg:sticky lg:top-6 lg:mt-0";
 
 /** Lista de cards que vira duas colunas no monitor grande. */
 export const LIST_GRID = "flex flex-col gap-2.5 xl:grid xl:grid-cols-2 xl:items-start";
+
+/**
+ * Barra de ação principal do celular (docs/DESIGN_SYSTEM.md, seção 11).
+ *
+ * A ação decisiva de uma tela longa não pode morar no fim dela. O cuidador abre o atendimento na
+ * porta da casa do paciente para **fazer check-in**, e o botão ficava depois do endereço, das
+ * informações do paciente e do cuidador. Publicar um atendimento ficava depois de onze
+ * atividades. Em tela pequena, isso é uma rolagem inteira entre a intenção e o toque.
+ *
+ * É um único elemento, não uma cópia: no celular ele sai do fluxo e flutua acima da barra de
+ * abas; a partir de `md` volta a ser uma linha de botões no lugar onde foi escrito. Por isso o
+ * `md:static` desfaz cada propriedade do estado flutuante em vez de esconder e redesenhar.
+ */
+export const MOBILE_ACTION_BAR =
+  "fixed inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-30 flex gap-2 border-t border-linha bg-surface-raised/95 px-5 py-3 shadow-raised backdrop-blur-md md:static md:z-auto md:border-0 md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-none";
+
+/** Folga no pé da página para a barra flutuante não cobrir o último conteúdo. */
+export const MOBILE_ACTION_SPACER = "h-16 md:hidden";

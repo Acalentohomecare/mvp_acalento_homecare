@@ -23,3 +23,14 @@ export const tabNavClass = (isActive: boolean) =>
 
 /** Traço da aba ativa: o estado não fica só na cor (DESIGN_SYSTEM.md, seção 3). */
 export const TAB_INDICATOR_CLASS = "absolute inset-x-5 top-0 h-0.5 rounded-full bg-accent";
+
+/**
+ * Botão de ícone do cabeçalho do celular (sino, menu). 44px de alvo com ícone pequeno: a área
+ * cresce, o desenho não.
+ */
+export const HEADER_ICON_CLASS =
+  "relative inline-flex size-11 shrink-0 items-center justify-center rounded-control text-ink-muted transition-colors duration-150 ease-out hover:bg-surface-sunken hover:text-ink";
+
+/** Linha da folha "Mais": destino de navegação secundário, com alvo de 48px. */
+export const SHEET_ITEM_CLASS =
+  "flex min-h-12 w-full items-center gap-3 rounded-control px-3 text-body font-medium text-ink transition-colors duration-150 ease-out hover:bg-surface-sunken";

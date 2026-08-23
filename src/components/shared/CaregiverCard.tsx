@@ -23,7 +23,7 @@ export function CaregiverCard({ caregiver, rating, to, favorite }: CaregiverCard
         <Avatar name={caregiver.name} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-title font-semibold">{caregiver.name}</span>
+            <span className="text-title">{caregiver.name}</span>
             {favorite && (
               <Heart size={13} className="fill-accent text-accent" aria-label="Favorito" />
             )}
@@ -51,7 +51,7 @@ export function CaregiverCard({ caregiver, rating, to, favorite }: CaregiverCard
                 <span className="font-normal text-ink-subtle">({rating.count})</span>
               </span>
             )}
-            <span className="ml-auto font-mono text-note text-ink-muted">
+            <span className="ml-auto numero text-note text-ink-muted">
               {formatCurrency(caregiver.shiftRate)}
             </span>
           </div>

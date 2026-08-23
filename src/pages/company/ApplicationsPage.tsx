@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea } from "../../components/ui";
+import { Star } from "lucide-react";
+import { Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { CATEGORY_CLASS, CATEGORY_LABEL } from "../../constants/caregiver";
@@ -15,7 +15,7 @@ import {
   confirmApplication,
 } from "../../services/invitations";
 import { formatRating } from "../../utils/format";
-import { PAGE_LIST } from "../../components/layout/page";
+import { LIST_GRID, PAGE_LIST } from "../../components/layout/page";
 
 const APPLICATION_LABEL = {
   pending: "Aguardando decisão",
@@ -53,16 +53,11 @@ export function ApplicationsPage() {
 
   return (
     <div className={PAGE_LIST}>
-      <Link
-        to="/empresa/atendimentos"
-        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
-      >
-        <ArrowLeft size={14} /> Atendimentos
-      </Link>
+      <VoltarLink to="/empresa/atendimentos">Atendimentos</VoltarLink>
 
       <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-display font-semibold">Candidaturas</h1>
+          <h1 className="text-display">Candidaturas</h1>
           <p className="prosa mt-1 text-body text-ink-subtle">
             {patient?.name} · {attendance.startDate.split("-").reverse().join("/")} às{" "}
             {attendance.startTime}
@@ -100,7 +95,7 @@ export function ApplicationsPage() {
           Nenhuma candidatura ainda.
         </p>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className={LIST_GRID}>
           {applications.map((application) => {
             const caregiver = state.caregivers.find((c) => c.id === application.caregiverId);
             if (!caregiver) return null;
@@ -110,7 +105,7 @@ export function ApplicationsPage() {
                 <Avatar name={caregiver.name} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-title font-semibold">{caregiver.name}</span>
+                    <span className="text-title">{caregiver.name}</span>
                     <span className="text-meta text-ink-subtle">
                       {APPLICATION_LABEL[application.status]}
                     </span>

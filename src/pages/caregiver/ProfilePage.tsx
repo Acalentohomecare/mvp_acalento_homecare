@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { BadgeCheck, Camera } from "lucide-react";
-import { Avatar, Button, Card, Chip, Cracha, Input, TelaCarregando, Textarea } from "../../components/ui";
+import { Avatar, Button, Card, Check, Chip, Cracha, Input, TelaCarregando, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
@@ -27,7 +27,7 @@ import { PAGE_FORM } from "../../components/layout/page";
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <fieldset>
-      <legend className="mb-1 block text-label font-medium text-ink-muted">{label}</legend>
+      <legend className="mb-1 block text-label text-ink-muted">{label}</legend>
       {children}
     </fieldset>
   );
@@ -108,7 +108,7 @@ export function CaregiverProfilePage() {
         <div className="flex items-start gap-3.5">
           <Avatar name={caregiver.name} size={56} />
           <div className="min-w-0 flex-1">
-            <h1 className="text-display font-semibold">{caregiver.name}</h1>
+            <h1 className="text-display">{caregiver.name}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Cracha
                 label={CATEGORY_LABEL[caregiver.category]}
@@ -265,15 +265,12 @@ export function CaregiverProfilePage() {
           <Field label="Atividades que realiza">
             <div className="flex flex-col gap-1.5">
               {allowedActivities(caregiver.category).map((activity) => (
-                <label key={activity.id} className="flex items-center gap-2 text-body text-ink-muted">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-accent"
-                    checked={activityIds.includes(activity.id)}
-                    onChange={() => setActivityIds((prev) => toggle(prev, activity.id))}
-                  />
-                  {activity.name}
-                </label>
+                <Check
+                  key={activity.id}
+                  label={activity.name}
+                  checked={activityIds.includes(activity.id)}
+                  onChange={() => setActivityIds((prev) => toggle(prev, activity.id))}
+                />
               ))}
             </div>
             <p className="mt-1.5 text-meta text-ink-subtle">

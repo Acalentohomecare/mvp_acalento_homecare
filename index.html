@@ -22,11 +22,28 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      A DM Sans é servida do próprio projeto (`public/fonts/`), não do Google. O
+      PRODUCT.md diz que a demonstração roda "sem rede": com a fonte vindo de CDN, uma reunião
+      com wi-fi ruim perdia a tipografia inteira e caía no fallback do sistema — justamente no
+      momento em que o produto precisa parecer acabado.
+
+      Só os dois pesos que aparecem na primeira tela são pré-carregados. O 500 desce junto com o
+      CSS, sem concorrer com o que pinta primeiro.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/dm-sans-400-latin.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/dm-sans-600-latin.woff2"
+      crossorigin
     />
     <title>Acalento Gestão</title>
   </head>

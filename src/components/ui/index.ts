@@ -10,8 +10,10 @@ export {
 export type { ButtonSize, ButtonVariant } from "./button-classes";
 export { ButtonLink } from "./ButtonLink";
 export { Card } from "./Card";
+export { Check } from "./Check";
 export { Chip } from "./Chip";
 export { Cracha } from "./Cracha";
+export { FilterRow } from "./FilterRow";
 export {
   FIELD_CLASS,
   FIELD_ERROR_CLASS,
@@ -19,11 +21,12 @@ export {
   FIELD_LABEL_CLASS,
 } from "./field";
 export { Input } from "./Input";
-export { Logo, LogoMark } from "./Logo";
+export { Logo, LogoMark, PRODUTO_NOME } from "./Logo";
 export { Modal } from "./Modal";
 export { Select } from "./Select";
 export { Skeleton, SkeletonCard, SkeletonLista } from "./Skeleton";
 export { Stepper } from "./Stepper";
 export { TelaCarregando } from "./TelaCarregando";
 export { Textarea } from "./Textarea";
+export { VoltarLink } from "./VoltarLink";
 export { ToastProvider } from "./Toast";
