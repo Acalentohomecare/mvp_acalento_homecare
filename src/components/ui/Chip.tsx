@@ -28,7 +28,7 @@ const SELECIONADO: Record<Modo, string> = {
 };
 
 const INATIVO =
-  "border border-linha bg-surface-raised text-ink/60 hover:border-accent/45 hover:text-ink";
+  "border border-linha bg-surface-raised text-ink-muted hover:border-accent/45 hover:text-ink";
 
 export function Chip({
   selecionado,

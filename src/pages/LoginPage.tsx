@@ -58,7 +58,7 @@ export function LoginPage() {
           <Logo variant="stacked" align="center" size={76} />
         </div>
 
-        <p className="prosa mx-auto mb-5 text-center text-note text-ink/55">
+        <p className="prosa mx-auto mb-5 text-center text-note text-ink-muted">
           Gestão de plantões, cuidadores e horas para empresas de home care.
         </p>
 
@@ -86,7 +86,7 @@ export function LoginPage() {
           </form>
         </Card>
 
-        <div className="mt-4 text-center text-note text-ink/40">
+        <div className="mt-4 text-center text-note text-ink-subtle">
           Ainda não tem conta?{" "}
           <Link to="/cadastro" className="font-semibold text-accent underline">
             Criar cadastro
@@ -94,7 +94,7 @@ export function LoginPage() {
         </div>
 
         <div className="mt-8">
-          <p className="mb-2 text-label font-semibold tracking-wide text-ink/45 uppercase">
+          <p className="mb-2 text-label font-semibold tracking-wide text-ink-subtle uppercase">
             Contas de demonstração
           </p>
           <div className="flex flex-col gap-1.5">
@@ -103,7 +103,7 @@ export function LoginPage() {
                 key={acc.email}
                 type="button"
                 onClick={() => attempt(acc.email, "123456")}
-                className="rounded-control border border-linha bg-surface-raised px-3 py-2 text-left text-note text-ink/70 shadow-card transition-colors duration-150 hover:border-accent/45 hover:bg-accent-soft/40"
+                className="rounded-control border border-linha bg-surface-raised px-3 py-2 text-left text-note text-ink-muted shadow-card transition-colors duration-150 hover:border-accent/45 hover:bg-accent-soft/40"
               >
                 <span className="font-semibold text-ink">{acc.label}</span> — {acc.email}
               </button>

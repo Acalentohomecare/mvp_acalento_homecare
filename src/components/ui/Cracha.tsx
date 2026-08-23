@@ -16,14 +16,14 @@ interface CrachaProps {
  * verificado, registro no conselho de classe e status de atendimento.
  *
  * O chip é de tinta sobre fundo claro, não de cor cheia com texto branco. Duas razões: num
- * ambiente azul e branco, seis pastilhas saturadas na mesma lista viram ruído e escondem o que
+ * ambiente verde e branco, seis pastilhas saturadas na mesma lista viram ruído e escondem o que
  * a coordenadora precisa ver (o nome do paciente, o horário); e texto branco sobre âmbar ou
  * sobre sálvia ficava em ~2,2:1 de contraste, abaixo do mínimo legível. Cada par base/`-soft`
  * dos tokens fecha em 4,5:1 ou mais.
  */
 export function Cracha({
   label,
-  className = "border-linha bg-surface-sunken text-ink/70",
+  className = "border-linha bg-surface-sunken text-ink-muted",
   icon,
 }: CrachaProps) {
   return (

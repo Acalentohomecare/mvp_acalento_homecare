@@ -21,7 +21,7 @@ export function TelaCarregando({ label = "Carregando…", alturaTotal = false }:
     <div
       role="status"
       aria-live="polite"
-      className={`flex items-center justify-center px-6 text-body text-ink/50 ${
+      className={`flex items-center justify-center px-6 text-body text-ink-subtle ${
         alturaTotal ? "min-h-[100dvh]" : "min-h-[60dvh]"
       }`}
     >

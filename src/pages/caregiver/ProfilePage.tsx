@@ -21,12 +21,13 @@ import {
 } from "../../services/caregivers";
 import { caregiverCompanies } from "../../services/roster";
 import type { Shift, Weekday } from "../../types";
+import { PAGE_FORM } from "../../components/layout/page";
 
 /** Grupo de controles (chips/checkboxes) — fieldset/legend para leitores de tela. */
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <fieldset>
-      <legend className="mb-1 block text-label font-medium text-ink/70">{label}</legend>
+      <legend className="mb-1 block text-label font-medium text-ink-muted">{label}</legend>
       {children}
     </fieldset>
   );
@@ -102,7 +103,7 @@ export function CaregiverProfilePage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_FORM}>
       <div>
         <div className="flex items-start gap-3.5">
           <Avatar name={caregiver.name} size={56} />
@@ -123,8 +124,8 @@ export function CaregiverProfilePage() {
         </div>
 
         <Card className="mt-4 flex items-center gap-3">
-          <Camera size={18} className="shrink-0 text-ink/40" />
-          <p className="text-note text-ink/50">
+          <Camera size={18} className="shrink-0 text-ink-subtle" />
+          <p className="text-note text-ink-subtle">
             A foto de perfil é simulada nesta demonstração — mostramos suas iniciais.
           </p>
         </Card>
@@ -134,13 +135,13 @@ export function CaregiverProfilePage() {
             Empresas que aprovaram seu cadastro
           </p>
           {companies.length === 0 ? (
-            <p className="mt-1.5 text-note text-ink/50">
+            <p className="mt-1.5 text-note text-ink-subtle">
               Nenhuma ainda — só recebe convites quem já foi aprovado no quadro de uma empresa.
             </p>
           ) : (
             <ul className="mt-1.5 flex flex-col gap-1">
               {companies.map((co) => (
-                <li key={co.id} className="text-body text-ink/75">
+                <li key={co.id} className="text-body text-ink-muted">
                   · {co.name}
                 </li>
               ))}
@@ -148,7 +149,7 @@ export function CaregiverProfilePage() {
           )}
         </Card>
 
-        <p className="mt-4 text-note text-ink/45">
+        <p className="mt-4 text-note text-ink-subtle">
           Categoria e CPF não podem ser alterados por aqui: mudar a categoria exige uma nova
           conferência das empresas que têm você no quadro.
         </p>
@@ -192,7 +193,7 @@ export function CaregiverProfilePage() {
               onChange={(e) => setNeighborhoods(e.target.value)}
               placeholder="Centro, Vila Nova"
             />
-            <p className="mt-1 text-meta text-ink/40">Separe por vírgula.</p>
+            <p className="mt-1 text-meta text-ink-subtle">Separe por vírgula.</p>
           </div>
 
           {needsCouncil && (
@@ -211,7 +212,7 @@ export function CaregiverProfilePage() {
                       className={APPROVAL_STATUS_CLASS[caregiver.councilRegistrationStatus]}
                     />
                   )}
-                  <span className="text-meta text-ink/40">
+                  <span className="text-meta text-ink-subtle">
                     Alterar o registro devolve o cadastro para conferência.
                   </span>
                 </div>
@@ -224,7 +225,7 @@ export function CaregiverProfilePage() {
                   onChange={(e) => setSpecialties(e.target.value)}
                   placeholder="Cuidados pós-cirúrgicos, Curativos complexos"
                 />
-                <p className="mt-1 text-meta text-ink/40">Separe por vírgula.</p>
+                <p className="mt-1 text-meta text-ink-subtle">Separe por vírgula.</p>
               </div>
             </>
           )}
@@ -264,7 +265,7 @@ export function CaregiverProfilePage() {
           <Field label="Atividades que realiza">
             <div className="flex flex-col gap-1.5">
               {allowedActivities(caregiver.category).map((activity) => (
-                <label key={activity.id} className="flex items-center gap-2 text-body text-ink/75">
+                <label key={activity.id} className="flex items-center gap-2 text-body text-ink-muted">
                   <input
                     type="checkbox"
                     className="size-4 accent-accent"
@@ -275,7 +276,7 @@ export function CaregiverProfilePage() {
                 </label>
               ))}
             </div>
-            <p className="mt-1.5 text-meta text-ink/40">
+            <p className="mt-1.5 text-meta text-ink-subtle">
               A lista mostra apenas o que a categoria {CATEGORY_LABEL[caregiver.category]} autoriza.
             </p>
           </Field>

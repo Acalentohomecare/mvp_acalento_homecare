@@ -32,7 +32,7 @@ export function Select({ label, error, className = "", children, ...props }: Sel
         <ChevronDown
           size={16}
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-ink/40"
+          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-ink-subtle"
         />
       </span>
       {error && (

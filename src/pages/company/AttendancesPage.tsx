@@ -11,6 +11,7 @@ import {
 } from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
 import type { Attendance } from "../../types";
+import { PAGE_LIST } from "../../components/layout/page";
 
 const ACTION_CLASS =
   "rounded-control border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent";
@@ -72,11 +73,11 @@ export function CompanyAttendancesPage() {
     id ? state.caregivers.find((c) => c.id === id)?.name : undefined;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_LIST}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-display font-semibold">Atendimentos</h1>
-          <p className="prosa mt-1 text-body text-ink/50">
+          <p className="prosa mt-1 text-body text-ink-subtle">
             Todo o histórico da {company?.name ?? "empresa"}.
           </p>
         </div>
@@ -93,12 +94,12 @@ export function CompanyAttendancesPage() {
         ))}
       </div>
 
-      <p className="mt-5 mb-2.5 text-note text-ink/45">
+      <p className="mt-5 mb-2.5 text-note text-ink-subtle">
         {visible.length} {visible.length === 1 ? "atendimento" : "atendimentos"}
       </p>
 
       {visible.length === 0 ? (
-        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
           Nenhum atendimento {filter === "all" ? "cadastrado" : "nesse filtro"}.
         </p>
       ) : (

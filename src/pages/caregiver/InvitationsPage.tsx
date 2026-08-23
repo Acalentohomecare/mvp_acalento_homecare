@@ -20,6 +20,7 @@ import {
 import { compatibleCaregivers } from "../../services/matching";
 import { formatCurrency } from "../../utils/format";
 import type { Attendance } from "../../types";
+import { PAGE_LIST } from "../../components/layout/page";
 
 function Section({ title, count, children }: { title: string; count: number; children: ReactNode }) {
   return (
@@ -34,7 +35,7 @@ function Section({ title, count, children }: { title: string; count: number; chi
 
 function Empty({ text }: { text: string }) {
   return (
-    <p className="rounded-card border border-dashed border-linha py-6 text-center text-body text-ink/45">
+    <p className="rounded-card border border-dashed border-linha py-6 text-center text-body text-ink-subtle">
       {text}
     </p>
   );
@@ -66,7 +67,7 @@ export function CaregiverInvitationsPage() {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-title font-semibold">{patientName(a.patientId)}</div>
-          <div className="mt-0.5 text-note text-ink/50">
+          <div className="mt-0.5 text-note text-ink-subtle">
             {ATTENDANCE_TYPE_LABEL[a.type]} · {a.durationHours}h
           </div>
         </div>
@@ -75,24 +76,24 @@ export function CaregiverInvitationsPage() {
           className={ATTENDANCE_STATUS_CLASS[a.status]}
         />
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-note text-ink/60">
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-note text-ink-muted">
         <span className="font-mono">
           {day(a)} · {a.startTime}
         </span>
-        <span className="font-mono text-ink/70">{formatCurrency(a.value)}</span>
+        <span className="font-mono text-ink-muted">{formatCurrency(a.value)}</span>
       </div>
       <div className="mt-1.5 inline-flex items-start gap-1.5 text-note">
         {canSeeFullAddress(a, caregiverId) ? (
           <>
-            <MapPin size={12} className="mt-0.5 shrink-0 text-ink/40" />
-            <span className="text-ink/70">
+            <MapPin size={12} className="mt-0.5 shrink-0 text-ink-subtle" />
+            <span className="text-ink-muted">
               {a.street}, {a.number} — {a.neighborhood}
             </span>
           </>
         ) : (
           <>
-            <Lock size={12} className="mt-0.5 shrink-0 text-ink/40" />
-            <span className="text-ink/50">
+            <Lock size={12} className="mt-0.5 shrink-0 text-ink-subtle" />
+            <span className="text-ink-subtle">
               {a.neighborhood} — endereço completo liberado após a confirmação.
             </span>
           </>
@@ -102,10 +103,10 @@ export function CaregiverInvitationsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_LIST}>
       <Link
         to="/cuidador"
-        className="inline-flex items-center gap-1.5 text-note text-ink/50 transition-colors hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} /> Início
       </Link>
@@ -191,7 +192,7 @@ export function CaregiverInvitationsPage() {
             {confirmed.map((a) => (
               <Card key={a.id}>
                 {summary(a)}
-                <p className="mt-2 text-meta text-ink/40">
+                <p className="mt-2 text-meta text-ink-subtle">
                   Perfil exigido: {CATEGORY_LABEL[attendanceRequiredCategory(a.activityIds)]}
                 </p>
               </Card>

@@ -7,9 +7,10 @@ export const CATEGORY_LABEL: Record<CaregiverCategory, string> = {
 };
 
 /**
- * Trio de utilidades do `Cracha` de categoria (DESIGN_SYSTEM.md, seção 3). A escala vai de
- * sálvia (informal) a azul clínico (técnico) até o teal da marca (superior): quanto mais alta a
- * credencial, mais próxima da cor institucional.
+ * Trio de utilidades do `Cracha` de categoria (DESIGN_SYSTEM.md, seção 3). A escala corre pelo
+ * próprio eixo da marca — sálvia (informal), petróleo médio (técnico), petróleo cheio
+ * (superior): quanto mais alta a credencial, mais fundo o verde e mais perto da cor
+ * institucional.
  */
 export const CATEGORY_CLASS: Record<CaregiverCategory, string> = {
   informal: "bg-cat-informal-soft text-cat-informal border-cat-informal/25",

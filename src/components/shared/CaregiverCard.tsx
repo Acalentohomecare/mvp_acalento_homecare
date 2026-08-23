@@ -33,7 +33,7 @@ export function CaregiverCard({ caregiver, rating, to, favorite }: CaregiverCard
               </span>
             )}
           </div>
-          <p className="mt-0.5 text-note text-ink/50">
+          <p className="mt-0.5 text-note text-ink-subtle">
             {caregiver.experienceYears} {caregiver.experienceYears === 1 ? "ano" : "anos"} de
             experiência · {caregiver.neighborhoods.join(", ")}
           </p>
@@ -43,15 +43,15 @@ export function CaregiverCard({ caregiver, rating, to, favorite }: CaregiverCard
               className={CATEGORY_CLASS[caregiver.category]}
             />
             {rating.average === null ? (
-              <span className="text-meta text-ink/40">Sem média pública</span>
+              <span className="text-meta text-ink-subtle">Sem média pública</span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-note font-semibold text-ink/70">
+              <span className="inline-flex items-center gap-1 text-note font-semibold text-ink-muted">
                 <Star size={12} className="fill-rating text-rating" />
                 {formatRating(rating.average)}
-                <span className="font-normal text-ink/40">({rating.count})</span>
+                <span className="font-normal text-ink-subtle">({rating.count})</span>
               </span>
             )}
-            <span className="ml-auto font-mono text-note text-ink/70">
+            <span className="ml-auto font-mono text-note text-ink-muted">
               {formatCurrency(caregiver.shiftRate)}
             </span>
           </div>

@@ -3,7 +3,8 @@
 > Padrão obrigatório para qualquer componente de front do projeto.
 > Fonte de verdade dos tokens: [`src/index.css`](../src/index.css) (bloco `@theme`).
 > Fonte de verdade dos componentes: [`src/components/ui/`](../src/components/ui/).
-> Arquivo-mestre da marca: [`docs/Logo/Logo 4.png`](Logo/Logo%204.png).
+> Arquivo-mestre da marca: [`public/logo-mark.png`](../public/logo-mark.png) (lockup completo
+> em [`public/logo-lockup.png`](../public/logo-lockup.png)).
 
 **Nenhuma alteração visual importante entra no produto sem que esta página seja criada ou
 atualizada junto.** Se um padrão novo nasce durante o desenvolvimento, ele é documentado aqui
@@ -56,7 +57,7 @@ Marcadores de situação usados na página inteira:
 
 ## 0. As cinco regras
 
-1. **Nunca escreva cor, raio ou sombra literal.** Nada de `bg-[#0050E0]`, `rounded-[12px]`,
+1. **Nunca escreva cor, raio ou sombra literal.** Nada de `bg-[#025658]`, `rounded-[12px]`,
    `shadow-lg`, `text-blue-600`. Use os tokens desta página. Se falta um token para o que você
    precisa, o token é que precisa nascer — em `@theme`, com nome semântico e comentário.
 2. **Antes de criar um componente, procure em `src/components/ui/`.** Botão, card, campo, crachá,
@@ -64,8 +65,8 @@ Marcadores de situação usados na página inteira:
 3. **Cor nunca é a única portadora de informação.** Todo estado tem rótulo em texto; todo item
    ativo tem peso, posição ou traço além do tom. Daltonismo e tela ao sol não são exceção nesse
    público.
-4. **Cor saturada é reservada.** O ambiente é branco, azul-gelo e cinza claro. Azul cheio só
-   aparece na ação primária da tela e nos crachás que carregam significado.
+4. **Cor saturada é reservada.** O ambiente é branco e cinza levemente esverdeado. Verde cheio
+   só aparece na ação primária da tela e nos crachás que carregam significado.
 5. **Escreva para tela pequena primeiro.** A coordenadora decide plantão do celular, em pé, com
    pressa. Piso de 12px de texto, alvo de toque de 44px, nada essencial escondido em `hover`.
    A regra completa está na [seção 11](#11-mobile-first--regras-transversais).
@@ -74,28 +75,33 @@ Marcadores de situação usados na página inteira:
 
 ## 1. Marca
 
-O símbolo é a rede de cuidado: um núcleo azul e cinco elos que saem dele — dois em azul, três em
-azul-gelo, cada forma com contorno escuro. O arquivo oficial é `docs/Logo/Logo 4.png`, servido
-como [`public/logo.png`](../public/logo.png). **Nada é redesenhado em código.**
+O símbolo é a rede de cuidado: um núcleo em verde petróleo e cinco elos que saem dele — três em
+sálvia, dois em petróleo. O arquivo oficial é [`public/logo-mark.png`](../public/logo-mark.png), e
+o lockup completo (símbolo + palavra) é [`public/logo-lockup.png`](../public/logo-lockup.png).
+**Nada é redesenhado em código.**
+
+A arte tem duas tintas, e são só estas duas:
 
 | Cor da marca | Token | Hex | Onde |
 |---|---|---|---|
-| Azul profundo | `--brand` | `#0050E0` | Núcleo do símbolo. É também `--accent`. |
-| Azul médio | `--brand-mid` | `#017BFA` | Elos azuis e altas-luzes. |
-| Azul-gelo | `--brand-pale` | `#DDEDFC` | Elos claros. É também `--accent-soft`. |
+| Verde petróleo | `--brand` | `#025658` | Núcleo e elos escuros — 20,7% dos pixels opacos. É também `--accent`. |
+| Verde sálvia | `--brand-sage` | `#6CA079` | Elos claros — 10,1% dos pixels opacos. Só preenche forma. |
+| Sálvia de texto | `--brand-sage-ink` | `#41704C` | A sálvia rebaixada até aguentar letra (5,8:1 sobre branco). |
 
-Os valores foram amostrados pixel a pixel do arquivo, não estimados. Por isso o fundo suave da
-interface é literalmente a mesma tinta dos elos claros do símbolo.
+Os valores foram amostrados pixel a pixel do arquivo, não estimados.
+
+`--brand-sage` **nunca carrega texto**: a sálvia da arte fica em 3,0:1 sobre branco. Onde a sálvia
+precisa virar palavra — o "Gestão" do lockup — quem entra é `--brand-sage-ink`.
 
 ### O símbolo vai sem fundo, em lugar nenhum
 
-O contorno escuro em volta de cada forma é o que sustenta isso. **27% dos pixels opacos da arte
-são azul-gelo** — três dos cinco elos são quase brancos — e sem contorno eles ficavam em ~1,1:1
-de contraste sobre as superfícies claras do produto e simplesmente sumiam. Com o contorno, cada
-elo tem borda própria e a marca se sustenta sozinha.
+As duas tintas da arte são escuras o bastante para se sustentarem sozinhas sobre qualquer
+superfície clara do produto — o petróleo em 8,5:1 e a sálvia em 3,0:1 sobre branco. Não há elo
+quase branco a proteger, que era o problema da marca azul anterior e o que obrigava a discutir
+ladrilho de fundo.
 
-Conferido sobre branco, sobre a barra lateral (`#F0F2F5`), sobre o fundo do conteúdo, sobre o véu
-da entrada e sobre aba escura de navegador (`#202124` e `#35363A`), de 170px até 16px.
+Conferido sobre branco, sobre a barra lateral (`#F1F3EF`), sobre o fundo do conteúdo e sobre o véu
+da entrada, de 170px até 16px.
 
 Por isso **não existe fundo por trás da marca em lugar nenhum** — nem na interface, nem nos
 favicons. A única exceção é o `apple-touch-icon`, que leva fundo branco porque o iOS pinta preto
@@ -136,42 +142,58 @@ outro peso; colocar fundo atrás do símbolo.
 
 ## 2. Cor — o ambiente
 
-Produto de saúde e de gestão: o fundo é frio, claro e quieto. Toda a escala neutra puxa para o
-azul (nenhum cinza puro, nenhum preto puro), o que faz o azul da marca parecer da mesma família
-em vez de um adesivo colado.
+Produto de saúde e de gestão: o fundo é claro e quieto. Toda a escala neutra puxa levemente para
+o verde (nenhum cinza puro, nenhum preto puro), o que faz o verde da marca parecer da mesma
+família em vez de um adesivo colado.
 
 ### Neutros
 
 | Token | Utilidade | Hex | Uso |
 |---|---|---|---|
-| `--color-ink` | `text-ink` `bg-ink` | `#14243D` | Texto principal. Azul-marinho ardósia, nunca `#000`. |
-| `--color-surface` | `bg-surface` | `#F3F6FB` | Fundo do app. |
+| `--color-ink` | `text-ink` `bg-ink` | `#202321` | Texto principal. Verde-grafite, nunca `#000`. |
+| `--color-ink-muted` | `text-ink-muted` | `#4E5552` | Texto secundário. |
+| `--color-ink-subtle` | `text-ink-subtle` | `#616865` | Terciário, ícone, placeholder. |
+| `--color-surface` | `bg-surface` | `#F7F7F5` | Fundo do app. |
 | `--color-surface-raised` | `bg-surface-raised` | `#FFFFFF` | Card, campo, `hover` de item de navegação. |
-| `--color-surface-sunken` | `bg-surface-sunken` | `#E6ECF5` | Faixa de apoio, contador, cabeçalho de tabela. |
-| `--color-surface-nav` | `bg-surface-nav` | `#F0F2F5` | Cromo de navegação: barra lateral, cabeçalho do celular, barra inferior. Cinza neutro, sem azul. |
-| `--color-linha` | `border-linha` | `#DCE5F0` | Toda borda e todo divisor. |
+| `--color-surface-sunken` | `bg-surface-sunken` | `#EDEFEB` | Faixa de apoio, contador, cabeçalho de tabela. |
+| `--color-surface-nav` | `bg-surface-nav` | `#F1F3EF` | Cromo de navegação: barra lateral, cabeçalho do celular, barra inferior. |
+| `--color-linha` | `border-linha` | `#E1E4DF` | Divisor e borda de card. **Não serve para delimitar controle.** |
+| `--color-linha-strong` | `border-linha-strong` | `#889089` | Borda de campo e de controle — 3,3:1 sobre branco. |
 
-**Hierarquia de texto por opacidade da tinta** — não invente cinzas:
+**Hierarquia de texto por token** — não invente cinzas, e **nunca** faça degrau com opacidade:
 
-| Papel | Classe |
-|---|---|
-| Texto principal | `text-ink` |
-| Texto secundário, rótulo de campo | `text-ink/65` — `text-ink/70` |
-| Apoio, legenda, metadado | `text-ink/50` |
-| Placeholder, vazio, desabilitado | `text-ink/35` — `text-ink/45` |
+| Papel | Classe | Pior contraste no produto |
+|---|---|---|
+| Texto principal | `text-ink` | 13,2:1 |
+| Texto secundário, rótulo de campo | `text-ink-muted` | 6,4:1 |
+| Apoio, legenda, metadado, ícone, placeholder, vazio | `text-ink-subtle` | 4,8:1 |
+
+> **Por que não `text-ink/50`.** A hierarquia já foi feita com opacidade — `text-ink/45`,
+> `/50`, `/60` — em 154 lugares. Opacidade mistura a tinta com o fundo, e o resultado ia de
+> 2,4:1 a 4,1:1: todo o degrau secundário e terciário do produto estava abaixo do mínimo da
+> WCAG AA, incluindo os carimbos do registro de atividade e a frase que explica a regra de
+> formação. O sistema de tokens estava correto e era contornado no call site. Agora o degrau
+> **é** o token, e os três foram medidos contra a pior superfície do produto, não contra branco.
+>
+> `disabled` é a única exceção: controle inativo é isento de contraste pela própria WCAG, e por
+> isso `field.ts` ainda usa `text-ink-subtle/70` ali — para que desabilitado continue parecendo
+> desabilitado.
 
 ### Ação
 
 | Token | Utilidade | Hex | Uso |
 |---|---|---|---|
-| `--color-accent` | `bg-accent` `text-accent` | `#0050E0` | Ação primária, item de navegação ativo, foco, valor em destaque. |
-| `--color-accent-strong` | `hover:bg-accent-strong` | `#0040B4` | `hover` / pressionado da ação primária. |
+| `--color-accent` | `bg-accent` `text-accent` | `#025658` | Ação primária, item de navegação ativo, foco, valor em destaque. |
+| `--color-accent-strong` | `hover:bg-accent-strong` | `#014143` | `hover` / pressionado da ação primária. |
 | `--color-accent-ink` | `text-accent-ink` | `#FFFFFF` | Texto e ícone **sobre** `--accent`. |
-| `--color-accent-soft` | `bg-accent-soft` | `#DDEDFC` | Fundo suave: nav ativa, avatar, véu da tela de entrada. |
-| `--color-rating` | `fill-rating` `text-rating` | `#D9A036` | **Só** preenchimento de estrela de avaliação. |
+| `--color-accent-ink-muted` | `text-accent-ink-muted` | `#C2D5D0` | Apoio **sobre** `--accent` (carimbo de hora na bolha de mensagem). |
+| `--color-accent-soft` | `bg-accent-soft` | `#E2EDE9` | Fundo tonal: nav ativa, avatar, botão `secondary`, véu da entrada. |
+| `--color-rating` | `fill-rating` `text-rating` | `#B4801E` | **Só** preenchimento de estrela de avaliação. |
 
-> `--rating` é o único token que não passa pela regra de contraste de texto: ele preenche forma,
-> nunca carrega letra. Estrela na cor da marca lia como botão.
+> `--rating` não carrega letra, mas **carrega informação**: estrela cheia é o que diz a nota. Por
+> isso ele responde pelos 3:1 da WCAG 1.4.11 e não pelos 4,5:1 de texto — e por isso o ouro claro
+> de antes (`#D9A036`, 2,3:1 sobre branco) não servia. Estrela na cor da marca lia como botão, o
+> que continua verdade; a saída é o ouro mais fundo, não a marca.
 
 **Uma ação primária por tela.** Se duas coisas na mesma tela são `bg-accent`, uma delas está
 errada — vira `ghost` ou `secondary`.
@@ -182,36 +204,38 @@ errada — vira `ghost` ou `secondary`.
 
 ### O semáforo do produto
 
-O produto tem um semáforo obrigatório, em versões dessaturadas para conviver com o ambiente azul:
-**âmbar = espera alguém agir**, **verde = combinado de pé**, **vermelho = caiu**. Somam-se a ele o
-azul-clínico do que acontece agora e a ardósia do que já é histórico.
+O produto tem um semáforo obrigatório, em versões dessaturadas para conviver com o ambiente
+verde: **âmbar = espera alguém agir**, **verde = combinado de pé**, **vermelho = caiu**. Somam-se
+a ele o petróleo vivo do que acontece agora e a ardósia do que já é histórico.
 
 Cada estado é um **par**: a cor base (texto, ícone, ponto) e o `-soft` (fundo do chip).
 
 | Estado | Token base | Base | Soft | Significado |
 |---|---|---|---|---|
-| Em busca / convite / candidaturas | `status-aberto` | `#8A5D0B` | `#FBF1DE` | Pendente — espera uma decisão. |
-| Confirmado | `status-confirmado` | `#2A7150` | `#E6F2EB` | Combinado de pé. |
-| Em andamento | `status-andamento` | `#0F6E86` | `#E0F1F6` | Acontecendo agora. |
-| Concluído / avaliado | `status-concluido` | `#4A6577` | `#E9EFF6` | Encerrado, já é histórico. |
-| Cancelado / recusado | `status-cancelado` | `#A53F34` | `#FBE9E6` | Caiu. |
-| Bloqueado | `status-bloqueado` | `#7A2B23` | `#F4E3E0` | Decisão posterior da empresa sobre quem já estava no quadro (R12). |
-| Rascunho | `status-rascunho` | `#556A7B` | `#EDF1F7` | Ainda não publicado. |
+| Em busca / convite / candidaturas | `status-aberto` | `#87550A` | `#FBF0DC` | Pendente — espera uma decisão. |
+| Confirmado | `status-confirmado` | `#2C6A45` | `#E7F1E7` | Combinado de pé. |
+| Em andamento | `status-andamento` | `#0F6E70` | `#DFEFEE` | Acontecendo agora. |
+| Concluído / avaliado | `status-concluido` | `#576460` | `#EBEEEA` | Encerrado, já é histórico. |
+| Cancelado / recusado | `status-cancelado` | `#A33F30` | `#FAE9E4` | Caiu. |
+| Bloqueado | `status-bloqueado` | `#78291F` | `#F3E2DE` | Decisão posterior da empresa sobre quem já estava no quadro (R12). |
+| Rascunho | `status-rascunho` | `#5C6560` | `#EDEFEB` | Ainda não publicado. |
 
 Bloqueado é vermelho mais profundo que cancelado de propósito: uma recusa é uma decisão pontual
 sobre o cadastro que chegou; um bloqueio é uma decisão posterior sobre alguém que já estava dentro.
 
 ### Categoria do cuidador (a credencial)
 
-É o elemento que mais aparece na jornada e o que diferencia a plataforma (R2/R3). A escala vai de
-verde-azulado até o azul institucional: **quanto mais alta a credencial, mais perto da cor da
-marca.**
+É o elemento que mais aparece na jornada e o que diferencia a plataforma (R2/R3). A escala corre
+pelo **próprio eixo da marca** — sálvia, petróleo médio, petróleo cheio: **quanto mais alta a
+credencial, mais fundo o verde e mais perto da cor institucional.** É o único lugar do produto
+onde as duas tintas do símbolo aparecem como escala, e não por acaso: credencial é exatamente a
+grandeza que a marca já desenha como profundidade.
 
 | Categoria | Token | Base | Soft |
 |---|---|---|---|
-| Informal | `cat-informal` | `#2A7263` | `#E4F1EE` |
-| Técnico | `cat-tecnico` | `#1A6699` | `#E2EFF9` |
-| Superior | `cat-superior` | `#0050E0` | `#DFE9FC` |
+| Informal | `cat-informal` | `#41704C` | `#E6F0E7` |
+| Técnico | `cat-tecnico` | `#136B6D` | `#DFEDED` |
+| Superior | `cat-superior` | `#025658` | `#DDE9E7` |
 
 ### Regra de contraste
 
@@ -341,8 +365,8 @@ Borda **tracejada** (`border-dashed`) tem um significado só: estado vazio. Nunc
 | `shadow-raised` | Card em `hover`, barra inferior do celular, card da tela de entrada. |
 | `shadow-overlay` | Modal e bottom sheet. |
 
-As três são **azuladas** (`rgb(20 36 61 / …)`), não pretas: sombra preta sobre fundo frio produz
-aquele cinza sujo que faz a tela parecer template.
+As três são **esverdeadas** (`rgb(32 35 33 / …)`), não pretas: sombra preta sobre este fundo
+produz aquele cinza sujo que faz a tela parecer template.
 
 Em celular, `shadow-raised` aparece em um lugar só — a barra inferior, para separá-la do conteúdo
 que rola por baixo. Card em celular fica em `shadow-card`: não há `hover` para gastar elevação, e
@@ -661,8 +685,11 @@ Safari do iPhone dá zoom sozinho ao focar o campo**, o formulário sai do enqua
 precisa fechar o zoom com dois dedos a cada campo. A altura resultante do campo é ~44px, o que
 resolve o alvo de toque no mesmo movimento.
 
-A borda é de 1,5px, e não 1px, porque a borda de 1px sobre `#FFF` com `#DCE5F0` desaparece na tela
-do celular sob luz ambiente forte.
+A borda usa `--linha-strong` (`#889089`) e não `--linha`, e tem 1,5px. As duas coisas resolvem
+problemas diferentes: a espessura é para a tela do celular sob luz ambiente forte; o token é para
+a WCAG 1.4.11, que cobra 3:1 de qualquer coisa que delimite um controle. Num campo vazio a borda
+é a única coisa que diz onde o campo começa — com `--linha` ela ficava em 1,27:1, e engrossar
+não muda contraste.
 
 O `<Select>` substitui a seta nativa — que muda de desenho em cada navegador — pelo chevron do
 produto.
@@ -702,7 +729,7 @@ absolutamente. É o furo que faz o elemento ser um crachá e não mais um chip g
 ```
 
 **Restrições.** **É tinta sobre fundo claro, não cor cheia com texto branco.** Duas razões: num
-ambiente azul e branco, seis pastilhas saturadas na mesma lista viram ruído e escondem o que a
+ambiente verde e branco, seis pastilhas saturadas na mesma lista viram ruído e escondem o que a
 coordenadora precisa ler — o nome do paciente, o horário; e texto branco sobre âmbar ficava em
 ~2,2:1 de contraste, abaixo do mínimo legível. Nunca escreva o trio de classes na tela.
 
@@ -1135,7 +1162,7 @@ invólucro que estica — o cinza acompanha a altura da página, sem degrau no m
 página longa. Conteúdo em `mx-auto max-w-2xl px-6 py-7`.
 
 **O cromo é mais escuro que o conteúdo, não mais claro.** Barra lateral, cabeçalho do celular e
-barra inferior usam `--surface-nav` (`#F0F2F5`); o conteúdo fica em `--surface` e os cards em
+barra inferior usam `--surface-nav` (`#F1F3EF`); o conteúdo fica em `--surface` e os cards em
 branco. A navegação recua, o conteúdo avança.
 
 O cabeçalho do celular e a barra inferior são translúcidos (`/90`, `/95`) com `backdrop-blur-md`:
@@ -1359,6 +1386,44 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 7 — de volta ao verde da marca, e o degrau de texto virou token (agosto/2026)
+
+Duas mudanças, e a segunda é a que muda mais tela.
+
+- **A paleta voltou para o verde da marca.** O produto inteiro estava montado sobre o azul de
+  `docs/Logo/Logo 4.png`. O arquivo corrente da marca é `public/logo-mark.png`, e ele é
+  verde petróleo + sálvia — que é, palavra por palavra, o que o `CLAUDE.md` §5–6 sempre pediu
+  ("verde sálvia ou verde petróleo suave"). O azul era a divergência, não o contrário.
+  `--brand`/`--accent` foi de `#0050E0` para `#025658`, `--accent-soft` para `#E2EDE9`, e toda a
+  escala neutra saiu do azul-marinho para o verde-grafite do `CLAUDE.md` (`#202321` / `#F7F7F5`).
+  Os dois valores da marca foram amostrados pixel a pixel do arquivo, como sempre.
+- **`--brand-mid` e `--brand-pale` morreram.** A arte nova tem duas tintas, não três. No lugar
+  entrou `--brand-sage` (a sálvia, que só preenche forma) e `--brand-sage-ink` (a sálvia
+  rebaixada, que é quem pode virar letra).
+- **A marca voltou a aparecer.** `Logo.tsx` apontava para `public/logo.png`, que não existe mais
+  no diretório: como o dev server de SPA devolve `index.html` com **200** para caminho não
+  encontrado, o navegador recebia HTML no lugar de PNG e desenhava imagem quebrada — sem 404 na
+  aba de rede, o que é exatamente por que ninguém viu. O mesmo valia para os três favicons.
+  Agora tudo aponta para os arquivos que existem, e o `apple-touch-icon` foi regerado a partir do
+  símbolo (é o único que leva fundo branco: o iOS pinta preto atrás de transparência).
+- **O degrau de texto deixou de ser opacidade.** `text-ink/45`, `/50`, `/60` em 154 lugares
+  rendiam de 2,4:1 a 4,1:1 — todo o texto secundário e terciário do produto abaixo da WCAG AA,
+  incluindo os carimbos do registro de atividade (a prova de R12), a frase que explica a regra de
+  formação e o "Sem média pública" que demonstra R10. Entraram `--ink-muted` e `--ink-subtle`,
+  medidos contra a **pior** superfície do produto e não contra branco.
+- **`--linha-strong` nasceu.** A borda de campo estava em `--linha`, 1,27:1. Num campo vazio a
+  borda é a única coisa que diz onde o campo começa, e a WCAG 1.4.11 cobra 3:1. O diagnóstico
+  antigo já estava certo — a borda sumia no celular sob sol — mas a resposta tinha sido engrossar
+  para 1,5px, que é o eixo errado. Os 1,5px ficam, agora sobre uma linha que se enxerga.
+- **`--rating` escureceu** de `#D9A036` (2,3:1) para `#B4801E` (3,5:1). Estrela cheia é
+  informação, então responde pelos 3:1 da 1.4.11.
+- **O botão `secondary` virou tonal.** Era `bg-ink` quase preto, que funcionava enquanto a ação
+  primária era azul; com a primária virando petróleo escuro, "Fazer check-in" e "Fazer check-out"
+  passaram a ser dois retângulos escuros sem hierarquia entre si.
+- **Verificação:** varredura de contraste computado sobre o DOM renderizado, nas 15 rotas do
+  produto, resolvendo o fundo real de cada nó de texto — **0 falhas**. Antes desta revisão, os
+  mesmos degraus falhavam por construção em 154 pontos de chamada.
 
 ### Revisão 6 — as pendências da revisão 5, implementadas (agosto/2026)
 

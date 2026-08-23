@@ -8,6 +8,7 @@ import { completedHours, todayISO } from "../../services/attendances";
 import { caregiverRating } from "../../services/caregivers";
 import { caregiverInvitations } from "../../services/invitations";
 import { formatCurrency, formatRating } from "../../utils/format";
+import { PAGE_WORK } from "../../components/layout/page";
 
 export function CaregiverDashboardPage() {
   const { session } = useSession();
@@ -32,9 +33,9 @@ export function CaregiverDashboardPage() {
   const patientName = (id: string) => state.patients.find((p) => p.id === id)?.name ?? "Paciente";
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_WORK}>
       <h1 className="text-display font-semibold">Início</h1>
-      <p className="prosa mt-1 text-body text-ink/50">{caregiver?.name}</p>
+      <p className="prosa mt-1 text-body text-ink-subtle">{caregiver?.name}</p>
 
       <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-linha bg-linha shadow-card sm:grid-cols-3">
         {[
@@ -46,7 +47,7 @@ export function CaregiverDashboardPage() {
           },
         ].map((item) => (
           <div key={item.label} className="flex h-full flex-col justify-between gap-2 bg-surface-raised px-3.5 py-3 last:col-span-2 sm:last:col-span-1">
-            <div className="text-meta font-medium tracking-wide text-ink/50 uppercase">{item.label}</div>
+            <div className="text-meta font-medium tracking-wide text-ink-subtle uppercase">{item.label}</div>
             <div className="mt-1 flex items-center gap-1 font-mono text-title leading-none font-medium text-accent">
               {item.label === "Avaliação" && rating.average !== null && (
                 <Star size={13} className="fill-rating text-rating" />
@@ -57,11 +58,11 @@ export function CaregiverDashboardPage() {
         ))}
       </div>
 
-      <h2 className="mt-7 mb-2.5 text-label font-semibold tracking-wide text-ink/50 uppercase">
+      <h2 className="mt-7 mb-2.5 text-label font-semibold tracking-wide text-ink-subtle uppercase">
         Próximo atendimento
       </h2>
       {!next ? (
-        <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink/45">
+        <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink-subtle">
           Nenhum atendimento à frente.
         </p>
       ) : (
@@ -70,7 +71,7 @@ export function CaregiverDashboardPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-title font-semibold">{patientName(next.patientId)}</div>
-                <div className="mt-0.5 text-note text-ink/50">
+                <div className="mt-0.5 text-note text-ink-subtle">
                   {ATTENDANCE_TYPE_LABEL[next.type]} · {next.durationHours}h
                 </div>
               </div>
@@ -79,22 +80,22 @@ export function CaregiverDashboardPage() {
                 className={ATTENDANCE_STATUS_CLASS[next.status]}
               />
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-4 text-note text-ink/60">
+            <div className="mt-2 flex flex-wrap gap-x-4 text-note text-ink-muted">
               <span className="font-mono">
                 {next.startDate.split("-").reverse().join("/")} · {next.startTime}
               </span>
               <span>{next.neighborhood}</span>
-              <span className="font-mono text-ink/70">{formatCurrency(next.value)}</span>
+              <span className="font-mono text-ink-muted">{formatCurrency(next.value)}</span>
             </div>
           </Card>
         </Link>
       )}
 
-      <h2 className="mt-7 mb-2.5 text-label font-semibold tracking-wide text-ink/50 uppercase">
+      <h2 className="mt-7 mb-2.5 text-label font-semibold tracking-wide text-ink-subtle uppercase">
         Próximos compromissos ({Math.max(upcoming.length - 1, 0)})
       </h2>
       {upcoming.length <= 1 ? (
-        <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink/45">
+        <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink-subtle">
           Nada além do próximo atendimento.
         </p>
       ) : (
@@ -105,11 +106,11 @@ export function CaregiverDashboardPage() {
               to={`/cuidador/atendimentos/${a.id}`}
               className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2.5 shadow-card transition-colors duration-150 ease-out hover:border-accent/45"
             >
-              <span className="font-mono text-note text-ink/70">
+              <span className="font-mono text-note text-ink-muted">
                 {a.startDate.split("-").reverse().slice(0, 2).join("/")}
               </span>
               <span className="min-w-0 flex-1 truncate text-note">{patientName(a.patientId)}</span>
-              <span className="font-mono text-note text-ink/50">{a.startTime}</span>
+              <span className="font-mono text-note text-ink-subtle">{a.startTime}</span>
             </Link>
           ))}
         </div>

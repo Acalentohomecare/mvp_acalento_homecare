@@ -22,6 +22,7 @@ import {
 import { companyPatients, createPatient, splitAddress } from "../../services/patients";
 import { formatCurrency } from "../../utils/format";
 import type { AttendanceType } from "../../types";
+import { PAGE_WORK } from "../../components/layout/page";
 
 const NEW_PATIENT = "__new__";
 
@@ -29,7 +30,7 @@ const NEW_PATIENT = "__new__";
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <fieldset>
-      <legend className="mb-1 block text-label font-medium text-ink/70">{label}</legend>
+      <legend className="mb-1 block text-label font-medium text-ink-muted">{label}</legend>
       {children}
     </fieldset>
   );
@@ -45,7 +46,7 @@ function Check({
   onChange: () => void;
 }) {
   return (
-    <label className="flex items-center gap-2 text-body text-ink/75">
+    <label className="flex items-center gap-2 text-body text-ink-muted">
       <input type="checkbox" className="size-4 accent-accent" checked={checked} onChange={onChange} />
       {label}
     </label>
@@ -202,22 +203,22 @@ export function NewAttendancePage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_WORK}>
       <Link
         to="/empresa"
-        className="inline-flex items-center gap-1.5 text-note text-ink/50 transition-colors hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} /> Início
       </Link>
 
       <h1 className="mt-3 text-display font-semibold">Novo atendimento</h1>
-      <p className="prosa mt-1 text-body text-ink/50">
+      <p className="prosa mt-1 text-body text-ink-subtle">
         As atividades marcadas definem sozinhas o perfil profissional exigido.
       </p>
 
       {previous.length > 0 && (
         <Card className="mt-5">
-          <div className="mb-2 flex items-center gap-1.5 text-note font-semibold text-ink/60">
+          <div className="mb-2 flex items-center gap-1.5 text-note font-semibold text-ink-muted">
             <Copy size={13} /> Reaproveitar atendimento anterior
           </div>
           <Select
@@ -250,8 +251,8 @@ export function NewAttendancePage() {
 
         {selectedPatient && (
           <Card className="flex items-start gap-2.5">
-            <Info size={15} className="mt-0.5 shrink-0 text-ink/40" />
-            <div className="text-note text-ink/70">
+            <Info size={15} className="mt-0.5 shrink-0 text-ink-subtle" />
+            <div className="text-note text-ink-muted">
               <p className="font-semibold text-ink">
                 {selectedPatient.name}, {selectedPatient.age} anos
               </p>
@@ -261,14 +262,14 @@ export function NewAttendancePage() {
                 {selectedPatient.usesFeedingTube && " · usa sonda"}
                 {` · animais em casa: ${selectedPatient.petsAtHome}`}
               </p>
-              {selectedPatient.notes && <p className="mt-1 text-ink/55">{selectedPatient.notes}</p>}
+              {selectedPatient.notes && <p className="mt-1 text-ink-muted">{selectedPatient.notes}</p>}
             </div>
           </Card>
         )}
 
         {isNewPatient && (
           <Card className="flex flex-col gap-3">
-            <p className="text-note font-semibold text-ink/60">Dados do novo paciente</p>
+            <p className="text-note font-semibold text-ink-muted">Dados do novo paciente</p>
             <Input label="Nome" value={pName} onChange={(e) => setPName(e.target.value)} />
             <div className="grid grid-cols-2 gap-3">
               <Input
@@ -380,9 +381,9 @@ export function NewAttendancePage() {
         </Field>
 
         <Card className="flex flex-wrap items-center gap-2.5">
-          <span className="text-note text-ink/60">Perfil necessário:</span>
+          <span className="text-note text-ink-muted">Perfil necessário:</span>
           <Cracha label={CATEGORY_LABEL[category]} className={CATEGORY_CLASS[category]} />
-          <span className="text-note text-ink/50">
+          <span className="text-note text-ink-subtle">
             {activityIds.length === 0
               ? "Marque as atividades para o sistema definir o perfil."
               : category === "informal"

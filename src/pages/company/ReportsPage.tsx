@@ -6,6 +6,7 @@ import { useSession } from "../../hooks/useSession";
 import { companyPatients } from "../../services/patients";
 import { buildReport, reportToCsv, reportTotals, type ReportFilters } from "../../services/reports";
 import { formatCurrency } from "../../utils/format";
+import { PAGE_LIST } from "../../components/layout/page";
 
 function hours(value: number): string {
   return `${value.toFixed(1).replace(".", ",")}h`;
@@ -49,11 +50,11 @@ export function ReportsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_LIST}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-display font-semibold">Relatório de horas</h1>
-          <p className="prosa mt-1 text-body text-ink/50">
+          <p className="prosa mt-1 text-body text-ink-subtle">
             Calculado a partir dos check-ins e check-outs registrados.
           </p>
         </div>
@@ -99,21 +100,21 @@ export function ReportsPage() {
           { label: "Valor estimado", value: formatCurrency(totals.value) },
         ].map((item) => (
           <div key={item.label} className="bg-surface-raised px-3.5 py-3">
-            <div className="text-meta font-medium tracking-wide text-ink/70 uppercase">{item.label}</div>
+            <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">{item.label}</div>
             <div className="mt-1 font-mono text-body leading-none">{item.value}</div>
           </div>
         ))}
       </div>
 
       {rows.length === 0 ? (
-        <p className="mt-5 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="mt-5 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
           Nenhum atendimento concluído nesse filtro.
         </p>
       ) : (
         <div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[540px] text-left text-note">
             <thead>
-              <tr className="border-b border-linha text-meta font-medium tracking-wide text-ink/70 uppercase">
+              <tr className="border-b border-linha text-meta font-medium tracking-wide text-ink-muted uppercase">
                 <th className="py-2 font-semibold">Data</th>
                 <th className="py-2 font-semibold">Cuidador</th>
                 <th className="py-2 font-semibold">Paciente</th>

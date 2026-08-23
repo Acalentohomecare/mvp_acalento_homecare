@@ -57,7 +57,7 @@ export function RegisterPage() {
           {step === 1 && (
             <div className="flex flex-col gap-4">
               <div>
-                <p className="mb-2 text-note font-semibold text-ink/60">Você é...</p>
+                <p className="mb-2 text-note font-semibold text-ink-muted">Você é...</p>
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -79,7 +79,7 @@ export function RegisterPage() {
               </div>
               {accountType === "caregiver" && (
                 <div>
-                  <p className="mb-2 text-note font-semibold text-ink/60">Categoria</p>
+                  <p className="mb-2 text-note font-semibold text-ink-muted">Categoria</p>
                   <div className="flex flex-wrap gap-2">
                     {CATEGORY_ORDER.map((cat) => (
                       <Button
@@ -102,7 +102,7 @@ export function RegisterPage() {
               >
                 Continuar
               </Button>
-              {notice && <p className="text-note text-ink/60">{notice}</p>}
+              {notice && <p className="text-note text-ink-muted">{notice}</p>}
             </div>
           )}
 
@@ -145,13 +145,13 @@ export function RegisterPage() {
           {step === 3 && (
             <div className="flex flex-col gap-4">
               <div className="rounded-card border border-linha p-4 text-center">
-                <Camera size={24} className="mx-auto mb-2 text-ink/50" />
+                <Camera size={24} className="mx-auto mb-2 text-ink-subtle" />
                 <p className="text-note font-semibold">Enviar documento + selfie (simulado)</p>
-                <p className="prosa mt-1 text-body text-ink/50">
+                <p className="prosa mt-1 text-body text-ink-subtle">
                   Nesta demo, o envio de documentos é simulado — sem upload real.
                 </p>
               </div>
-              <p className="text-note text-ink/50">
+              <p className="text-note text-ink-subtle">
                 Ao continuar, você aceita os Termos de Uso e a Política de Privacidade (simulado).
               </p>
               <Button variant="primary" block onClick={submitCaregiver}>
@@ -161,7 +161,7 @@ export function RegisterPage() {
           )}
         </Card>
 
-        <div className="mt-4 text-center text-note text-ink/40">
+        <div className="mt-4 text-center text-note text-ink-subtle">
           <Link to="/login" className="underline">
             Voltar à entrada
           </Link>

@@ -41,7 +41,7 @@ export function PendingApprovalPage() {
         <Clock size={26} strokeWidth={1.9} />
       </span>
       <h1 className="mt-3 text-display font-semibold">{title}</h1>
-      <p className="mt-2 prosa text-body text-ink/60">
+      <p className="mt-2 prosa text-body text-ink-muted">
         {decision
           ? `${decision.companyName}: ${decision.reason ?? "documento não aprovado."}`
           : "As empresas estão conferindo seus documentos. Assim que uma delas aprovar seu cadastro, você passa a receber convites para os plantões."}

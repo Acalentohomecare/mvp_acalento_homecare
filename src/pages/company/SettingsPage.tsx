@@ -5,6 +5,7 @@ import { Button, Card, Modal, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { companyAuditLog } from "../../services/roster";
+import { PAGE_FORM } from "../../components/layout/page";
 
 /**
  * Configurações da empresa (CLAUDE.md §16). Guarda o registro de atividade da empresa (R12) e o
@@ -25,9 +26,9 @@ export function CompanySettingsPage() {
   const log = [...companyAuditLog(state, session?.companyId)].reverse();
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_FORM}>
       <h1 className="text-display font-semibold">Configurações</h1>
-      <p className="prosa mt-1 text-body text-ink/50">{company?.name}</p>
+      <p className="prosa mt-1 text-body text-ink-subtle">{company?.name}</p>
 
       <section className="mt-7">
         <h2 className="mb-2.5 text-body font-semibold text-ink">
@@ -36,19 +37,19 @@ export function CompanySettingsPage() {
         <Card>
           <dl className="flex flex-col gap-2 text-note">
             <div className="flex justify-between gap-4">
-              <dt className="text-ink/50">CNPJ</dt>
+              <dt className="text-ink-subtle">CNPJ</dt>
               <dd className="font-mono text-note">{company?.cnpj}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-ink/50">Cidade</dt>
+              <dt className="text-ink-subtle">Cidade</dt>
               <dd>{company?.city}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-ink/50">Telefone</dt>
+              <dt className="text-ink-subtle">Telefone</dt>
               <dd className="font-mono text-note">{company?.phone}</dd>
             </div>
             <div className="flex min-w-0 justify-between gap-4">
-              <dt className="text-ink/50">E-mail</dt>
+              <dt className="text-ink-subtle">E-mail</dt>
               <dd className="truncate">{company?.email}</dd>
             </div>
           </dl>
@@ -59,11 +60,11 @@ export function CompanySettingsPage() {
         <h2 className="mb-1 text-body font-semibold text-ink">
           Registro de atividade
         </h2>
-        <p className="mb-2.5 text-note text-ink/50">
+        <p className="mb-2.5 text-note text-ink-subtle">
           Toda aprovação, recusa, bloqueio e cancelamento da sua empresa fica registrado (R12).
         </p>
         {log.length === 0 ? (
-          <p className="rounded-card border border-dashed border-linha py-6 text-center text-body text-ink/45">
+          <p className="rounded-card border border-dashed border-linha py-6 text-center text-body text-ink-subtle">
             Nenhum registro ainda.
           </p>
         ) : (
@@ -71,7 +72,7 @@ export function CompanySettingsPage() {
             {log.map((entry) => (
               <li key={entry.id} className="border-b border-linha py-2.5 text-note last:border-0">
                 <span className="font-semibold">{entry.action}</span> — {entry.detail}
-                <div className="mt-0.5 font-mono text-meta text-ink/45">
+                <div className="mt-0.5 font-mono text-meta text-ink-subtle">
                   {entry.actor} · {new Date(entry.createdAt).toLocaleString("pt-BR")}
                 </div>
               </li>
@@ -86,7 +87,7 @@ export function CompanySettingsPage() {
         </h2>
         <Card>
           <p className="text-title font-semibold">Restaurar dados da demonstração</p>
-          <p className="mt-1 text-note text-ink/60">
+          <p className="mt-1 text-note text-ink-muted">
             Apaga tudo o que foi feito durante a apresentação (atendimentos criados, aprovações de
             cuidadores, check-ins, avaliações, mensagens) e devolve o conjunto de dados inicial.
             Você será desconectado para começar do zero.
@@ -99,7 +100,7 @@ export function CompanySettingsPage() {
 
       {resetting && (
         <Modal title="Restaurar dados?" onClose={() => setResetting(false)}>
-          <p className="mb-4 text-note text-ink/70">
+          <p className="mb-4 text-note text-ink-muted">
             Todas as ações feitas nesta demonstração serão apagadas e o conjunto de dados inicial
             volta ao lugar. Não dá para desfazer.
           </p>

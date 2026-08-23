@@ -41,7 +41,7 @@ export function CaregiverLayout() {
           <Logo variant="stacked" size={40} />
         </div>
 
-        <p className="mt-5 truncate rounded-control border border-linha bg-surface-raised px-3 py-2 text-meta font-medium text-ink/60">
+        <p className="mt-5 truncate rounded-control border border-linha bg-surface-raised px-3 py-2 text-meta font-medium text-ink-muted">
           {caregiver?.name ?? "Cuidador"}
         </p>
 
@@ -65,7 +65,7 @@ export function CaregiverLayout() {
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-linha bg-surface-nav/90 px-5 py-3 backdrop-blur-md md:hidden">
           <div className="flex min-w-0 flex-col gap-0.5">
             <Logo variant="inline" size={30} />
-            <span className="truncate text-meta text-ink/50">
+            <span className="truncate text-meta text-ink-subtle">
               {caregiver?.name ?? "Cuidador"}
             </span>
           </div>

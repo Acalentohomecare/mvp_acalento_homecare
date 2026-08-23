@@ -16,6 +16,7 @@ import {
 } from "../../services/invitations";
 import { formatCurrency, formatRating } from "../../utils/format";
 import type { Shift } from "../../types";
+import { PAGE_LIST } from "../../components/layout/page";
 
 export function MatchingPage() {
   const { attendanceId } = useParams();
@@ -33,8 +34,8 @@ export function MatchingPage() {
   const attendance = attendanceById(state, attendanceId);
   if (!attendance || attendance.companyId !== session?.companyId) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-10 text-center">
-        <p className="text-note text-ink/60">Atendimento não encontrado.</p>
+      <div className="mx-auto w-full max-w-2xl px-6 py-10 text-center">
+        <p className="text-note text-ink-muted">Atendimento não encontrado.</p>
         <Link to="/empresa/atendimentos" className="mt-4 inline-block text-note underline">
           Voltar aos atendimentos
         </Link>
@@ -49,24 +50,24 @@ export function MatchingPage() {
   const matches = filterMatches(compatibleCaregivers(state, attendance), { query, shift, maxRate });
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_LIST}>
       <Link
         to="/empresa/atendimentos"
-        className="inline-flex items-center gap-1.5 text-note text-ink/50 transition-colors hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} /> Atendimentos
       </Link>
 
       <h1 className="mt-3 text-display font-semibold">Cuidadores compatíveis</h1>
-      <p className="prosa mt-1 text-body text-ink/50">
+      <p className="prosa mt-1 text-body text-ink-subtle">
         {patient?.name} · {attendance.startDate.split("-").reverse().join("/")} às{" "}
         {attendance.startTime} · {attendance.neighborhood}
       </p>
 
       <Card className="mt-4 flex flex-wrap items-center gap-2.5">
-        <span className="text-note text-ink/60">Perfil exigido pelas atividades:</span>
+        <span className="text-note text-ink-muted">Perfil exigido pelas atividades:</span>
         <Cracha label={CATEGORY_LABEL[required]} className={CATEGORY_CLASS[required]} />
-        <span className="text-note text-ink/50">
+        <span className="text-note text-ink-subtle">
           {required === "informal"
             ? "Nenhuma atividade exige formação."
             : "Cuidadores de categoria inferior não aparecem nesta lista."}
@@ -76,7 +77,7 @@ export function MatchingPage() {
       <Card className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-note font-semibold">Publicação aberta</p>
-          <p className="mt-0.5 text-note text-ink/50">
+          <p className="mt-0.5 text-note text-ink-subtle">
             Qualquer cuidador compatível pode se candidatar.
           </p>
         </div>
@@ -115,12 +116,12 @@ export function MatchingPage() {
         />
       </div>
 
-      <p className="mt-5 mb-2.5 text-note text-ink/45">
+      <p className="mt-5 mb-2.5 text-note text-ink-subtle">
         {matches.length} {matches.length === 1 ? "cuidador compatível" : "cuidadores compatíveis"}
       </p>
 
       {matches.length === 0 ? (
-        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
           Nenhum cuidador compatível com esses critérios.
         </p>
       ) : (
@@ -143,20 +144,20 @@ export function MatchingPage() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-note text-ink/50">
+                  <p className="mt-0.5 text-note text-ink-subtle">
                     {c.neighborhoods.join(", ")} · {c.experienceYears} anos
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Cracha label={CATEGORY_LABEL[c.category]} className={CATEGORY_CLASS[c.category]} />
                     {rating.average === null ? (
-                      <span className="text-meta text-ink/40">Sem média pública</span>
+                      <span className="text-meta text-ink-subtle">Sem média pública</span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-note font-semibold text-ink/70">
+                      <span className="inline-flex items-center gap-1 text-note font-semibold text-ink-muted">
                         <Star size={12} className="fill-rating text-rating" />
                         {formatRating(rating.average)}
                       </span>
                     )}
-                    <span className="font-mono text-note text-ink/70">
+                    <span className="font-mono text-note text-ink-muted">
                       {formatCurrency(c.shiftRate)}
                     </span>
                   </div>

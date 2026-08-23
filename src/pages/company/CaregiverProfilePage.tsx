@@ -34,6 +34,7 @@ import { caregiverHistory } from "../../services/evaluations";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL } from "../../constants/attendance";
 import { useSession } from "../../hooks/useSession";
 import { formatCurrency, formatRating } from "../../utils/format";
+import { PAGE_WORK } from "../../components/layout/page";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -50,7 +51,7 @@ function Chips({ items }: { items: string[] }) {
       {items.map((item) => (
         <span
           key={item}
-          className="rounded-full border border-linha bg-surface-raised px-2.5 py-1 text-note text-ink/70"
+          className="rounded-full border border-linha bg-surface-raised px-2.5 py-1 text-note text-ink-muted"
         >
           {item}
         </span>
@@ -74,8 +75,8 @@ export function CompanyCaregiverProfilePage() {
 
   if (!caregiver) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-10 text-center">
-        <p className="text-note text-ink/60">Cuidador não encontrado.</p>
+      <div className="mx-auto w-full max-w-2xl px-6 py-10 text-center">
+        <p className="text-note text-ink-muted">Cuidador não encontrado.</p>
         <Link to="/empresa/cuidadores" className="mt-4 inline-block text-note underline">
           Voltar à lista
         </Link>
@@ -113,11 +114,11 @@ export function CompanyCaregiverProfilePage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_WORK}>
       <div>
         <Link
           to="/empresa/cuidadores"
-          className="inline-flex items-center gap-1.5 text-note text-ink/50 transition-colors hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
         >
           <ArrowLeft size={14} /> Cuidadores
         </Link>
@@ -191,28 +192,28 @@ export function CompanyCaregiverProfilePage() {
         </div>
 
         {status !== "approved" && (
-          <p className="mt-3 text-note text-ink/50">
+          <p className="mt-3 text-note text-ink-subtle">
             {status === "pending"
               ? "Este cadastro ainda não faz parte do seu quadro — aprove para poder convidá-lo."
               : "Fora do seu quadro: não aparece na busca nem recebe convites desta empresa."}
           </p>
         )}
 
-        <p className="prosa mt-4 text-body text-ink/75">{caregiver.bio}</p>
+        <p className="prosa mt-4 text-body text-ink-muted">{caregiver.bio}</p>
 
         <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           <Card>
-            <div className="text-meta font-medium tracking-wide text-ink/70 uppercase">Experiência</div>
+            <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Experiência</div>
             <div className="mt-1 font-mono text-body">{caregiver.experienceYears} anos</div>
           </Card>
           <Card>
-            <div className="text-meta font-medium tracking-wide text-ink/70 uppercase">Por plantão</div>
+            <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Por plantão</div>
             <div className="mt-1 font-mono text-body">{formatCurrency(caregiver.shiftRate)}</div>
           </Card>
           <Card>
-            <div className="text-meta font-medium tracking-wide text-ink/70 uppercase">Avaliação</div>
+            <div className="text-meta font-medium tracking-wide text-ink-muted uppercase">Avaliação</div>
             {rating.average === null ? (
-              <div className="mt-1 text-note text-ink/45">
+              <div className="mt-1 text-note text-ink-subtle">
                 {rating.count} de {MIN_EVALUATIONS_FOR_PUBLIC_AVERAGE}
               </div>
             ) : (
@@ -247,7 +248,7 @@ export function CompanyCaregiverProfilePage() {
         )}
 
         <Section title="Região de atendimento">
-          <p className="text-body text-ink/75">{caregiver.city}</p>
+          <p className="text-body text-ink-muted">{caregiver.city}</p>
           <div className="mt-1.5">
             <Chips items={caregiver.neighborhoods} />
           </div>
@@ -263,7 +264,7 @@ export function CompanyCaregiverProfilePage() {
         <Section title="Atividades que realiza">
           <ul className="flex flex-col gap-1">
             {activityNames(caregiver.activityIds).map((name) => (
-              <li key={name} className="text-body text-ink/75">
+              <li key={name} className="text-body text-ink-muted">
                 · {name}
               </li>
             ))}
@@ -272,7 +273,7 @@ export function CompanyCaregiverProfilePage() {
 
         <Section title={`Histórico com a empresa (${history.length})`}>
           {history.length === 0 ? (
-            <p className="text-note text-ink/45">Nenhum atendimento com esta empresa ainda.</p>
+            <p className="text-note text-ink-subtle">Nenhum atendimento com esta empresa ainda.</p>
           ) : (
             <ul className="flex flex-col gap-1.5">
               {history.map((a) => (
@@ -280,7 +281,7 @@ export function CompanyCaregiverProfilePage() {
                   key={a.id}
                   className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2"
                 >
-                  <span className="font-mono text-note text-ink/70">
+                  <span className="font-mono text-note text-ink-muted">
                     {a.startDate.split("-").reverse().join("/")}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-note">
@@ -298,7 +299,7 @@ export function CompanyCaregiverProfilePage() {
 
         <Section title={`Avaliações recebidas (${evaluations.length})`}>
           {evaluations.length === 0 ? (
-            <p className="text-note text-ink/45">Ainda sem avaliações.</p>
+            <p className="text-note text-ink-subtle">Ainda sem avaliações.</p>
           ) : (
             <div className="flex flex-col gap-2.5">
               {evaluations.map((e) => (
@@ -311,11 +312,11 @@ export function CompanyCaregiverProfilePage() {
                         className={i < e.rating ? "fill-rating text-rating" : "text-linha"}
                       />
                     ))}
-                    <span className="ml-1 font-mono text-meta text-ink/40">
+                    <span className="ml-1 font-mono text-meta text-ink-subtle">
                       {new Date(e.createdAt).toLocaleDateString("pt-BR")}
                     </span>
                   </div>
-                  <p className="prosa mt-1.5 text-body text-ink/75">{e.comment}</p>
+                  <p className="prosa mt-1.5 text-body text-ink-muted">{e.comment}</p>
                 </Card>
               ))}
             </div>

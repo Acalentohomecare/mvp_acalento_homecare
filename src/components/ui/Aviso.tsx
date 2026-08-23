@@ -24,7 +24,7 @@ interface AvisoProps {
 const TOM_CLASSES: Record<Tom, string> = {
   erro: "border-status-cancelado/40 bg-status-cancelado-soft text-status-cancelado",
   sucesso: "border-status-confirmado/40 bg-status-confirmado-soft text-status-confirmado",
-  info: "border-linha bg-surface-sunken text-ink/70",
+  info: "border-linha bg-surface-sunken text-ink-muted",
 };
 
 const TOM_ICONE: Record<Tom, typeof Info> = {

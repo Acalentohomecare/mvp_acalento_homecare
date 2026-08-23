@@ -15,6 +15,7 @@ import {
   confirmApplication,
 } from "../../services/invitations";
 import { formatRating } from "../../utils/format";
+import { PAGE_LIST } from "../../components/layout/page";
 
 const APPLICATION_LABEL = {
   pending: "Aguardando decisão",
@@ -36,8 +37,8 @@ export function ApplicationsPage() {
   const attendance = attendanceById(state, attendanceId);
   if (!attendance || attendance.companyId !== session?.companyId) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-10 text-center">
-        <p className="text-note text-ink/60">Atendimento não encontrado.</p>
+      <div className="mx-auto w-full max-w-2xl px-6 py-10 text-center">
+        <p className="text-note text-ink-muted">Atendimento não encontrado.</p>
         <Link to="/empresa/atendimentos" className="mt-4 inline-block text-note underline">
           Voltar aos atendimentos
         </Link>
@@ -51,10 +52,10 @@ export function ApplicationsPage() {
   const isClosed = attendance.status === "cancelled" || Boolean(attendance.confirmedCaregiverId);
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_LIST}>
       <Link
         to="/empresa/atendimentos"
-        className="inline-flex items-center gap-1.5 text-note text-ink/50 transition-colors hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-note text-ink-subtle transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} /> Atendimentos
       </Link>
@@ -62,7 +63,7 @@ export function ApplicationsPage() {
       <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-display font-semibold">Candidaturas</h1>
-          <p className="prosa mt-1 text-body text-ink/50">
+          <p className="prosa mt-1 text-body text-ink-subtle">
             {patient?.name} · {attendance.startDate.split("-").reverse().join("/")} às{" "}
             {attendance.startTime}
           </p>
@@ -75,7 +76,7 @@ export function ApplicationsPage() {
 
       {attendance.cancellation && (
         <Card className="mt-4 border-status-cancelado/40">
-          <p className="text-body text-ink/75">
+          <p className="text-body text-ink-muted">
             Cancelado por {attendance.cancellation.by === "company" ? "empresa" : "cuidador"} com{" "}
             {attendance.cancellation.noticeHours}h de antecedência
             {attendance.cancellation.noticeHours < 12 && " (menos de 12h)"}: {attendance.cancellation.reason}
@@ -84,7 +85,7 @@ export function ApplicationsPage() {
       )}
 
       {pendingInvites.length > 0 && (
-        <p className="mt-4 text-note text-ink/50">
+        <p className="mt-4 text-note text-ink-subtle">
           {pendingInvites.length}{" "}
           {pendingInvites.length === 1 ? "convite aguardando resposta" : "convites aguardando resposta"}.
         </p>
@@ -95,7 +96,7 @@ export function ApplicationsPage() {
       </h2>
 
       {applications.length === 0 ? (
-        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
           Nenhuma candidatura ainda.
         </p>
       ) : (
@@ -110,7 +111,7 @@ export function ApplicationsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-title font-semibold">{caregiver.name}</span>
-                    <span className="text-meta text-ink/45">
+                    <span className="text-meta text-ink-subtle">
                       {APPLICATION_LABEL[application.status]}
                     </span>
                   </div>
@@ -120,12 +121,12 @@ export function ApplicationsPage() {
                       className={CATEGORY_CLASS[caregiver.category]}
                     />
                     {rating.average !== null && (
-                      <span className="inline-flex items-center gap-1 text-note font-semibold text-ink/70">
+                      <span className="inline-flex items-center gap-1 text-note font-semibold text-ink-muted">
                         <Star size={12} className="fill-rating text-rating" />
                         {formatRating(rating.average)}
                       </span>
                     )}
-                    <span className="text-note text-ink/50">
+                    <span className="text-note text-ink-subtle">
                       {caregiver.experienceYears} anos · {caregiver.neighborhoods.join(", ")}
                     </span>
                   </div>

@@ -1,19 +1,16 @@
 /*
  * Marca do produto (docs/DESIGN_SYSTEM.md, seção 1).
  *
- * O símbolo é o arquivo oficial `public/logo.png` (origem: `docs/Logo/Logo 4.png`), exibido
- * direto, sem nenhum fundo por trás.
+ * O símbolo é `public/logo-mark.png`, o arquivo oficial da marca, exibido direto e sem fundo.
+ * O lockup completo (símbolo + palavra) existe em `public/logo-lockup.png` e serve de
+ * referência; aqui o nome é texto de verdade, não imagem, para escalar com a tipografia da
+ * interface e continuar legível para leitor de tela.
  *
- * A Logo 4 resolveu sozinha o problema que a versão anterior tinha: cada forma da arte agora
- * traz contorno escuro, então os três elos azul-gelo — que na Logo 3 ficavam em ~1,1:1 de
- * contraste e sumiam sobre fundo claro — passam a ter borda própria. Conferido sobre branco,
- * sobre a barra lateral (#F0F2F5), sobre o fundo do conteúdo, sobre o véu da entrada e sobre
- * aba escura de navegador, de 170px até 16px. É por isso que não existe mais fundo por trás da
- * marca em lugar nenhum do produto.
- *
- * O nome vem abaixo do símbolo e em caixa normal — "Acalento Gestão", não "ACALENTO GESTÃO".
- * "Gestão" sai na cor da marca, que é o eco do lockup original, onde a segunda palavra sempre
- * teve cor própria.
+ * Os dois verdes do produto saem daqui: o petróleo dos elos escuros e a sálvia dos claros,
+ * amostrados pixel a pixel deste arquivo (ver `src/index.css`). O nome acompanha —
+ * "Acalento" na tinta principal, "Gestão" na sálvia, que é como a marca sempre distinguiu as
+ * duas palavras. A sálvia do texto é a versão rebaixada (`--brand-sage-ink`): a sálvia da arte
+ * fica em 3,0:1 sobre branco e não sustenta uma palavra.
  */
 
 interface LogoMarkProps {
@@ -25,7 +22,7 @@ interface LogoMarkProps {
 export function LogoMark({ size = 40, className = "" }: LogoMarkProps) {
   return (
     <img
-      src="/logo.png"
+      src="/logo-mark.png"
       alt=""
       aria-hidden="true"
       width={size}
@@ -58,7 +55,8 @@ export function Logo({
 }: LogoProps) {
   const nome = (fontSize: number) => (
     <span className="leading-none font-semibold" style={{ fontSize, letterSpacing: "-0.015em" }}>
-      <span className="text-ink">Acalento</span> <span className="text-accent">Gestão</span>
+      <span className="text-ink">Acalento</span>{" "}
+        <span className="text-brand-sage-ink">Gestão</span>
     </span>
   );
 

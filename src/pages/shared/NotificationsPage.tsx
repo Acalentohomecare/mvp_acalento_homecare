@@ -4,6 +4,7 @@ import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { markAllRead, sessionNotifications } from "../../services/notifications";
 import type { NotificationType } from "../../types";
+import { PAGE_LIST } from "../../components/layout/page";
 
 const TYPE_LABEL: Record<NotificationType, string> = {
   invitation: "Convite",
@@ -29,11 +30,11 @@ export function NotificationsPage() {
   const unread = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_LIST}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-display font-semibold">Notificações</h1>
-          <p className="prosa mt-1 text-body text-ink/50">
+          <p className="prosa mt-1 text-body text-ink-subtle">
             {unread === 0 ? "Tudo lido." : `${unread} não ${unread === 1 ? "lida" : "lidas"}.`}
           </p>
         </div>
@@ -45,7 +46,7 @@ export function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <p className="mt-6 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="mt-6 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
           Nenhuma notificação.
         </p>
       ) : (
@@ -57,10 +58,10 @@ export function NotificationsPage() {
                 n.read ? "border-linha bg-transparent" : "border-accent/40 bg-surface-raised"
               }`}
             >
-              <Bell size={14} className={`mt-0.5 shrink-0 ${n.read ? "text-ink/30" : "text-accent"}`} />
+              <Bell size={14} className={`mt-0.5 shrink-0 ${n.read ? "text-ink-subtle" : "text-accent"}`} />
               <div className="min-w-0">
-                <p className="text-body text-ink/75">{n.text}</p>
-                <p className="mt-0.5 font-mono text-meta text-ink/40">
+                <p className="text-body text-ink-muted">{n.text}</p>
+                <p className="mt-0.5 font-mono text-meta text-ink-subtle">
                   {TYPE_LABEL[n.type]} · {new Date(n.createdAt).toLocaleString("pt-BR")}
                 </p>
               </div>

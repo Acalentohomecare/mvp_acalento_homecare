@@ -19,6 +19,7 @@ import {
   upcomingAttendances,
 } from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
+import { PAGE_WORK } from "../../components/layout/page";
 
 function Section({
   title,
@@ -31,10 +32,10 @@ function Section({
 }) {
   return (
     <section className="mt-7">
-      <h2 className="mb-2.5 flex items-center gap-2 text-label font-semibold tracking-wide text-ink/50 uppercase">
+      <h2 className="mb-2.5 flex items-center gap-2 text-label font-semibold tracking-wide text-ink-subtle uppercase">
         {title}
         {count !== undefined && count > 0 && (
-          <span className="rounded-full bg-surface-sunken px-1.5 py-0.5 font-mono text-meta leading-none text-ink/55">
+          <span className="rounded-full bg-surface-sunken px-1.5 py-0.5 font-mono text-meta leading-none text-ink-muted">
             {count}
           </span>
         )}
@@ -46,7 +47,7 @@ function Section({
 
 function Empty({ text }: { text: string }) {
   return (
-    <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink/45">
+    <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink-subtle">
       {text}
     </p>
   );
@@ -112,11 +113,11 @@ export function CompanyDashboardPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_WORK}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-display font-semibold">Início</h1>
-          <p className="prosa mt-1 text-body text-ink/50">{company?.name}</p>
+          <p className="prosa mt-1 text-body text-ink-subtle">{company?.name}</p>
         </div>
         <ButtonLink to="/empresa/atendimentos/novo">
           <Plus size={15} /> Novo atendimento
@@ -129,7 +130,7 @@ export function CompanyDashboardPage() {
             key={n.label}
             className="flex h-full flex-col justify-between gap-2 bg-surface-raised px-3.5 py-3 last:col-span-2 sm:last:col-span-1"
           >
-            <div className="text-meta font-medium tracking-wide text-ink/50 uppercase">{n.label}</div>
+            <div className="text-meta font-medium tracking-wide text-ink-subtle uppercase">{n.label}</div>
             <div className="mt-1 font-mono text-title leading-none font-medium text-accent">{n.value}</div>
           </div>
         ))}
@@ -143,7 +144,7 @@ export function CompanyDashboardPage() {
             {pendencies.map((p) => (
               <li
                 key={p.id}
-                className="flex items-start gap-2.5 rounded-control border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink/75 shadow-card"
+                className="flex items-start gap-2.5 rounded-control border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink-muted shadow-card"
               >
                 <span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-status-aberto" />
                 {p.text}
@@ -218,8 +219,8 @@ export function CompanyDashboardPage() {
           <ul>
             {activity.map((entry) => (
               <li key={entry.id} className="border-b border-linha py-2.5 last:border-0">
-                <p className="text-body text-ink/75">{entry.text}</p>
-                <p className="mt-0.5 font-mono text-meta text-ink/40">
+                <p className="text-body text-ink-muted">{entry.text}</p>
+                <p className="mt-0.5 font-mono text-meta text-ink-subtle">
                   {new Date(entry.at).toLocaleString("pt-BR")}
                 </p>
               </li>

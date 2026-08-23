@@ -180,7 +180,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
             type="button"
             aria-label="Fechar"
             onClick={fechar}
-            className="-m-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-control text-ink/45 transition-colors duration-150 hover:bg-surface-sunken hover:text-ink"
+            className="-m-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-control text-ink-subtle transition-colors duration-150 hover:bg-surface-sunken hover:text-ink"
           >
             <X size={18} />
           </button>

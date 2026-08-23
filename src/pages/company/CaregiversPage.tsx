@@ -24,6 +24,7 @@ import {
   rosterStatus,
 } from "../../services/roster";
 import type { CaregiverCategory } from "../../types";
+import { PAGE_LIST } from "../../components/layout/page";
 
 type CategoryFilter = CaregiverCategory | "all";
 type Tab = "quadro" | "analise" | "inativos";
@@ -96,9 +97,9 @@ export function CompanyCaregiversPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-7">
+    <div className={PAGE_LIST}>
       <h1 className="text-display font-semibold">Cuidadores</h1>
-      <p className="prosa mt-1 text-body text-ink/50">
+      <p className="prosa mt-1 text-body text-ink-subtle">
         Só quem está no seu quadro aparece na busca e pode ser convidado para um plantão.
       </p>
 
@@ -108,7 +109,7 @@ export function CompanyCaregiversPage() {
             {t.label}
             {t.count > 0 && (
               <span
-                className={`font-mono text-meta ${tab === t.key ? "text-surface/70" : "text-ink/40"}`}
+                className={`font-mono text-meta ${tab === t.key ? "text-accent-ink-muted" : "text-ink-subtle"}`}
               >
                 {t.count}
               </span>
@@ -119,15 +120,15 @@ export function CompanyCaregiversPage() {
 
       {tab === "quadro" && (
         <>
-          <label className="mt-5 flex items-center gap-2 rounded-control border-[1.5px] border-linha bg-surface-raised px-3 py-2 transition-colors focus-within:border-accent">
-            <Search size={15} className="shrink-0 text-ink/40" />
+          <label className="mt-5 flex items-center gap-2 rounded-control border-[1.5px] border-linha-strong bg-surface-raised px-3 py-2 transition-colors focus-within:border-accent">
+            <Search size={15} className="shrink-0 text-ink-subtle" />
             <span className="sr-only">Buscar cuidador</span>
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Nome, bairro ou especialidade"
-              className="w-full bg-transparent text-body text-ink outline-none placeholder:text-ink/35"
+              className="w-full bg-transparent text-body text-ink outline-none placeholder:text-ink-subtle"
             />
           </label>
 
@@ -146,12 +147,12 @@ export function CompanyCaregiversPage() {
             </Chip>
           </div>
 
-          <p className="mt-5 mb-2.5 text-note text-ink/45">
+          <p className="mt-5 mb-2.5 text-note text-ink-subtle">
             {visible.length} {visible.length === 1 ? "cuidador no quadro" : "cuidadores no quadro"}
           </p>
 
           {visible.length === 0 ? (
-            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
               Nenhum cuidador encontrado com esses critérios.
             </p>
           ) : (
@@ -172,14 +173,14 @@ export function CompanyCaregiversPage() {
 
       {tab === "analise" && (
         <>
-          <p className="mt-5 mb-2.5 text-note text-ink/45">
+          <p className="mt-5 mb-2.5 text-note text-ink-subtle">
             {queue.length === 0
               ? "Nenhum cadastro aguardando conferência."
               : `${queue.length} cadastro(s) aguardando sua conferência.`}
           </p>
 
           {queue.length === 0 ? (
-            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
               Quando um cuidador criar cadastro, ele aparece aqui para conferência.
             </p>
           ) : (
@@ -194,7 +195,7 @@ export function CompanyCaregiversPage() {
                       >
                         {c.name}
                       </Link>
-                      <div className="mt-0.5 text-note text-ink/50">
+                      <div className="mt-0.5 text-note text-ink-subtle">
                         {c.councilRegistration ?? "Sem registro de conselho (informal)"} · {c.city}
                       </div>
                     </div>
@@ -231,12 +232,12 @@ export function CompanyCaregiversPage() {
 
       {tab === "inativos" && (
         <>
-          <p className="mt-5 mb-2.5 text-note text-ink/45">
+          <p className="mt-5 mb-2.5 text-note text-ink-subtle">
             Recusados e bloqueados ficam fora da busca e não recebem convites desta empresa.
           </p>
 
           {inactive.length === 0 ? (
-            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
+            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
               Ninguém recusado ou bloqueado.
             </p>
           ) : (
@@ -245,7 +246,7 @@ export function CompanyCaregiversPage() {
                 <Card key={c.id} className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="text-title font-semibold">{c.name}</div>
-                    <div className="mt-0.5 text-note text-ink/50">{c.city}</div>
+                    <div className="mt-0.5 text-note text-ink-subtle">{c.city}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Cracha

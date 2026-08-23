@@ -44,7 +44,7 @@ export const ATTENDANCE_STATUS_LABEL: Record<AttendanceStatus, string> = {
 /**
  * Trio de utilidades do `Cracha` por status (docs/DESIGN_SYSTEM.md, seção 3): fundo `-soft`,
  * texto na cor base, borda na cor base a 25%. Semáforo do produto — âmbar para o que espera
- * alguém agir, verde para o combinado de pé, azul-clínico para o que acontece agora, ardósia
+ * alguém agir, verde para o combinado de pé, petróleo vivo para o que acontece agora, ardósia
  * para o que já é histórico e vermelho para o que caiu.
  */
 export const ATTENDANCE_STATUS_CLASS: Record<AttendanceStatus, string> = {

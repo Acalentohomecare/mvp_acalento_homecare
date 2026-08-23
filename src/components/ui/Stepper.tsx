@@ -39,7 +39,7 @@ export function Stepper({ steps, currentIndex }: StepperProps) {
           <div
             key={step}
             className={`flex-1 px-1 text-center text-meta ${
-              i === currentIndex ? "font-semibold text-accent" : "text-ink/45"
+              i === currentIndex ? "font-semibold text-accent" : "text-ink-subtle"
             }`}
           >
             {step}

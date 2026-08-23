@@ -6,11 +6,19 @@
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
 export type ButtonSize = "md" | "sm";
 
-/** Uma variante por peso de decisão: `primary` é a ação da tela e aparece uma vez só. */
+/**
+ * Uma variante por peso de decisão: `primary` é a ação da tela e aparece uma vez só.
+ *
+ * `secondary` é tonal — o petróleo diluído, não um bloco escuro. Enquanto o accent era azul,
+ * um botão quase preto ao lado dele se distinguia; agora que a ação primária é o próprio
+ * petróleo escuro da marca, dois retângulos escuros lado a lado (o "Fazer check-in" e o
+ * "Fazer check-out") deixavam de ter hierarquia. O tonal resolve isso e ainda é a forma certa
+ * de dizer "selecionado" nos alternadores do cadastro, onde `ghost` é o não-selecionado.
+ */
 export const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-ink shadow-card hover:bg-accent-strong",
-  secondary: "bg-ink text-surface hover:bg-ink/90",
-  ghost: "border border-linha bg-surface-raised text-ink/75 hover:border-accent/45 hover:text-ink",
+  secondary: "bg-accent-soft text-accent hover:brightness-[0.97]",
+  ghost: "border border-linha bg-surface-raised text-ink-muted hover:border-accent/45 hover:text-ink",
   destructive: "bg-status-cancelado text-white hover:brightness-95",
 };
 

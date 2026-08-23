@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 
 /**
- * Superfície elevada padrão (docs/DESIGN_SYSTEM.md, seção 7). Borda clara + sombra azulada
+ * Superfície elevada padrão (docs/DESIGN_SYSTEM.md, seção 7). Borda clara + sombra esverdeada
  * rasa: o card precisa se destacar de `--surface` sem virar uma caixa pesada numa lista de
  * quinze plantões.
  */
