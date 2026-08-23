@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Cracha } from "../../components/ui";
+import { Chip, Cracha, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL } from "../../constants/attendance";
@@ -15,9 +15,7 @@ export function SchedulePage() {
   const [range, setRange] = useState<1 | 7>(7);
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">Carregando…</div>
-    );
+    return <TelaCarregando />;
   }
 
   const isCompany = session?.role === "company";
@@ -40,19 +38,9 @@ export function SchedulePage() {
 
       <div className="mt-4 flex gap-1.5">
         {([1, 7] as const).map((r) => (
-          <button
-            key={r}
-            type="button"
-            aria-pressed={range === r}
-            onClick={() => setRange(r)}
-            className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
-              range === r
-                ? "bg-ink text-surface"
-                : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
-            }`}
-          >
+          <Chip key={r} selecionado={range === r} onClick={() => setRange(r)}>
             {r === 1 ? "Hoje" : "Semana"}
-          </button>
+          </Chip>
         ))}
       </div>
 
@@ -80,7 +68,7 @@ export function SchedulePage() {
                       <Link
                         key={a.id}
                         to={`${base}/${a.id}`}
-                        className="flex items-center gap-3 rounded-[10px] border border-linha bg-surface-raised px-3 py-2.5 transition-colors duration-200 ease-out hover:border-accent"
+                        className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2.5 transition-colors duration-150 ease-out hover:border-accent"
                       >
                         <span className="font-mono text-note text-ink/70">{a.startTime}</span>
                         <span className="min-w-0 flex-1">

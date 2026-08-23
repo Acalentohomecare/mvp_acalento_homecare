@@ -2,12 +2,31 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!--
+      Favicons gerados de docs/Logo/Logo 4.png, sem fundo. A Logo 4 traz contorno escuro em
+      volta de cada forma, então os elos claros seguram tanto na aba clara quanto na escura —
+      foi o que dispensou o ladrilho azul que a Logo 3 exigia.
+      O 32px é renderizado à parte porque redução automática de 256 para 16 embola os elos finos.
+      O apple-touch-icon é o único com fundo (branco): o iOS pinta preto atrás de PNG
+      transparente na tela de início.
+    -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0050E0" />
+    <!--
+      viewport-fit=cover é o que faz env(safe-area-inset-*) valer alguma coisa no iOS. Sem ele o
+      inset vale zero e a barra de abas fica por baixo do indicador de início do iPhone, mesmo
+      com o padding declarado (DESIGN_SYSTEM.md, seção 11).
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <title>Acalento Gestão</title>

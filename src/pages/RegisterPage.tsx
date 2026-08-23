@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Camera } from "lucide-react";
-import { Button, Card, Input } from "../components/ui";
+import { Button, Card, Input, Logo, TelaCarregando } from "../components/ui";
 import { useAppState } from "../hooks/useAppState";
 import { useSession } from "../hooks/useSession";
 import { registerCaregiver } from "../services/auth";
@@ -24,11 +24,7 @@ export function RegisterPage() {
   const [notice, setNotice] = useState("");
 
   if (!state) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando alturaTotal />;
   }
 
   const submitCaregiver = () => {
@@ -47,6 +43,10 @@ export function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 py-14">
       <div className="w-full max-w-sm">
+        <div className="mb-6 flex justify-center">
+          <Logo variant="stacked" align="center" size={58} />
+        </div>
+
         <div className="mb-6 flex gap-1">
           {[1, 2, 3].map((s) => (
             <div key={s} className={`h-1 flex-1 rounded-full ${s <= step ? "bg-accent" : "bg-linha"}`} />
@@ -144,7 +144,7 @@ export function RegisterPage() {
 
           {step === 3 && (
             <div className="flex flex-col gap-4">
-              <div className="rounded-[14px] border border-linha p-4 text-center">
+              <div className="rounded-card border border-linha p-4 text-center">
                 <Camera size={24} className="mx-auto mb-2 text-ink/50" />
                 <p className="text-note font-semibold">Enviar documento + selfie (simulado)</p>
                 <p className="prosa mt-1 text-body text-ink/50">

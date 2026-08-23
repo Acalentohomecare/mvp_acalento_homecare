@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { BadgeCheck, Camera } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Input, Textarea } from "../../components/ui";
+import { Avatar, Button, Card, Chip, Cracha, Input, TelaCarregando, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
@@ -42,18 +42,10 @@ function ChipToggle({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
-        active
-          ? "bg-ink text-surface"
-          : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
-      }`}
-    >
+    // Dias e turnos ficam vários acesos ao mesmo tempo: modo múltiplo, fundo suave (seção 9.3).
+    <Chip selecionado={active} modo="multiplo" onClick={onClick}>
       {label}
-    </button>
+    </Chip>
   );
 }
 
@@ -82,11 +74,7 @@ export function CaregiverProfilePage() {
   const [saved, setSaved] = useState(false);
 
   if (!state || !caregiver) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando alturaTotal />;
   }
 
   const needsCouncil = requiresCouncil(caregiver.category);

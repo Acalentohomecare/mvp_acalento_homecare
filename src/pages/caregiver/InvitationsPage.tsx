@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Lock, MapPin } from "lucide-react";
-import { Button, Card, Cracha } from "../../components/ui";
+import { Aviso, Button, Card, Cracha, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL, ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
@@ -34,7 +34,7 @@ function Section({ title, count, children }: { title: string; count: number; chi
 
 function Empty({ text }: { text: string }) {
   return (
-    <p className="rounded-[14px] border border-dashed border-linha py-6 text-center text-body text-ink/45">
+    <p className="rounded-card border border-dashed border-linha py-6 text-center text-body text-ink/45">
       {text}
     </p>
   );
@@ -46,11 +46,7 @@ export function CaregiverInvitationsPage() {
   const [error, setError] = useState("");
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando />;
   }
 
   const caregiverId = session?.caregiverId;
@@ -116,11 +112,7 @@ export function CaregiverInvitationsPage() {
 
       <h1 className="mt-3 text-display font-semibold">Convites</h1>
 
-      {error && (
-        <p className="mt-3 rounded-[10px] border border-status-cancelado/40 px-3 py-2 text-note text-status-cancelado">
-          {error}
-        </p>
-      )}
+      {error && <Aviso className="mt-3">{error}</Aviso>}
 
       <Section title="Convites recebidos" count={invitations.length}>
         {invitations.length === 0 ? (

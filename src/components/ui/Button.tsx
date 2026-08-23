@@ -1,39 +1,42 @@
 import type { ButtonHTMLAttributes } from "react";
-
-type Variant = "primary" | "secondary" | "ghost" | "destructive";
-type Size = "md" | "sm";
+import { Loader2 } from "lucide-react";
+import { buttonClass } from "./button-classes";
+import type { ButtonSize, ButtonVariant } from "./button-classes";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   block?: boolean;
+  /** Ação em andamento: desabilita, mostra o giro e anuncia com `aria-busy` (seção 8.1). */
+  loading?: boolean;
 }
 
-const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-accent text-accent-ink",
-  secondary: "bg-ink text-surface",
-  ghost: "border border-linha bg-transparent text-ink",
-  destructive: "bg-status-cancelado text-white",
-};
-
-const SIZE_CLASSES: Record<Size, string> = {
-  md: "px-4 py-2.5 text-note",
-  sm: "px-2.5 py-1.5 text-label",
-};
-
+/**
+ * Ação clicável do produto (docs/DESIGN_SYSTEM.md, seção 7). As classes vêm de
+ * `button-classes.ts`, compartilhadas com o `<ButtonLink>`.
+ *
+ * `data-movimento="afunda"` é o gancho que a regra de `prefers-reduced-motion` usa para desligar
+ * o `active:scale` sem desligar junto a transição de cor (seção 6).
+ */
 export function Button({
   variant = "primary",
   size = "md",
   block = false,
+  loading = false,
+  disabled,
   className = "",
   children,
   ...props
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] font-semibold transition-transform duration-[80ms] active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-45 ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${block ? "w-full" : ""} ${className}`}
+      data-movimento="afunda"
+      aria-busy={loading || undefined}
+      disabled={disabled || loading}
+      className={`${buttonClass(variant, size, block)} ${className}`}
       {...props}
     >
+      {loading && <Loader2 size={size === "sm" ? 13 : 15} aria-hidden="true" className="girando" />}
       {children}
     </button>
   );

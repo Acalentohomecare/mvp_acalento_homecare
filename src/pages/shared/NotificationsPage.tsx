@@ -1,5 +1,5 @@
 import { Bell } from "lucide-react";
-import { Button } from "../../components/ui";
+import { Button, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { markAllRead, sessionNotifications } from "../../services/notifications";
@@ -22,9 +22,7 @@ export function NotificationsPage() {
   const { state, setState } = useAppState();
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">Carregando…</div>
-    );
+    return <TelaCarregando />;
   }
 
   const notifications = sessionNotifications(state, session);
@@ -47,7 +45,7 @@ export function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <p className="mt-6 rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="mt-6 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
           Nenhuma notificação.
         </p>
       ) : (
@@ -55,7 +53,7 @@ export function NotificationsPage() {
           {notifications.map((n) => (
             <li
               key={n.id}
-              className={`flex items-start gap-2.5 rounded-[10px] border px-3 py-2.5 ${
+              className={`flex items-start gap-2.5 rounded-control border px-3 py-2.5 ${
                 n.read ? "border-linha bg-transparent" : "border-accent/40 bg-surface-raised"
               }`}
             >

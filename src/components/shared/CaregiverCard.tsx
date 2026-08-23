@@ -17,7 +17,7 @@ export function CaregiverCard({ caregiver, rating, to, favorite }: CaregiverCard
   return (
     <Link
       to={to}
-      className="block rounded-[14px] border border-linha bg-surface-raised p-3.5 transition-colors duration-200 ease-out hover:border-accent focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="block rounded-card border border-linha bg-surface-raised p-3.5 shadow-card transition-[border-color,box-shadow] duration-150 ease-out hover:border-accent/45 hover:shadow-raised"
     >
       <div className="flex items-start gap-3">
         <Avatar name={caregiver.name} />
@@ -46,7 +46,7 @@ export function CaregiverCard({ caregiver, rating, to, favorite }: CaregiverCard
               <span className="text-meta text-ink/40">Sem média pública</span>
             ) : (
               <span className="inline-flex items-center gap-1 text-note font-semibold text-ink/70">
-                <Star size={12} className="fill-accent text-accent" />
+                <Star size={12} className="fill-rating text-rating" />
                 {formatRating(rating.average)}
                 <span className="font-normal text-ink/40">({rating.count})</span>
               </span>

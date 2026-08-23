@@ -1,20 +1,36 @@
+import { useId } from "react";
 import type { InputHTMLAttributes } from "react";
+import {
+  FIELD_CLASS,
+  FIELD_ERROR_CLASS,
+  FIELD_ERROR_TEXT_CLASS,
+  FIELD_LABEL_CLASS,
+} from "./field";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  /** Mensagem de validação. Diz o que fazer, não o que a máquina achou (seção 8.3). */
+  error?: string;
 }
 
-export function Input({ label, id, className = "", ...props }: InputProps) {
+export function Input({ label, id, error, className = "", ...props }: InputProps) {
+  const erroId = useId();
+
   return (
     <label className="block">
-      {label && (
-        <span className="mb-1 block text-label font-medium text-ink/70">{label}</span>
-      )}
+      {label && <span className={FIELD_LABEL_CLASS}>{label}</span>}
       <input
         id={id}
-        className={`w-full rounded-[10px] border-[1.5px] border-linha bg-surface-raised px-[11px] py-[9px] text-body text-ink outline-none transition-colors focus:border-accent disabled:cursor-not-allowed disabled:bg-linha/25 disabled:text-ink/45 ${className}`}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? erroId : undefined}
+        className={`${FIELD_CLASS} ${error ? FIELD_ERROR_CLASS : ""} ${className}`}
         {...props}
       />
+      {error && (
+        <span id={erroId} className={FIELD_ERROR_TEXT_CLASS}>
+          {error}
+        </span>
+      )}
     </label>
   );
 }

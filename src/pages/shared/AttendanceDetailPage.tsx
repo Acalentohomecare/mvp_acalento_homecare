@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Camera, Lock, LogIn, LogOut, MapPin, Send, Star } from "lucide-react";
-import { Button, Card, Cracha, Input, Textarea } from "../../components/ui";
+import { Button, Card, Cracha, Input, TelaCarregando, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL, ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
@@ -34,7 +34,7 @@ function Stars({ value, onChange }: { value: number; onChange?: (v: 1 | 2 | 3 | 
     <div className="flex items-center gap-1">
       {([1, 2, 3, 4, 5] as const).map((n) => {
         const filled = n <= value;
-        const icon = <Star size={16} className={filled ? "fill-accent text-accent" : "text-linha"} />;
+        const icon = <Star size={16} className={filled ? "fill-rating text-rating" : "text-linha"} />;
         return onChange ? (
           <button key={n} type="button" aria-label={`${n} estrela${n > 1 ? "s" : ""}`} onClick={() => onChange(n)}>
             {icon}
@@ -58,9 +58,7 @@ export function AttendanceDetailPage() {
   const [comment, setComment] = useState("");
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">Carregando…</div>
-    );
+    return <TelaCarregando />;
   }
 
   const role = session?.role === "caregiver" ? "caregiver" : "company";
@@ -382,8 +380,10 @@ export function AttendanceDetailPage() {
             {messages.map((m) => (
               <div
                 key={m.id}
-                className={`max-w-[85%] rounded-[12px] px-3 py-2 text-note ${
-                  m.from === role ? "self-end bg-ink text-surface" : "bg-surface-raised border border-linha"
+                className={`max-w-[85%] rounded-control px-3 py-2 text-note ${
+                  m.from === role
+                    ? "self-end bg-accent text-accent-ink"
+                    : "border border-linha bg-surface-raised"
                 }`}
               >
                 {m.text}

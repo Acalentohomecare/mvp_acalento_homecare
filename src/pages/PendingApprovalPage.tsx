@@ -31,7 +31,15 @@ export function PendingApprovalPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <Clock size={32} className={decision ? "text-status-cancelado" : "text-accent"} />
+      <span
+        className={`flex size-14 items-center justify-center rounded-full ${
+          decision
+            ? "bg-status-cancelado-soft text-status-cancelado"
+            : "bg-status-aberto-soft text-status-aberto"
+        }`}
+      >
+        <Clock size={26} strokeWidth={1.9} />
+      </span>
       <h1 className="mt-3 text-display font-semibold">{title}</h1>
       <p className="mt-2 prosa text-body text-ink/60">
         {decision

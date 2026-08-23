@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
+import { ButtonLink, Chip, TelaCarregando } from "../../components/ui";
 import { AttendanceCard } from "../../components/shared/AttendanceCard";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
@@ -12,7 +13,7 @@ import { companyPatients } from "../../services/patients";
 import type { Attendance } from "../../types";
 
 const ACTION_CLASS =
-  "rounded-[10px] border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent";
+  "rounded-control border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent";
 
 type Filter = "all" | "awaiting" | "scheduled" | "done" | "draft";
 
@@ -59,11 +60,7 @@ export function CompanyAttendancesPage() {
   );
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando />;
   }
 
   const company = state.companies.find((c) => c.id === session?.companyId);
@@ -83,29 +80,16 @@ export function CompanyAttendancesPage() {
             Todo o histórico da {company?.name ?? "empresa"}.
           </p>
         </div>
-        <Link
-          to="/empresa/atendimentos/novo"
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-note font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
-        >
+        <ButtonLink to="/empresa/atendimentos/novo">
           <Plus size={15} /> Novo atendimento
-        </Link>
+        </ButtonLink>
       </div>
 
       <div className="mt-5 flex flex-wrap gap-1.5">
         {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            aria-pressed={filter === f.key}
-            onClick={() => setFilter(f.key)}
-            className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
-              filter === f.key
-                ? "bg-ink text-surface"
-                : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
-            }`}
-          >
+          <Chip key={f.key} selecionado={filter === f.key} onClick={() => setFilter(f.key)}>
             {f.label}
-          </button>
+          </Chip>
         ))}
       </div>
 
@@ -114,7 +98,7 @@ export function CompanyAttendancesPage() {
       </p>
 
       {visible.length === 0 ? (
-        <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
           Nenhum atendimento {filter === "all" ? "cadastrado" : "nesse filtro"}.
         </p>
       ) : (

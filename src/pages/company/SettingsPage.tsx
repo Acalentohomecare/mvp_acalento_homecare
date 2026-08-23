@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RotateCcw } from "lucide-react";
-import { Button, Card, Modal } from "../../components/ui";
+import { Button, Card, Modal, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { companyAuditLog } from "../../services/roster";
@@ -18,11 +18,7 @@ export function CompanySettingsPage() {
   const [resetting, setResetting] = useState(false);
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando />;
   }
 
   const company = state.companies.find((c) => c.id === session?.companyId);
@@ -67,7 +63,7 @@ export function CompanySettingsPage() {
           Toda aprovação, recusa, bloqueio e cancelamento da sua empresa fica registrado (R12).
         </p>
         {log.length === 0 ? (
-          <p className="rounded-[14px] border border-dashed border-linha py-6 text-center text-body text-ink/45">
+          <p className="rounded-card border border-dashed border-linha py-6 text-center text-body text-ink/45">
             Nenhum registro ainda.
           </p>
         ) : (

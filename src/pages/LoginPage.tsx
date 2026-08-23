@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { HeartHandshake } from "lucide-react";
-import { Button, Card, Input } from "../components/ui";
+import { Aviso, Button, Card, Input, Logo, TelaCarregando } from "../components/ui";
 import { useAppState } from "../hooks/useAppState";
 import { useSession } from "../hooks/useSession";
 import { login } from "../services/auth";
@@ -20,11 +19,7 @@ export function LoginPage() {
   const [error, setError] = useState("");
 
   if (!state) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando alturaTotal />;
   }
 
   const attempt = (attemptEmail: string, attemptPassword: string) => {
@@ -49,14 +44,25 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 py-14">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex items-center justify-center gap-2.5">
-          <HeartHandshake className="text-accent-ink" size={22} strokeWidth={1.75} />
-          <span className="text-display font-semibold">Acalento Gestão</span>
+    /*
+      A entrada é a única tela sem navegação: ganha um véu suave da cor da marca no topo para
+      não ser um retângulo cinza vazio, e o card fica elevado sobre ele.
+    */
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-14">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-accent-soft to-transparent"
+      />
+      <div className="relative w-full max-w-sm">
+        <div className="mb-8 flex justify-center">
+          <Logo variant="stacked" align="center" size={76} />
         </div>
 
-        <Card>
+        <p className="prosa mx-auto mb-5 text-center text-note text-ink/55">
+          Gestão de plantões, cuidadores e horas para empresas de home care.
+        </p>
+
+        <Card className="p-5 shadow-raised">
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <Input
               label="E-mail"
@@ -73,7 +79,7 @@ export function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {error && <p className="text-note text-status-cancelado">{error}</p>}
+            {error && <Aviso>{error}</Aviso>}
             <Button type="submit" variant="primary" block>
               Entrar
             </Button>
@@ -82,13 +88,13 @@ export function LoginPage() {
 
         <div className="mt-4 text-center text-note text-ink/40">
           Ainda não tem conta?{" "}
-          <Link to="/cadastro" className="font-semibold text-ink/70 underline">
+          <Link to="/cadastro" className="font-semibold text-accent underline">
             Criar cadastro
           </Link>
         </div>
 
         <div className="mt-8">
-          <p className="mb-2 text-body font-semibold text-ink">
+          <p className="mb-2 text-label font-semibold tracking-wide text-ink/45 uppercase">
             Contas de demonstração
           </p>
           <div className="flex flex-col gap-1.5">
@@ -97,7 +103,7 @@ export function LoginPage() {
                 key={acc.email}
                 type="button"
                 onClick={() => attempt(acc.email, "123456")}
-                className="rounded-[10px] border border-linha bg-surface-raised px-3 py-2 text-left text-note text-ink/70 transition-colors hover:border-accent"
+                className="rounded-control border border-linha bg-surface-raised px-3 py-2 text-left text-note text-ink/70 shadow-card transition-colors duration-150 hover:border-accent/45 hover:bg-accent-soft/40"
               >
                 <span className="font-semibold text-ink">{acc.label}</span> — {acc.email}
               </button>

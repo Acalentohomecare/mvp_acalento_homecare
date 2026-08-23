@@ -1,19 +1,34 @@
+import { useId } from "react";
 import type { TextareaHTMLAttributes } from "react";
+import {
+  FIELD_CLASS,
+  FIELD_ERROR_CLASS,
+  FIELD_ERROR_TEXT_CLASS,
+  FIELD_LABEL_CLASS,
+} from "./field";
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
+  error?: string;
 }
 
-export function Textarea({ label, className = "", ...props }: TextareaProps) {
+export function Textarea({ label, error, className = "", ...props }: TextareaProps) {
+  const erroId = useId();
+
   return (
     <label className="block">
-      {label && (
-        <span className="mb-1 block text-label font-medium text-ink/70">{label}</span>
-      )}
+      {label && <span className={FIELD_LABEL_CLASS}>{label}</span>}
       <textarea
-        className={`w-full rounded-[10px] border-[1.5px] border-linha bg-surface-raised px-[11px] py-[9px] text-body text-ink outline-none transition-colors focus:border-accent ${className}`}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? erroId : undefined}
+        className={`${FIELD_CLASS} resize-y ${error ? FIELD_ERROR_CLASS : ""} ${className}`}
         {...props}
       />
+      {error && (
+        <span id={erroId} className={FIELD_ERROR_TEXT_CLASS}>
+          {error}
+        </span>
+      )}
     </label>
   );
 }

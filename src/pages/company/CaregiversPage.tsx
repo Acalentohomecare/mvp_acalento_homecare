@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Search } from "lucide-react";
 import { CaregiverCard } from "../../components/shared/CaregiverCard";
-import { Button, Card, Cracha, Modal, Textarea } from "../../components/ui";
+import { Button, Card, Chip, Cracha, Modal, TelaCarregando, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
+import { useToast } from "../../hooks/useToast";
 import {
   APPROVAL_STATUS_CLASS,
   APPROVAL_STATUS_LABEL,
@@ -37,6 +38,7 @@ export function CompanyCaregiversPage() {
   const { session } = useSession();
   const companyId = session?.companyId;
 
+  const { avisar } = useToast();
   const [tab, setTab] = useState<Tab>("quadro");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
@@ -59,19 +61,27 @@ export function CompanyCaregiversPage() {
   );
 
   if (!state) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando alturaTotal />;
   }
+
+  /*
+   * Aprovar e recusar tiram o card da fila — e um card que some não diz qual das duas coisas
+   * aconteceu. A confirmação precisa ser dita (DESIGN_SYSTEM.md, seção 8.4).
+   */
+  const confirmApprove = (id: string, name: string) => {
+    if (!companyId) return;
+    setState((s) => approveCaregiver(s, companyId, id));
+    avisar(`${name} entrou no seu quadro e já pode receber convites.`);
+  };
 
   const confirmReject = () => {
     if (!rejecting || !companyId) return;
     const motive = reason.trim() || "Documentos não conferem.";
+    const { name } = rejecting;
     setState((s) => rejectCaregiver(s, companyId, rejecting.id, motive));
     setRejecting(null);
     setReason("");
+    avisar(`Cadastro de ${name} recusado. Está em "Inativos".`);
   };
 
   const filters: { key: CategoryFilter; label: string }[] = [
@@ -94,17 +104,7 @@ export function CompanyCaregiversPage() {
 
       <div className="mt-5 flex flex-wrap gap-1.5">
         {tabs.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            aria-pressed={tab === t.key}
-            onClick={() => setTab(t.key)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
-              tab === t.key
-                ? "bg-ink text-surface"
-                : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
-            }`}
-          >
+          <Chip key={t.key} selecionado={tab === t.key} onClick={() => setTab(t.key)}>
             {t.label}
             {t.count > 0 && (
               <span
@@ -113,13 +113,13 @@ export function CompanyCaregiversPage() {
                 {t.count}
               </span>
             )}
-          </button>
+          </Chip>
         ))}
       </div>
 
       {tab === "quadro" && (
         <>
-          <label className="mt-5 flex items-center gap-2 rounded-[10px] border-[1.5px] border-linha bg-surface-raised px-3 py-2 transition-colors focus-within:border-accent">
+          <label className="mt-5 flex items-center gap-2 rounded-control border-[1.5px] border-linha bg-surface-raised px-3 py-2 transition-colors focus-within:border-accent">
             <Search size={15} className="shrink-0 text-ink/40" />
             <span className="sr-only">Buscar cuidador</span>
             <input
@@ -133,32 +133,17 @@ export function CompanyCaregiversPage() {
 
           <div className="mt-3 flex flex-wrap gap-1.5">
             {filters.map((f) => (
-              <button
+              <Chip
                 key={f.key}
-                type="button"
-                aria-pressed={category === f.key}
+                selecionado={category === f.key}
                 onClick={() => setCategory(f.key)}
-                className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
-                  category === f.key
-                    ? "bg-ink text-surface"
-                    : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
-                }`}
               >
                 {f.label}
-              </button>
+              </Chip>
             ))}
-            <button
-              type="button"
-              aria-pressed={favoritesOnly}
-              onClick={() => setFavoritesOnly((v) => !v)}
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
-                favoritesOnly
-                  ? "bg-ink text-surface"
-                  : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
-              }`}
-            >
+            <Chip selecionado={favoritesOnly} onClick={() => setFavoritesOnly((v) => !v)}>
               <Heart size={12} className={favoritesOnly ? "fill-surface" : ""} /> Favoritos
-            </button>
+            </Chip>
           </div>
 
           <p className="mt-5 mb-2.5 text-note text-ink/45">
@@ -166,7 +151,7 @@ export function CompanyCaregiversPage() {
           </p>
 
           {visible.length === 0 ? (
-            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
+            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
               Nenhum cuidador encontrado com esses critérios.
             </p>
           ) : (
@@ -194,7 +179,7 @@ export function CompanyCaregiversPage() {
           </p>
 
           {queue.length === 0 ? (
-            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
+            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
               Quando um cuidador criar cadastro, ele aparece aqui para conferência.
             </p>
           ) : (
@@ -232,9 +217,7 @@ export function CompanyCaregiversPage() {
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() =>
-                        companyId && setState((s) => approveCaregiver(s, companyId, c.id))
-                      }
+                      onClick={() => confirmApprove(c.id, c.name)}
                     >
                       Aprovar para o quadro
                     </Button>
@@ -253,7 +236,7 @@ export function CompanyCaregiversPage() {
           </p>
 
           {inactive.length === 0 ? (
-            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
+            <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
               Ninguém recusado ou bloqueado.
             </p>
           ) : (

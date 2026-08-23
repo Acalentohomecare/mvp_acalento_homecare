@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BadgeCheck, Heart, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Modal, Textarea } from "../../components/ui";
+import { Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import {
   APPROVAL_STATUS_CLASS,
@@ -67,11 +67,7 @@ export function CompanyCaregiverProfilePage() {
   const [reason, setReason] = useState("");
 
   if (!state) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando alturaTotal />;
   }
 
   const caregiver = state.caregivers.find((c) => c.id === caregiverId);
@@ -221,7 +217,7 @@ export function CompanyCaregiverProfilePage() {
               </div>
             ) : (
               <div className="mt-1 flex items-center gap-1 font-mono text-body">
-                <Star size={13} className="fill-accent text-accent" />
+                <Star size={13} className="fill-rating text-rating" />
                 {formatRating(rating.average)}
               </div>
             )}
@@ -282,7 +278,7 @@ export function CompanyCaregiverProfilePage() {
               {history.map((a) => (
                 <li
                   key={a.id}
-                  className="flex items-center gap-3 rounded-[10px] border border-linha bg-surface-raised px-3 py-2"
+                  className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2"
                 >
                   <span className="font-mono text-note text-ink/70">
                     {a.startDate.split("-").reverse().join("/")}
@@ -312,7 +308,7 @@ export function CompanyCaregiverProfilePage() {
                       <Star
                         key={i}
                         size={12}
-                        className={i < e.rating ? "fill-accent text-accent" : "text-linha"}
+                        className={i < e.rating ? "fill-rating text-rating" : "text-linha"}
                       />
                     ))}
                     <span className="ml-1 font-mono text-meta text-ink/40">

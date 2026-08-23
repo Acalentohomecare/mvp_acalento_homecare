@@ -116,22 +116,29 @@ necessária para funcionar. Toda a operação é simulada no navegador.
 ## Brand Commitments
 
 - **Nome: "Acalento Gestão"** — é ao mesmo tempo o nome da empresa e o nome deste aplicativo.
-  Confirmado pelo usuário nesta rodada. A interface hoje exibe apenas "Acalento" em seis pontos
-  (`src/components/layout/AppHeader.tsx`, `src/layouts/CompanyLayout.tsx`,
-  `src/layouts/CaregiverLayout.tsx`, `src/pages/LoginPage.tsx`) — desalinhamento a corrigir.
-- **Logo vinculante:** `docs/Logo/logo.jpeg` — símbolo de nó/rede com wordmark "ACALENTO /
-  GESTÃO", em verde petróleo escuro e verde sálvia sobre off-white. Confirmado como definitivo e
-  de uso obrigatório na interface: login, header e favicon. Nenhum trabalho futuro pode
-  substituí-lo. O `public/favicon.svg` atual é um SVG roxo genérico herdado do scaffold e
-  contradiz a marca.
+  Confirmado pelo usuário nesta rodada. Corrigido: o nome completo agora vem do lockup da marca
+  (`src/components/ui/Logo.tsx`), usado em cabeçalho, barra lateral, entrada e cadastro.
+- **Logo vinculante:** `docs/Logo/Logo 4.png` — símbolo de nó/rede em azul com contorno escuro,
+  PNG com transparência real. Sucede a `Logo 3.png` (mesma arte, sem contorno) e a marca
+  verde-petróleo original (`logo.jpeg`); as duas ficam no repositório apenas como histórico.
+  Servido como `public/logo.png`, sem redesenho: o produto usa o arquivo do cliente.
+- **Problema de contraste da marca — resolvido pela Logo 4.** 27% dos pixels opacos da arte são
+  azul-gelo: três dos cinco elos são quase brancos. Na `Logo 3.png` eles ficavam em ~1,1:1 sobre
+  fundo claro e sumiam, o que obrigava a escolher entre um ladrilho de fundo (recusado pelo
+  usuário) e um símbolo pela metade. O contorno da `Logo 4.png` dá borda própria a cada elo e
+  encerra o dilema: a marca vai sem fundo em toda a interface e nos favicons. Só o
+  `apple-touch-icon` leva fundo branco, porque o iOS pinta preto atrás de transparência.
+- **O nome vem abaixo do símbolo e em caixa normal** — "Acalento Gestão", com "Gestão" na cor da
+  marca. É texto, não imagem (`src/components/ui/Logo.tsx`).
 - **Voz:** português do Brasil, sóbria e operacional. Sem linguagem promocional, sem superlativos,
   sem emoji como elemento de interface.
-- **Conflito de identidade não resolvido, registrado aqui para que ninguém o resolva por
-  distração:** o sistema visual implementado (`src/index.css` + `docs/DESIGN_SYSTEM.md`) usa
-  accent marigold `#E8A33D` com Fraunces/Work Sans/IBM Plex Mono, enquanto o `CLAUDE.md` (§5–6)
-  prescreve fundo `#F7F7F5`, accent verde sálvia/petróleo e tipografia da família Inter — e o logo
-  confirmado é verde. As três fontes discordam. Isto é um fato registrado, não uma decisão: a
-  resolução pertence ao trabalho visual, não a este documento.
+- **Identidade — resolvida.** O desempate entre `CLAUDE.md` §5–6, o design system e o logo foi
+  decidido pelo usuário: ambiente azul/branco/cinza, cor de ação vinda da marca. Com a troca do
+  logo para a versão azul, os três azuis do produto (`#0050E0`, `#017BFA`, `#DDEDFC`) são
+  amostrados pixel a pixel do arquivo oficial, não estimados. A tipografia de interface passou a
+  ser **Inter** — a preferência nº 1 do `CLAUDE.md` §6 e a escolha certa para um produto que vive
+  entre 12 e 16px no celular; a IBM Plex Mono continua reservada a registro/prova (horário, horas,
+  valor, documento). Qualquer proposta de mudar de novo passa pelo `DESIGN_SYSTEM.md`.
 - **Privacidade:** todos os dados são fictícios. Nunca inserir CPF, CNPJ, documento, telefone,
   endereço ou informação de saúde reais, mesmo que pareçam mais convincentes na apresentação.
 

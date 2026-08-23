@@ -1,48 +1,103 @@
 @import "tailwindcss";
 
 /*
-  Tokens do design system (docs/DESIGN_SYSTEM.md, seções 1 e 2).
-  Cada `--color-*`, `--font-*` e `--text-*` abaixo vira automaticamente uma utilidade Tailwind
-  (ex.: --color-accent -> bg-accent / text-accent; --text-body -> text-body).
+  Tokens do design system (docs/DESIGN_SYSTEM.md, seções 1 a 6).
+  Cada `--color-*`, `--font-*`, `--text-*`, `--radius-*` e `--shadow-*` abaixo vira automaticamente
+  uma utilidade Tailwind (ex.: --color-accent -> bg-accent / text-accent; --radius-card ->
+  rounded-card; --shadow-card -> shadow-card).
+
+  Regra da paleta: produto de saúde e de gestão. O ambiente é azul, branco e cinza-azulado; a cor
+  saturada só aparece onde carrega significado (estado, categoria, ação primária). Todo par
+  "base + soft" abaixo foi conferido com contraste >= 4.5:1 do texto base sobre o próprio soft.
+
+  Os azuis da marca foram amostrados pixel a pixel de `docs/Logo/Logo 4.png` — não são
+  aproximações. É por isso que o fundo suave da interface é exatamente o azul dos elos claros do
+  símbolo: quando a marca aparece sobre `--accent-soft`, é a mesma tinta.
 */
 @theme {
-  --color-ink: #16241f;
-  --color-surface: #f5f6f2;
-  --color-surface-raised: #ffffff;
-  --color-accent: #e8a33d;
-  --color-accent-ink: #7a5419;
-  --color-linha: #dcdfd6;
+  /* ------------------------------------------------------------------ marca */
+  --color-brand: #0050e0; /* núcleo do símbolo — azul profundo */
+  --color-brand-mid: #017bfa; /* elos azuis — azul médio */
+  --color-brand-pale: #ddedfc; /* elos claros — azul gelo */
 
-  --color-cat-informal: #6b8f71;
-  --color-cat-tecnico: #3e7cb1;
-  --color-cat-superior: #a6672b;
+  /* ------------------------------------------- neutros (cinza levemente azul) */
+  --color-ink: #14243d; /* texto principal — azul-marinho ardósia, nunca preto puro */
+  --color-surface: #f3f6fb; /* fundo do app */
+  --color-surface-raised: #ffffff; /* cards e superfícies elevadas */
+  --color-surface-sunken: #e6ecf5; /* faixas, cabeçalhos, áreas de apoio */
+  /* Cromo de navegação: barra lateral, cabeçalho do celular e barra inferior. Cinza claro
+     neutro — sem azul —, um degrau abaixo do conteúdo, para a navegação recuar e o conteúdo
+     (que é branco) avançar. */
+  --color-surface-nav: #f0f2f5;
+  --color-linha: #dce5f0; /* bordas e divisores */
 
-  --color-status-aberto: #e8a33d;
-  --color-status-confirmado: #3e7cb1;
-  --color-status-andamento: #2a9d8f;
-  --color-status-concluido: #6b8f71;
-  --color-status-cancelado: #b24c3a;
-  --color-status-bloqueado: #4a2a24;
+  /* ------------------------------------------------------------------ ação */
+  --color-accent: #0050e0; /* ação primária = azul da marca */
+  --color-accent-strong: #0040b4; /* hover/pressionado da ação primária */
+  --color-accent-ink: #ffffff; /* texto e ícone sobre --accent */
+  --color-accent-soft: #ddedfc; /* fundo suave — o azul gelo dos elos claros */
+
+  /* Ouro de avaliação: só preenche estrela, nunca carrega texto — por isso pode ser mais
+     claro que os tokens de estado. Estrela na cor da marca lia como ação. */
+  --color-rating: #d9a036;
+
+  /* --------------------------------------- categoria de cuidador (credencial) */
+  /* Escala de profundidade: verde-azulado -> azul clínico -> azul da marca (nível mais alto). */
+  --color-cat-informal: #2a7263;
+  --color-cat-informal-soft: #e4f1ee;
+  --color-cat-tecnico: #1a6699;
+  --color-cat-tecnico-soft: #e2eff9;
+  --color-cat-superior: #0050e0;
+  --color-cat-superior-soft: #dfe9fc;
+
+  /* ------------------------------------------------------- estado (crachás) */
+  /* Semáforo pedido pelo produto — âmbar pendente, verde confirmado, vermelho cancelado —
+     em versões dessaturadas, para conviver com o ambiente azul sem gritar. */
+  --color-status-aberto: #8a5d0b; /* âmbar — pendente, aguardando alguém agir */
+  --color-status-aberto-soft: #fbf1de;
+  --color-status-confirmado: #2a7150; /* verde — confirmado, combinado de pé */
+  --color-status-confirmado-soft: #e6f2eb;
+  --color-status-andamento: #0f6e86; /* azul-clínico — acontecendo agora */
+  --color-status-andamento-soft: #e0f1f6;
+  --color-status-concluido: #4a6577; /* ardósia — encerrado, já é histórico */
+  --color-status-concluido-soft: #e9eff6;
+  --color-status-cancelado: #a53f34; /* vermelho — cancelado, recusado */
+  --color-status-cancelado-soft: #fbe9e6;
+  --color-status-bloqueado: #7a2b23; /* vermelho profundo — decisão posterior da empresa */
+  --color-status-bloqueado-soft: #f4e3e0;
+  --color-status-rascunho: #556a7b; /* cinza — ainda não publicado */
+  --color-status-rascunho-soft: #edf1f7;
+
+  /* ------------------------------------------------------------------ raio */
+  /* Três raios por papel. Nada de valor arbitrário no meio do className. */
+  --radius-control: 10px; /* botão, campo, item de lista, chip retangular */
+  --radius-card: 14px; /* card e blocos de conteúdo */
+  --radius-panel: 18px; /* modal e painéis grandes */
+
+  /* -------------------------------------------------------------- elevação */
+  /* Sombra azulada (nunca preta): mantém o ambiente frio e evita o cinza sujo. */
+  --shadow-card: 0 1px 2px 0 rgb(20 36 61 / 0.04), 0 1px 3px 0 rgb(20 36 61 / 0.05);
+  --shadow-raised: 0 2px 4px -2px rgb(20 36 61 / 0.06), 0 10px 22px -8px rgb(20 36 61 / 0.14);
+  --shadow-overlay: 0 24px 48px -12px rgb(20 36 61 / 0.3);
 
   /*
-    Uma família de interface e uma de dados. A Fraunces foi aposentada: rodava no máximo a 22px,
-    tamanho em que o caráter de uma serifada não se lê, e brigava com o wordmark geométrico da
-    marca. O CLAUDE.md §6 pede uma única família principal — é o que temos agora.
+    Inter é a família de interface. A Work Sans saiu porque é uma grotesca de origem editorial:
+    boa em texto corrido, mas com x-height baixa e formas abertas que a 12–14px — o tamanho em
+    que este produto vive — perdem definição na tela do celular. A Inter foi desenhada para
+    interface exatamente nessa faixa, tem x-height alta e dígitos tabulares, e é a preferência
+    nº 1 do CLAUDE.md §6.
+
     A IBM Plex Mono fica porque tem um papel que só ela cumpre: horário de check-in/check-out,
     horas fechadas, valores e documentos. Número que serve de prova não usa a fonte do texto.
   */
   --font-sans:
-    "Work Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
     sans-serif;
   --font-mono:
     "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", "Cascadia Mono", Menlo, monospace;
 
   /*
-    Escala por papel, não por pixel. Antes existiam 16 tamanhos arbitrários — seis deles dentro
-    de uma faixa de 3,5px, diferença que o olho não resolve — e nenhum deles carregava
-    line-height: no CSS compilado `text-[12.5px]` saía como `font-size:12.5px` e mais nada, então
-    a entrelinha de quase todo o produto era herdada por acaso. Cada papel abaixo traz o seu
-    próprio line-height e tracking.
+    Escala por papel, não por pixel. Cada papel traz o seu próprio line-height e tracking.
 
     O piso é 12px (--text-meta). Nada menor: o cuidador lê no celular em deslocamento e o cliente
     lê numa tela grande do outro lado da sala de reunião.
@@ -61,12 +116,12 @@
 
   --text-title: 1.125rem; /* 18px — nome de paciente/cuidador, título de card e de modal */
   --text-title--line-height: 1.35;
-  --text-title--letter-spacing: -0.01em;
+  --text-title--letter-spacing: -0.014em;
 
   /* 26px no celular, 32px a partir de ~740px: a única voz grande do produto. */
   --text-display: clamp(1.625rem, 1.35rem + 1.35vw, 2rem);
   --text-display--line-height: 1.15;
-  --text-display--letter-spacing: -0.022em;
+  --text-display--letter-spacing: -0.028em;
 }
 
 body {
@@ -76,17 +131,25 @@ body {
   line-height: var(--text-body--line-height);
 }
 
+/*
+  Número em coluna precisa alinhar. A Inter traz dígitos tabulares; ligamos por padrão, porque
+  quase todo número deste produto (horas, valores, contagens) aparece em lista ou tabela.
+*/
+:where(body) {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Medida de leitura para texto corrido (bio, observações, estados vazios). */
 .prosa {
   max-width: 62ch;
 }
 
 /*
-  Superfícies do navegador: seleção, cursor e sublinhado saem com o padrão de fábrica e não
-  pertencem a design system nenhum. Aqui elas passam a usar os tokens do produto.
+  Superfícies do navegador: seleção, cursor, sublinhado e anel de foco saem com o padrão de
+  fábrica e não pertencem a design system nenhum. Aqui elas passam a usar os tokens do produto.
 */
 ::selection {
-  background-color: color-mix(in oklab, var(--color-accent) 32%, transparent);
+  background-color: color-mix(in oklab, var(--color-accent) 18%, transparent);
   color: var(--color-ink);
 }
 
@@ -95,7 +158,97 @@ textarea {
   caret-color: var(--color-accent);
 }
 
+/*
+  Um único anel de foco para o produto inteiro, aplicado por :focus-visible — teclado e leitor de
+  tela ganham o mesmo destaque em botão, link, campo e item de lista, sem precisar repetir classe
+  em cada call site.
+
+  O seletor está dentro de :where() de propósito: especificidade zero. Qualquer utilidade de raio
+  no elemento (rounded-full de um crachá, rounded-card de um item de lista) ganha desta regra — o
+  raio abaixo só serve de padrão para quem não declara nenhum, como um link de texto puro, para
+  que o anel não saia com canto reto.
+*/
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
 a {
   text-underline-offset: 0.18em;
   text-decoration-thickness: from-font;
+}
+
+/* A cor de marca também vale para os controles nativos (checkbox, radio, range). */
+:root {
+  accent-color: var(--color-accent);
+  color-scheme: light;
+}
+
+/*
+  Pulsação do <Skeleton> (DESIGN_SYSTEM.md, seção 8.1). Lenta e por opacidade, nunca brilho
+  varrendo: o shimmer atravessando a tela chama mais atenção que o conteúdo e é justamente o
+  efeito que prefers-reduced-motion existe para desligar.
+*/
+@keyframes pulso-esqueleto {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.esqueleto {
+  animation: pulso-esqueleto 1.6s ease-in-out infinite;
+}
+
+/* Giro do indicador de ação em andamento (botão carregando, seção 8.1). */
+@keyframes giro {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.girando {
+  animation: giro 0.9s linear infinite;
+}
+
+/*
+  Movimento reduzido (DESIGN_SYSTEM.md, seção 6). Quem liga a preferência no sistema pede que
+  deslocamento e mudança de escala parem — é sintoma vestibular, não preferência estética.
+
+  Mudança de cor continua acontecendo: ela não desloca nada, e sem ela o produto perderia o
+  retorno de hover e de foco sem ganhar nada em troca. Por isso a regra zera a duração em vez de
+  remover a transição, e o transform some por `transform: none` no que afunda ao toque.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .esqueleto {
+    animation: none;
+    opacity: 0.75;
+  }
+
+  /*
+    O giro é exceção deliberada: ele não é enfeite, é a única prova de que a ação está em
+    andamento. Um giro congelado seria pior do que nenhum. Fica, mais lento.
+  */
+  .girando {
+    animation: giro 1.8s linear infinite !important;
+  }
+
+  /* O afundar do botão e a subida da folha são deslocamento: somem por inteiro. */
+  [data-movimento="afunda"]:active,
+  [data-movimento="sobe"] {
+    transform: none !important;
+  }
 }

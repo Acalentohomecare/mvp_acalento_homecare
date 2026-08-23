@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { FileText, Plus } from "lucide-react";
+import { ButtonLink, TelaCarregando } from "../../components/ui";
 import { AttendanceCard } from "../../components/shared/AttendanceCard";
 import { rosterQueue } from "../../services/roster";
 import { useAppState } from "../../hooks/useAppState";
@@ -30,9 +31,13 @@ function Section({
 }) {
   return (
     <section className="mt-7">
-      <h2 className="mb-2.5 text-body font-semibold text-ink">
+      <h2 className="mb-2.5 flex items-center gap-2 text-label font-semibold tracking-wide text-ink/50 uppercase">
         {title}
-        {count !== undefined && count > 0 && <span className="ml-1.5 text-ink/30">({count})</span>}
+        {count !== undefined && count > 0 && (
+          <span className="rounded-full bg-surface-sunken px-1.5 py-0.5 font-mono text-meta leading-none text-ink/55">
+            {count}
+          </span>
+        )}
       </h2>
       {children}
     </section>
@@ -41,7 +46,7 @@ function Section({
 
 function Empty({ text }: { text: string }) {
   return (
-    <p className="rounded-[14px] border border-dashed border-linha py-6 text-center text-body text-ink/45">
+    <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink/45">
       {text}
     </p>
   );
@@ -52,11 +57,7 @@ export function CompanyDashboardPage() {
   const { state } = useAppState();
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando />;
   }
 
   const company = state.companies.find((c) => c.id === session?.companyId);
@@ -117,22 +118,19 @@ export function CompanyDashboardPage() {
           <h1 className="text-display font-semibold">Início</h1>
           <p className="prosa mt-1 text-body text-ink/50">{company?.name}</p>
         </div>
-        <Link
-          to="/empresa/atendimentos/novo"
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-note font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
-        >
+        <ButtonLink to="/empresa/atendimentos/novo">
           <Plus size={15} /> Novo atendimento
-        </Link>
+        </ButtonLink>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-linha bg-linha sm:grid-cols-5">
+      <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-linha bg-linha shadow-card sm:grid-cols-5">
         {numbers.map((n) => (
           <div
             key={n.label}
             className="flex h-full flex-col justify-between gap-2 bg-surface-raised px-3.5 py-3 last:col-span-2 sm:last:col-span-1"
           >
-            <div className="text-meta font-medium tracking-wide text-ink/70 uppercase">{n.label}</div>
-            <div className="mt-1 font-mono text-title leading-none">{n.value}</div>
+            <div className="text-meta font-medium tracking-wide text-ink/50 uppercase">{n.label}</div>
+            <div className="mt-1 font-mono text-title leading-none font-medium text-accent">{n.value}</div>
           </div>
         ))}
       </div>
@@ -145,9 +143,9 @@ export function CompanyDashboardPage() {
             {pendencies.map((p) => (
               <li
                 key={p.id}
-                className="flex items-start gap-2 rounded-[10px] border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink/75"
+                className="flex items-start gap-2.5 rounded-control border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink/75 shadow-card"
               >
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
+                <span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-status-aberto" />
                 {p.text}
               </li>
             ))}
@@ -208,7 +206,7 @@ export function CompanyDashboardPage() {
 
       <Link
         to="/empresa/relatorios"
-        className="mt-7 inline-flex items-center gap-2 rounded-[10px] border border-linha bg-surface-raised px-4 py-2.5 text-note font-semibold transition-colors duration-200 ease-out hover:border-accent md:hidden"
+        className="mt-7 inline-flex items-center gap-2 rounded-control border border-linha bg-surface-raised px-4 py-2.5 text-note font-semibold shadow-card transition-colors duration-150 ease-out hover:border-accent/45 md:hidden"
       >
         <FileText size={15} /> Relatório de horas
       </Link>

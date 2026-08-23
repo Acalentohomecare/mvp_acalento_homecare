@@ -1,15 +1,12 @@
 import type { ReactNode } from "react";
-import { HeartHandshake } from "lucide-react";
+import { Logo } from "../ui";
 
 export function AppHeader({ subtitle, right }: { subtitle: string; right?: ReactNode }) {
   return (
-    <header className="flex items-center justify-between border-b border-linha px-6 py-4">
-      <div className="flex items-center gap-2.5">
-        <HeartHandshake className="text-accent-ink" size={20} strokeWidth={1.75} />
-        <div>
-          <div className="text-title leading-none font-semibold">Acalento Gestão</div>
-          <div className="mt-0.5 text-meta text-ink/50">{subtitle}</div>
-        </div>
+    <header className="flex items-center justify-between gap-4 border-b border-linha bg-surface-nav px-6 py-4">
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <Logo variant="inline" size={30} />
+        <span className="truncate text-meta text-ink/50">{subtitle}</span>
       </div>
       {right}
     </header>

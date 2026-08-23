@@ -4,13 +4,13 @@ import {
   CalendarCheck,
   CalendarDays,
   FileText,
-  HeartHandshake,
   Home,
   LogOut,
   Settings,
   Users,
 } from "lucide-react";
-import { Button } from "../components/ui";
+import { Button, Logo } from "../components/ui";
+import { TAB_INDICATOR_CLASS, sideNavClass, tabNavClass } from "../components/layout/nav";
 import { useAppState } from "../hooks/useAppState";
 import { useSession } from "../hooks/useSession";
 
@@ -43,57 +43,45 @@ export function CompanyLayout() {
 
   return (
     <div className="min-h-screen md:flex">
-      <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-56 md:shrink-0 md:flex-col md:border-r md:border-linha md:px-4 md:py-5">
-        <div className="flex items-center gap-2.5 px-2">
-          <HeartHandshake className="text-accent-ink" size={20} strokeWidth={1.75} />
-          <div className="min-w-0">
-            <div className="text-title leading-none font-semibold">Acalento Gestão</div>
-            <div className="mt-0.5 truncate text-meta text-ink/50">
-              {company?.name ?? "Empresa"}
-            </div>
-          </div>
+      <div className="hidden md:block md:w-60 md:shrink-0 md:border-r md:border-linha md:bg-surface-nav">
+      <aside className="sticky top-0 flex h-screen flex-col px-3.5 py-5">
+        <div className="px-2">
+          <Logo variant="stacked" size={40} />
         </div>
 
-        <nav className="mt-6 flex flex-col gap-1">
+        <p className="mt-5 truncate rounded-control border border-linha bg-surface-raised px-3 py-2 text-meta font-medium text-ink/60">
+          {company?.name ?? "Empresa"}
+        </p>
+
+        <nav className="mt-4 flex flex-col gap-0.5">
           {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `flex items-center gap-2 rounded-[10px] px-3 py-2 text-note font-medium transition-colors duration-200 ease-out ${
-                  isActive ? "bg-ink text-surface" : "text-ink/60 hover:bg-linha/50"
-                }`
-              }
-            >
-              <Icon size={15} /> {label}
+            <NavLink key={to} to={to} end={end} className={({ isActive }) => sideNavClass(isActive)}>
+              <Icon size={16} strokeWidth={1.9} /> {label}
             </NavLink>
           ))}
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto pt-4">
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut size={14} /> Sair
           </Button>
         </div>
       </aside>
+      </div>
 
       <div className="min-w-0 flex-1 pb-20 md:pb-0">
-        <header className="flex items-center justify-between border-b border-linha px-6 py-4 md:hidden">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <HeartHandshake className="shrink-0 text-accent-ink" size={20} strokeWidth={1.75} />
-            <div className="min-w-0">
-              <div className="text-title leading-none font-semibold">Acalento Gestão</div>
-              <div className="mt-0.5 truncate text-meta text-ink/50">
-                {company?.name ?? "Empresa"}
-              </div>
-            </div>
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-linha bg-surface-nav/90 px-5 py-3 backdrop-blur-md md:hidden">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <Logo variant="inline" size={30} />
+            <span className="truncate text-meta text-ink/50">
+              {company?.name ?? "Empresa"}
+            </span>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <Link
               to="/empresa/configuracoes"
               aria-label="Configurações"
-              className="rounded-[10px] p-2 text-ink/55 transition-colors duration-200 ease-out hover:bg-linha/50 hover:text-ink"
+              className="rounded-control p-2 text-ink/55 transition-colors duration-150 ease-out hover:bg-surface-sunken hover:text-ink"
             >
               <Settings size={16} />
             </Link>
@@ -106,20 +94,12 @@ export function CompanyLayout() {
         <Outlet />
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-linha bg-surface-raised md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-linha bg-surface-nav/95 pb-[env(safe-area-inset-bottom)] shadow-raised backdrop-blur-md md:hidden">
         {NAV_ITEMS.filter((item) => item.mobile).map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              `flex flex-1 flex-col items-center gap-1 px-1 py-2.5 text-center text-meta font-medium -tracking-[0.01em] transition-colors duration-200 ease-out ${
-                isActive ? "text-ink" : "text-ink/45"
-              }`
-            }
-          >
+          <NavLink key={to} to={to} end={end} className={({ isActive }) => tabNavClass(isActive)}>
             {({ isActive }) => (
               <>
+                {isActive && <span className={TAB_INDICATOR_CLASS} />}
                 <Icon size={18} strokeWidth={isActive ? 2.2 : 1.75} />
                 {label}
               </>

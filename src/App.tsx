@@ -1,7 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppStateProvider } from "./app/AppStateProvider";
 import { ProtectedRoute } from "./app/ProtectedRoute";
+import { RolagemAoTopo } from "./app/RolagemAoTopo";
 import { SessionProvider } from "./app/SessionProvider";
+import { ToastProvider } from "./components/ui";
 import { useSession } from "./hooks/useSession";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -89,7 +91,13 @@ export default function App() {
     <BrowserRouter>
       <AppStateProvider>
         <SessionProvider>
-          <AppRoutes />
+          {/* O aviso flutuante precisa sobreviver à troca de tela: quem publica um atendimento
+              e é levado de volta para a lista só vê a confirmação se ela não morrer na
+              navegação (DESIGN_SYSTEM.md, seção 8.4). */}
+          <ToastProvider>
+            <RolagemAoTopo />
+            <AppRoutes />
+          </ToastProvider>
         </SessionProvider>
       </AppStateProvider>
     </BrowserRouter>

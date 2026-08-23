@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Download } from "lucide-react";
-import { Button, Input, Select } from "../../components/ui";
+import { Button, Input, Select, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { companyPatients } from "../../services/patients";
@@ -22,9 +22,7 @@ export function ReportsPage() {
   });
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">Carregando…</div>
-    );
+    return <TelaCarregando />;
   }
 
   const rows = buildReport(state, session?.companyId, filters);
@@ -93,7 +91,7 @@ export function ReportsPage() {
         </Select>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-linha bg-linha sm:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-card border border-linha bg-linha sm:grid-cols-4">
         {[
           { label: "Atendimentos", value: String(totals.attendances) },
           { label: "Horas previstas", value: hours(totals.plannedHours) },
@@ -108,7 +106,7 @@ export function ReportsPage() {
       </div>
 
       {rows.length === 0 ? (
-        <p className="mt-5 rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="mt-5 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
           Nenhum atendimento concluído nesse filtro.
         </p>
       ) : (

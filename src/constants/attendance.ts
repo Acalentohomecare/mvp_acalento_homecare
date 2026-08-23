@@ -41,14 +41,20 @@ export const ATTENDANCE_STATUS_LABEL: Record<AttendanceStatus, string> = {
   cancelled: "Cancelado",
 };
 
+/**
+ * Trio de utilidades do `Cracha` por status (docs/DESIGN_SYSTEM.md, seção 3): fundo `-soft`,
+ * texto na cor base, borda na cor base a 25%. Semáforo do produto — âmbar para o que espera
+ * alguém agir, verde para o combinado de pé, azul-clínico para o que acontece agora, ardósia
+ * para o que já é histórico e vermelho para o que caiu.
+ */
 export const ATTENDANCE_STATUS_CLASS: Record<AttendanceStatus, string> = {
-  draft: "bg-ink/70",
-  open: "bg-status-aberto",
-  invited: "bg-status-aberto",
-  applications_received: "bg-status-aberto",
-  confirmed: "bg-status-confirmado",
-  in_progress: "bg-status-andamento",
-  completed: "bg-status-concluido",
-  evaluated: "bg-status-concluido",
-  cancelled: "bg-status-cancelado",
+  draft: "bg-status-rascunho-soft text-status-rascunho border-status-rascunho/25",
+  open: "bg-status-aberto-soft text-status-aberto border-status-aberto/25",
+  invited: "bg-status-aberto-soft text-status-aberto border-status-aberto/25",
+  applications_received: "bg-status-aberto-soft text-status-aberto border-status-aberto/25",
+  confirmed: "bg-status-confirmado-soft text-status-confirmado border-status-confirmado/25",
+  in_progress: "bg-status-andamento-soft text-status-andamento border-status-andamento/25",
+  completed: "bg-status-concluido-soft text-status-concluido border-status-concluido/25",
+  evaluated: "bg-status-concluido-soft text-status-concluido border-status-concluido/25",
+  cancelled: "bg-status-cancelado-soft text-status-cancelado border-status-cancelado/25",
 };

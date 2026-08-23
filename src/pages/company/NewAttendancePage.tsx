@@ -1,9 +1,10 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Copy, Info } from "lucide-react";
-import { Button, Card, Cracha, Input, Select, Textarea } from "../../components/ui";
+import { Aviso, Button, Card, Chip, Cracha, Input, Select, TelaCarregando, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
+import { useToast } from "../../hooks/useToast";
 import { ACTIVITIES } from "../../constants/activities";
 import {
   ATTENDANCE_TYPE_DURATION,
@@ -55,6 +56,7 @@ export function NewAttendancePage() {
   const { session } = useSession();
   const { state, setState } = useAppState();
   const navigate = useNavigate();
+  const { avisar } = useToast();
 
   const [patientId, setPatientId] = useState("");
   const [type, setType] = useState<AttendanceType>("shift12");
@@ -81,11 +83,7 @@ export function NewAttendancePage() {
   const [pPets, setPPets] = useState("nenhum");
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando />;
   }
 
   const company = state.companies.find((c) => c.id === session?.companyId);
@@ -193,6 +191,13 @@ export function NewAttendancePage() {
       ).nextState;
     });
 
+    // A ação leva para outra tela: sem o aviso, quem publica não vê confirmação nenhuma do que
+    // acabou de fazer (DESIGN_SYSTEM.md, seção 8.4).
+    avisar(
+      publish
+        ? "Atendimento publicado. Já aparece para os cuidadores compatíveis."
+        : "Rascunho salvo.",
+    );
     navigate(publish ? "/empresa" : "/empresa/atendimentos");
   };
 
@@ -302,19 +307,9 @@ export function NewAttendancePage() {
         <Field label="Tipo de atendimento">
           <div className="flex flex-wrap gap-1.5">
             {ATTENDANCE_TYPE_ORDER.map((t) => (
-              <button
-                key={t}
-                type="button"
-                aria-pressed={type === t}
-                onClick={() => chooseType(t)}
-                className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
-                  type === t
-                    ? "bg-ink text-surface"
-                    : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
-                }`}
-              >
+              <Chip key={t} selecionado={type === t} onClick={() => chooseType(t)}>
                 {ATTENDANCE_TYPE_LABEL[t]}
-              </button>
+              </Chip>
             ))}
           </div>
         </Field>
@@ -404,7 +399,7 @@ export function NewAttendancePage() {
           onChange={(e) => setValue(e.target.value)}
         />
 
-        {error && <p className="text-note text-status-cancelado">{error}</p>}
+        {error && <Aviso>{error}</Aviso>}
 
         <div className="flex flex-wrap gap-2">
           <Button type="submit" variant="primary" onClick={(e) => submit(e, true)}>

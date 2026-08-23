@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BadgeCheck, Check, Heart, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Input, Select } from "../../components/ui";
+import { Avatar, Button, Card, Cracha, Input, Select, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { CATEGORY_CLASS, CATEGORY_LABEL, SHIFT_LABEL, SHIFT_ORDER } from "../../constants/caregiver";
@@ -27,11 +27,7 @@ export function MatchingPage() {
   const [maxRate, setMaxRate] = useState("");
 
   if (!state) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
-        Carregando…
-      </div>
-    );
+    return <TelaCarregando />;
   }
 
   const attendance = attendanceById(state, attendanceId);
@@ -124,7 +120,7 @@ export function MatchingPage() {
       </p>
 
       {matches.length === 0 ? (
-        <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
+        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink/45">
           Nenhum cuidador compatível com esses critérios.
         </p>
       ) : (
@@ -156,7 +152,7 @@ export function MatchingPage() {
                       <span className="text-meta text-ink/40">Sem média pública</span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-note font-semibold text-ink/70">
-                        <Star size={12} className="fill-accent text-accent" />
+                        <Star size={12} className="fill-rating text-rating" />
                         {formatRating(rating.average)}
                       </span>
                     )}
@@ -167,7 +163,7 @@ export function MatchingPage() {
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">
                     <Link
                       to={`/empresa/cuidadores/${c.id}`}
-                      className="rounded-[10px] border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent"
+                      className="rounded-control border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent"
                     >
                       Ver perfil
                     </Link>
