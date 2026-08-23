@@ -47,8 +47,8 @@ export function CompanyLayout() {
         <div className="flex items-center gap-2.5 px-2">
           <HeartHandshake className="text-accent-ink" size={20} strokeWidth={1.75} />
           <div className="min-w-0">
-            <div className="font-display text-base leading-none font-semibold">Acalento</div>
-            <div className="mt-0.5 truncate text-[11px] text-ink/50">
+            <div className="text-title leading-none font-semibold">Acalento Gestão</div>
+            <div className="mt-0.5 truncate text-meta text-ink/50">
               {company?.name ?? "Empresa"}
             </div>
           </div>
@@ -61,7 +61,7 @@ export function CompanyLayout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-2 rounded-[10px] px-3 py-2 text-[13px] font-medium transition-colors duration-200 ease-out ${
+                `flex items-center gap-2 rounded-[10px] px-3 py-2 text-note font-medium transition-colors duration-200 ease-out ${
                   isActive ? "bg-ink text-surface" : "text-ink/60 hover:bg-linha/50"
                 }`
               }
@@ -83,8 +83,8 @@ export function CompanyLayout() {
           <div className="flex min-w-0 items-center gap-2.5">
             <HeartHandshake className="shrink-0 text-accent-ink" size={20} strokeWidth={1.75} />
             <div className="min-w-0">
-              <div className="font-display text-base leading-none font-semibold">Acalento</div>
-              <div className="mt-0.5 truncate text-[11px] text-ink/50">
+              <div className="text-title leading-none font-semibold">Acalento Gestão</div>
+              <div className="mt-0.5 truncate text-meta text-ink/50">
                 {company?.name ?? "Empresa"}
               </div>
             </div>
@@ -113,7 +113,7 @@ export function CompanyLayout() {
             to={to}
             end={end}
             className={({ isActive }) =>
-              `flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors duration-200 ease-out ${
+              `flex flex-1 flex-col items-center gap-1 px-1 py-2.5 text-center text-meta font-medium -tracking-[0.01em] transition-colors duration-200 ease-out ${
                 isActive ? "text-ink" : "text-ink/45"
               }`
             }

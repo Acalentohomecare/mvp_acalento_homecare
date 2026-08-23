@@ -21,7 +21,7 @@ export function LoginPage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-ink/50">
+      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
         Carregando…
       </div>
     );
@@ -53,7 +53,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center justify-center gap-2.5">
           <HeartHandshake className="text-accent-ink" size={22} strokeWidth={1.75} />
-          <span className="font-display text-xl font-semibold">Acalento</span>
+          <span className="text-display font-semibold">Acalento Gestão</span>
         </div>
 
         <Card>
@@ -73,14 +73,14 @@ export function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {error && <p className="text-xs text-status-cancelado">{error}</p>}
+            {error && <p className="text-note text-status-cancelado">{error}</p>}
             <Button type="submit" variant="primary" block>
               Entrar
             </Button>
           </form>
         </Card>
 
-        <div className="mt-4 text-center text-xs text-ink/40">
+        <div className="mt-4 text-center text-note text-ink/40">
           Ainda não tem conta?{" "}
           <Link to="/cadastro" className="font-semibold text-ink/70 underline">
             Criar cadastro
@@ -88,7 +88,7 @@ export function LoginPage() {
         </div>
 
         <div className="mt-8">
-          <p className="mb-2 text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+          <p className="mb-2 text-body font-semibold text-ink">
             Contas de demonstração
           </p>
           <div className="flex flex-col gap-1.5">
@@ -97,7 +97,7 @@ export function LoginPage() {
                 key={acc.email}
                 type="button"
                 onClick={() => attempt(acc.email, "123456")}
-                className="rounded-[10px] border border-linha bg-surface-raised px-3 py-2 text-left text-xs text-ink/70 transition-colors hover:border-accent"
+                className="rounded-[10px] border border-linha bg-surface-raised px-3 py-2 text-left text-note text-ink/70 transition-colors hover:border-accent"
               >
                 <span className="font-semibold text-ink">{acc.label}</span> — {acc.email}
               </button>

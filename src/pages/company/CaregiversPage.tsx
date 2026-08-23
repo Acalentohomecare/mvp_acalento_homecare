@@ -60,7 +60,7 @@ export function CompanyCaregiversPage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-ink/50">
+      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
         Carregando…
       </div>
     );
@@ -87,8 +87,8 @@ export function CompanyCaregiversPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-7">
-      <h1 className="font-display text-[22px] font-semibold">Cuidadores</h1>
-      <p className="mt-1 text-[12.5px] text-ink/50">
+      <h1 className="text-display font-semibold">Cuidadores</h1>
+      <p className="prosa mt-1 text-body text-ink/50">
         Só quem está no seu quadro aparece na busca e pode ser convidado para um plantão.
       </p>
 
@@ -99,7 +99,7 @@ export function CompanyCaregiversPage() {
             type="button"
             aria-pressed={tab === t.key}
             onClick={() => setTab(t.key)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors duration-200 ease-out ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
               tab === t.key
                 ? "bg-ink text-surface"
                 : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
@@ -108,7 +108,7 @@ export function CompanyCaregiversPage() {
             {t.label}
             {t.count > 0 && (
               <span
-                className={`font-mono text-[10px] ${tab === t.key ? "text-surface/70" : "text-ink/40"}`}
+                className={`font-mono text-meta ${tab === t.key ? "text-surface/70" : "text-ink/40"}`}
               >
                 {t.count}
               </span>
@@ -127,7 +127,7 @@ export function CompanyCaregiversPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Nome, bairro ou especialidade"
-              className="w-full bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink/35"
+              className="w-full bg-transparent text-body text-ink outline-none placeholder:text-ink/35"
             />
           </label>
 
@@ -138,7 +138,7 @@ export function CompanyCaregiversPage() {
                 type="button"
                 aria-pressed={category === f.key}
                 onClick={() => setCategory(f.key)}
-                className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors duration-200 ease-out ${
+                className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
                   category === f.key
                     ? "bg-ink text-surface"
                     : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
@@ -151,7 +151,7 @@ export function CompanyCaregiversPage() {
               type="button"
               aria-pressed={favoritesOnly}
               onClick={() => setFavoritesOnly((v) => !v)}
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors duration-200 ease-out ${
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
                 favoritesOnly
                   ? "bg-ink text-surface"
                   : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
@@ -161,12 +161,12 @@ export function CompanyCaregiversPage() {
             </button>
           </div>
 
-          <p className="mt-5 mb-2.5 text-[11.5px] text-ink/45">
+          <p className="mt-5 mb-2.5 text-note text-ink/45">
             {visible.length} {visible.length === 1 ? "cuidador no quadro" : "cuidadores no quadro"}
           </p>
 
           {visible.length === 0 ? (
-            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-[12.5px] text-ink/45">
+            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
               Nenhum cuidador encontrado com esses critérios.
             </p>
           ) : (
@@ -187,14 +187,14 @@ export function CompanyCaregiversPage() {
 
       {tab === "analise" && (
         <>
-          <p className="mt-5 mb-2.5 text-[11.5px] text-ink/45">
+          <p className="mt-5 mb-2.5 text-note text-ink/45">
             {queue.length === 0
               ? "Nenhum cadastro aguardando conferência."
               : `${queue.length} cadastro(s) aguardando sua conferência.`}
           </p>
 
           {queue.length === 0 ? (
-            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-[12.5px] text-ink/45">
+            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
               Quando um cuidador criar cadastro, ele aparece aqui para conferência.
             </p>
           ) : (
@@ -205,11 +205,11 @@ export function CompanyCaregiversPage() {
                     <div className="min-w-0">
                       <Link
                         to={`/empresa/cuidadores/${c.id}`}
-                        className="text-[13.5px] font-semibold underline-offset-2 hover:underline"
+                        className="text-note font-semibold underline-offset-2 hover:underline"
                       >
                         {c.name}
                       </Link>
-                      <div className="mt-0.5 text-[11.5px] text-ink/50">
+                      <div className="mt-0.5 text-note text-ink/50">
                         {c.councilRegistration ?? "Sem registro de conselho (informal)"} · {c.city}
                       </div>
                     </div>
@@ -248,12 +248,12 @@ export function CompanyCaregiversPage() {
 
       {tab === "inativos" && (
         <>
-          <p className="mt-5 mb-2.5 text-[11.5px] text-ink/45">
+          <p className="mt-5 mb-2.5 text-note text-ink/45">
             Recusados e bloqueados ficam fora da busca e não recebem convites desta empresa.
           </p>
 
           {inactive.length === 0 ? (
-            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-[12.5px] text-ink/45">
+            <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
               Ninguém recusado ou bloqueado.
             </p>
           ) : (
@@ -261,8 +261,8 @@ export function CompanyCaregiversPage() {
               {inactive.map((c) => (
                 <Card key={c.id} className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[13.5px] font-semibold">{c.name}</div>
-                    <div className="mt-0.5 text-[11.5px] text-ink/50">{c.city}</div>
+                    <div className="text-title font-semibold">{c.name}</div>
+                    <div className="mt-0.5 text-note text-ink/50">{c.city}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Cracha

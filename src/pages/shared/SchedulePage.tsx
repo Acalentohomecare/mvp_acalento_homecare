@@ -16,7 +16,7 @@ export function SchedulePage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-sm text-ink/50">Carregando…</div>
+      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">Carregando…</div>
     );
   }
 
@@ -31,10 +31,10 @@ export function SchedulePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-7">
-      <h1 className="font-display text-[22px] font-semibold">
+      <h1 className="text-display font-semibold">
         {isCompany ? "Escala" : "Minha agenda"}
       </h1>
-      <p className="mt-1 text-[12.5px] text-ink/50">
+      <p className="prosa mt-1 text-body text-ink/50">
         {total} {total === 1 ? "atendimento" : "atendimentos"} no período.
       </p>
 
@@ -45,7 +45,7 @@ export function SchedulePage() {
             type="button"
             aria-pressed={range === r}
             onClick={() => setRange(r)}
-            className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors duration-200 ease-out ${
+            className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
               range === r
                 ? "bg-ink text-surface"
                 : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
@@ -63,14 +63,14 @@ export function SchedulePage() {
           return (
             <div key={day.date}>
               <div className="mb-2 flex items-baseline gap-2 border-b border-linha pb-1.5">
-                <span className="font-mono text-[13px] font-semibold">
+                <span className="font-mono text-note font-semibold">
                   {dayNumber}/{month}
                 </span>
-                <span className="text-[11.5px] text-ink/45">{weekday}</span>
+                <span className="text-note text-ink/45">{weekday}</span>
               </div>
 
               {day.items.length === 0 ? (
-                <p className="py-1 text-[12px] text-ink/35">Sem atendimentos.</p>
+                <p className="py-1 text-note text-ink/35">Sem atendimentos.</p>
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {day.items.map((a) => {
@@ -82,12 +82,12 @@ export function SchedulePage() {
                         to={`${base}/${a.id}`}
                         className="flex items-center gap-3 rounded-[10px] border border-linha bg-surface-raised px-3 py-2.5 transition-colors duration-200 ease-out hover:border-accent"
                       >
-                        <span className="font-mono text-[12.5px] text-ink/70">{a.startTime}</span>
+                        <span className="font-mono text-note text-ink/70">{a.startTime}</span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[13px] font-semibold">
+                          <span className="block truncate text-note font-semibold">
                             {patient?.name}
                           </span>
-                          <span className="block truncate text-[11px] text-ink/50">
+                          <span className="block truncate text-meta text-ink/50">
                             {isCompany
                               ? (caregiver?.name ?? "Sem cuidador definido")
                               : `${a.neighborhood} · ${formatCurrency(a.value)}`}

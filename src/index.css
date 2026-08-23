@@ -2,8 +2,8 @@
 
 /*
   Tokens do design system (docs/DESIGN_SYSTEM.md, seções 1 e 2).
-  Cada `--color-*` e `--font-*` abaixo vira automaticamente uma utilidade Tailwind
-  (ex.: --color-accent -> bg-accent / text-accent / border-accent).
+  Cada `--color-*`, `--font-*` e `--text-*` abaixo vira automaticamente uma utilidade Tailwind
+  (ex.: --color-accent -> bg-accent / text-accent; --text-body -> text-body).
 */
 @theme {
   --color-ink: #16241f;
@@ -24,11 +24,78 @@
   --color-status-cancelado: #b24c3a;
   --color-status-bloqueado: #4a2a24;
 
-  --font-display: "Fraunces", serif;
-  --font-sans: "Work Sans", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
+  /*
+    Uma família de interface e uma de dados. A Fraunces foi aposentada: rodava no máximo a 22px,
+    tamanho em que o caráter de uma serifada não se lê, e brigava com o wordmark geométrico da
+    marca. O CLAUDE.md §6 pede uma única família principal — é o que temos agora.
+    A IBM Plex Mono fica porque tem um papel que só ela cumpre: horário de check-in/check-out,
+    horas fechadas, valores e documentos. Número que serve de prova não usa a fonte do texto.
+  */
+  --font-sans:
+    "Work Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    sans-serif;
+  --font-mono:
+    "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", "Cascadia Mono", Menlo, monospace;
+
+  /*
+    Escala por papel, não por pixel. Antes existiam 16 tamanhos arbitrários — seis deles dentro
+    de uma faixa de 3,5px, diferença que o olho não resolve — e nenhum deles carregava
+    line-height: no CSS compilado `text-[12.5px]` saía como `font-size:12.5px` e mais nada, então
+    a entrelinha de quase todo o produto era herdada por acaso. Cada papel abaixo traz o seu
+    próprio line-height e tracking.
+
+    O piso é 12px (--text-meta). Nada menor: o cuidador lê no celular em deslocamento e o cliente
+    lê numa tela grande do outro lado da sala de reunião.
+  */
+  --text-meta: 0.75rem; /* 12px — carimbo de data/hora, contagens, apoio terciário */
+  --text-meta--line-height: 1.4;
+
+  --text-label: 0.8125rem; /* 13px — rótulo de campo, título de seção, botão pequeno */
+  --text-label--line-height: 1.35;
+
+  --text-note: 0.875rem; /* 14px — texto denso dentro de card, lista, botão */
+  --text-note--line-height: 1.5;
+
+  --text-body: 1rem; /* 16px — leitura corrente e todo campo de formulário */
+  --text-body--line-height: 1.55;
+
+  --text-title: 1.125rem; /* 18px — nome de paciente/cuidador, título de card e de modal */
+  --text-title--line-height: 1.35;
+  --text-title--letter-spacing: -0.01em;
+
+  /* 26px no celular, 32px a partir de ~740px: a única voz grande do produto. */
+  --text-display: clamp(1.625rem, 1.35rem + 1.35vw, 2rem);
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.022em;
 }
 
 body {
   @apply bg-surface text-ink font-sans antialiased;
+  /* Base herdável: sem isto, todo texto sem utilidade de tamanho fica sem entrelinha definida. */
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+/* Medida de leitura para texto corrido (bio, observações, estados vazios). */
+.prosa {
+  max-width: 62ch;
+}
+
+/*
+  Superfícies do navegador: seleção, cursor e sublinhado saem com o padrão de fábrica e não
+  pertencem a design system nenhum. Aqui elas passam a usar os tokens do produto.
+*/
+::selection {
+  background-color: color-mix(in oklab, var(--color-accent) 32%, transparent);
+  color: var(--color-ink);
+}
+
+input,
+textarea {
+  caret-color: var(--color-accent);
+}
+
+a {
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: from-font;
 }

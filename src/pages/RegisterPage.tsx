@@ -25,7 +25,7 @@ export function RegisterPage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-ink/50">
+      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
         Carregando…
       </div>
     );
@@ -57,7 +57,7 @@ export function RegisterPage() {
           {step === 1 && (
             <div className="flex flex-col gap-4">
               <div>
-                <p className="mb-2 text-[11.5px] font-semibold text-ink/60">Você é...</p>
+                <p className="mb-2 text-note font-semibold text-ink/60">Você é...</p>
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -79,7 +79,7 @@ export function RegisterPage() {
               </div>
               {accountType === "caregiver" && (
                 <div>
-                  <p className="mb-2 text-[11.5px] font-semibold text-ink/60">Categoria</p>
+                  <p className="mb-2 text-note font-semibold text-ink/60">Categoria</p>
                   <div className="flex flex-wrap gap-2">
                     {CATEGORY_ORDER.map((cat) => (
                       <Button
@@ -102,7 +102,7 @@ export function RegisterPage() {
               >
                 Continuar
               </Button>
-              {notice && <p className="text-xs text-ink/60">{notice}</p>}
+              {notice && <p className="text-note text-ink/60">{notice}</p>}
             </div>
           )}
 
@@ -146,12 +146,12 @@ export function RegisterPage() {
             <div className="flex flex-col gap-4">
               <div className="rounded-[14px] border border-linha p-4 text-center">
                 <Camera size={24} className="mx-auto mb-2 text-ink/50" />
-                <p className="text-[13px] font-semibold">Enviar documento + selfie (simulado)</p>
-                <p className="mt-1 text-[11.5px] text-ink/50">
+                <p className="text-note font-semibold">Enviar documento + selfie (simulado)</p>
+                <p className="prosa mt-1 text-body text-ink/50">
                   Nesta demo, o envio de documentos é simulado — sem upload real.
                 </p>
               </div>
-              <p className="text-[11.5px] text-ink/50">
+              <p className="text-note text-ink/50">
                 Ao continuar, você aceita os Termos de Uso e a Política de Privacidade (simulado).
               </p>
               <Button variant="primary" block onClick={submitCaregiver}>
@@ -161,7 +161,7 @@ export function RegisterPage() {
           )}
         </Card>
 
-        <div className="mt-4 text-center text-xs text-ink/40">
+        <div className="mt-4 text-center text-note text-ink/40">
           <Link to="/login" className="underline">
             Voltar à entrada
           </Link>

@@ -30,7 +30,7 @@ function Section({
 }) {
   return (
     <section className="mt-7">
-      <h2 className="mb-2.5 text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+      <h2 className="mb-2.5 text-body font-semibold text-ink">
         {title}
         {count !== undefined && count > 0 && <span className="ml-1.5 text-ink/30">({count})</span>}
       </h2>
@@ -41,7 +41,7 @@ function Section({
 
 function Empty({ text }: { text: string }) {
   return (
-    <p className="rounded-[14px] border border-dashed border-linha py-6 text-center text-[12.5px] text-ink/45">
+    <p className="rounded-[14px] border border-dashed border-linha py-6 text-center text-body text-ink/45">
       {text}
     </p>
   );
@@ -53,7 +53,7 @@ export function CompanyDashboardPage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-sm text-ink/50">
+      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
         Carregando…
       </div>
     );
@@ -114,12 +114,12 @@ export function CompanyDashboardPage() {
     <div className="mx-auto max-w-2xl px-6 py-7">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-[22px] font-semibold">Início</h1>
-          <p className="mt-1 text-[12.5px] text-ink/50">{company?.name}</p>
+          <h1 className="text-display font-semibold">Início</h1>
+          <p className="prosa mt-1 text-body text-ink/50">{company?.name}</p>
         </div>
         <Link
           to="/empresa/atendimentos/novo"
-          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-[13.5px] font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
+          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-note font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
         >
           <Plus size={15} /> Novo atendimento
         </Link>
@@ -129,10 +129,10 @@ export function CompanyDashboardPage() {
         {numbers.map((n) => (
           <div
             key={n.label}
-            className="bg-surface-raised px-3.5 py-3 last:col-span-2 sm:last:col-span-1"
+            className="flex h-full flex-col justify-between gap-2 bg-surface-raised px-3.5 py-3 last:col-span-2 sm:last:col-span-1"
           >
-            <div className="text-[10px] tracking-wide text-ink/40 uppercase">{n.label}</div>
-            <div className="mt-1 font-mono text-[17px] leading-none">{n.value}</div>
+            <div className="text-meta font-medium tracking-wide text-ink/70 uppercase">{n.label}</div>
+            <div className="mt-1 font-mono text-title leading-none">{n.value}</div>
           </div>
         ))}
       </div>
@@ -145,7 +145,7 @@ export function CompanyDashboardPage() {
             {pendencies.map((p) => (
               <li
                 key={p.id}
-                className="flex items-start gap-2 rounded-[10px] border border-linha bg-surface-raised px-3 py-2.5 text-[12.5px] text-ink/75"
+                className="flex items-start gap-2 rounded-[10px] border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink/75"
               >
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
                 {p.text}
@@ -208,7 +208,7 @@ export function CompanyDashboardPage() {
 
       <Link
         to="/empresa/relatorios"
-        className="mt-7 inline-flex items-center gap-2 rounded-[10px] border border-linha bg-surface-raised px-4 py-2.5 text-[13.5px] font-semibold transition-colors duration-200 ease-out hover:border-accent md:hidden"
+        className="mt-7 inline-flex items-center gap-2 rounded-[10px] border border-linha bg-surface-raised px-4 py-2.5 text-note font-semibold transition-colors duration-200 ease-out hover:border-accent md:hidden"
       >
         <FileText size={15} /> Relatório de horas
       </Link>
@@ -220,8 +220,8 @@ export function CompanyDashboardPage() {
           <ul>
             {activity.map((entry) => (
               <li key={entry.id} className="border-b border-linha py-2.5 last:border-0">
-                <p className="text-[12.5px] text-ink/75">{entry.text}</p>
-                <p className="mt-0.5 font-mono text-[10.5px] text-ink/40">
+                <p className="text-body text-ink/75">{entry.text}</p>
+                <p className="mt-0.5 font-mono text-meta text-ink/40">
                   {new Date(entry.at).toLocaleString("pt-BR")}
                 </p>
               </li>

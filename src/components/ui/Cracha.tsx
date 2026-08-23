@@ -15,7 +15,7 @@ interface CrachaProps {
 export function Cracha({ label, className = "bg-ink", icon }: CrachaProps) {
   return (
     <span
-      className={`relative inline-flex items-center gap-1.5 rounded-full py-1 pr-3 pl-3.5 text-[11px] font-semibold text-white ${className}`}
+      className={`relative inline-flex items-center gap-1.5 rounded-full py-1 pr-3 pl-3.5 text-meta font-semibold text-white ${className}`}
     >
       <span className="absolute top-1/2 left-1.5 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-white/55" />
       <span className="flex items-center gap-1 pl-1.5">

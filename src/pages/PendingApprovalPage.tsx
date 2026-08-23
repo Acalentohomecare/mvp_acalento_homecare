@@ -32,8 +32,8 @@ export function PendingApprovalPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
       <Clock size={32} className={decision ? "text-status-cancelado" : "text-accent"} />
-      <h1 className="mt-3 font-display text-xl font-semibold">{title}</h1>
-      <p className="mt-2 max-w-xs text-sm text-ink/60">
+      <h1 className="mt-3 text-display font-semibold">{title}</h1>
+      <p className="mt-2 prosa text-body text-ink/60">
         {decision
           ? `${decision.companyName}: ${decision.reason ?? "documento não aprovado."}`
           : "As empresas estão conferindo seus documentos. Assim que uma delas aprovar seu cadastro, você passa a receber convites para os plantões."}

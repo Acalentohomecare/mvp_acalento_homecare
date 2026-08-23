@@ -32,8 +32,8 @@ export function AttendanceCard({
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[13.5px] font-semibold">{patientName}</div>
-          <div className="mt-0.5 text-[11.5px] text-ink/50">
+          <div className="text-title font-semibold">{patientName}</div>
+          <div className="mt-0.5 text-note text-ink/50">
             {ATTENDANCE_TYPE_LABEL[attendance.type]} · {attendance.durationHours}h
           </div>
         </div>
@@ -43,7 +43,7 @@ export function AttendanceCard({
         />
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] text-ink/60">
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-note text-ink/60">
         <span className="inline-flex items-center gap-1">
           <CalendarDays size={12} className="text-ink/40" />
           <span className="font-mono">{formatDate(attendance.startDate)}</span>
@@ -59,7 +59,7 @@ export function AttendanceCard({
         <span className="ml-auto font-mono text-ink/70">{formatCurrency(attendance.value)}</span>
       </div>
 
-      <div className="mt-2 inline-flex items-center gap-1 text-[11.5px]">
+      <div className="mt-2 inline-flex items-center gap-1 text-note">
         <UserRound size={12} className="text-ink/40" />
         {caregiverName ? (
           <span className="text-ink/70">{caregiverName}</span>

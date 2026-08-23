@@ -18,7 +18,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-2.5 flex items-center justify-between">
-          <span className="font-display text-[16.5px] font-semibold">{title}</span>
+          <span className="text-title font-semibold">{title}</span>
           <X size={18} className="cursor-pointer" onClick={onClose} />
         </div>
         {children}

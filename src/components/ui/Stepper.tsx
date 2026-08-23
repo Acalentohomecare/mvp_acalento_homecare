@@ -33,8 +33,8 @@ export function Stepper({ steps, currentIndex }: StepperProps) {
         {steps.map((step, i) => (
           <div
             key={step}
-            className={`w-14 text-center text-[9.5px] ${
-              i === currentIndex ? "font-bold text-ink" : "text-ink/50"
+            className={`flex-1 px-1 text-center text-meta ${
+              i === currentIndex ? "font-semibold text-ink" : "text-ink/50"
             }`}
           >
             {step}

@@ -8,11 +8,11 @@ export function Input({ label, id, className = "", ...props }: InputProps) {
   return (
     <label className="block">
       {label && (
-        <span className="mb-1 block text-[11.5px] font-semibold text-ink/60">{label}</span>
+        <span className="mb-1 block text-label font-medium text-ink/70">{label}</span>
       )}
       <input
         id={id}
-        className={`w-full rounded-[10px] border-[1.5px] border-linha bg-surface-raised px-[11px] py-[9px] text-[13.5px] text-ink outline-none transition-colors focus:border-accent disabled:cursor-not-allowed disabled:bg-linha/25 disabled:text-ink/45 ${className}`}
+        className={`w-full rounded-[10px] border-[1.5px] border-linha bg-surface-raised px-[11px] py-[9px] text-body text-ink outline-none transition-colors focus:border-accent disabled:cursor-not-allowed disabled:bg-linha/25 disabled:text-ink/45 ${className}`}
         {...props}
       />
     </label>

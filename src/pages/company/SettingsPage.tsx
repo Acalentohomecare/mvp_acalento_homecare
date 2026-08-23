@@ -19,7 +19,7 @@ export function CompanySettingsPage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-sm text-ink/50">
+      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
         Carregando…
       </div>
     );
@@ -30,18 +30,18 @@ export function CompanySettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-7">
-      <h1 className="font-display text-[22px] font-semibold">Configurações</h1>
-      <p className="mt-1 text-[12.5px] text-ink/50">{company?.name}</p>
+      <h1 className="text-display font-semibold">Configurações</h1>
+      <p className="prosa mt-1 text-body text-ink/50">{company?.name}</p>
 
       <section className="mt-7">
-        <h2 className="mb-2.5 text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+        <h2 className="mb-2.5 text-body font-semibold text-ink">
           Dados da empresa
         </h2>
         <Card>
-          <dl className="flex flex-col gap-2 text-[13px]">
+          <dl className="flex flex-col gap-2 text-note">
             <div className="flex justify-between gap-4">
               <dt className="text-ink/50">CNPJ</dt>
-              <dd className="font-mono text-[12.5px]">{company?.cnpj}</dd>
+              <dd className="font-mono text-note">{company?.cnpj}</dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-ink/50">Cidade</dt>
@@ -49,7 +49,7 @@ export function CompanySettingsPage() {
             </div>
             <div className="flex justify-between gap-4">
               <dt className="text-ink/50">Telefone</dt>
-              <dd className="font-mono text-[12.5px]">{company?.phone}</dd>
+              <dd className="font-mono text-note">{company?.phone}</dd>
             </div>
             <div className="flex min-w-0 justify-between gap-4">
               <dt className="text-ink/50">E-mail</dt>
@@ -60,22 +60,22 @@ export function CompanySettingsPage() {
       </section>
 
       <section className="mt-7">
-        <h2 className="mb-1 text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+        <h2 className="mb-1 text-body font-semibold text-ink">
           Registro de atividade
         </h2>
-        <p className="mb-2.5 text-[12.5px] text-ink/50">
+        <p className="mb-2.5 text-note text-ink/50">
           Toda aprovação, recusa, bloqueio e cancelamento da sua empresa fica registrado (R12).
         </p>
         {log.length === 0 ? (
-          <p className="rounded-[14px] border border-dashed border-linha py-6 text-center text-[12.5px] text-ink/45">
+          <p className="rounded-[14px] border border-dashed border-linha py-6 text-center text-body text-ink/45">
             Nenhum registro ainda.
           </p>
         ) : (
           <ul>
             {log.map((entry) => (
-              <li key={entry.id} className="border-b border-linha py-2.5 text-[12.5px] last:border-0">
+              <li key={entry.id} className="border-b border-linha py-2.5 text-note last:border-0">
                 <span className="font-semibold">{entry.action}</span> — {entry.detail}
-                <div className="mt-0.5 font-mono text-[10.5px] text-ink/45">
+                <div className="mt-0.5 font-mono text-meta text-ink/45">
                   {entry.actor} · {new Date(entry.createdAt).toLocaleString("pt-BR")}
                 </div>
               </li>
@@ -85,12 +85,12 @@ export function CompanySettingsPage() {
       </section>
 
       <section className="mt-7">
-        <h2 className="mb-2.5 text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+        <h2 className="mb-2.5 text-body font-semibold text-ink">
           Demonstração
         </h2>
         <Card>
-          <p className="text-[13.5px] font-semibold">Restaurar dados da demonstração</p>
-          <p className="mt-1 text-[12.5px] text-ink/60">
+          <p className="text-title font-semibold">Restaurar dados da demonstração</p>
+          <p className="mt-1 text-note text-ink/60">
             Apaga tudo o que foi feito durante a apresentação (atendimentos criados, aprovações de
             cuidadores, check-ins, avaliações, mensagens) e devolve o conjunto de dados inicial.
             Você será desconectado para começar do zero.
@@ -103,7 +103,7 @@ export function CompanySettingsPage() {
 
       {resetting && (
         <Modal title="Restaurar dados?" onClose={() => setResetting(false)}>
-          <p className="mb-4 text-[13px] text-ink/70">
+          <p className="mb-4 text-note text-ink/70">
             Todas as ações feitas nesta demonstração serão apagadas e o conjunto de dados inicial
             volta ao lugar. Não dá para desfazer.
           </p>

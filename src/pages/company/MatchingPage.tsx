@@ -28,7 +28,7 @@ export function MatchingPage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-sm text-ink/50">
+      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">
         Carregando…
       </div>
     );
@@ -38,8 +38,8 @@ export function MatchingPage() {
   if (!attendance || attendance.companyId !== session?.companyId) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-10 text-center">
-        <p className="text-[13px] text-ink/60">Atendimento não encontrado.</p>
-        <Link to="/empresa/atendimentos" className="mt-4 inline-block text-[12.5px] underline">
+        <p className="text-note text-ink/60">Atendimento não encontrado.</p>
+        <Link to="/empresa/atendimentos" className="mt-4 inline-block text-note underline">
           Voltar aos atendimentos
         </Link>
       </div>
@@ -56,21 +56,21 @@ export function MatchingPage() {
     <div className="mx-auto max-w-2xl px-6 py-7">
       <Link
         to="/empresa/atendimentos"
-        className="inline-flex items-center gap-1.5 text-[12.5px] text-ink/50 transition-colors hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-note text-ink/50 transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} /> Atendimentos
       </Link>
 
-      <h1 className="mt-3 font-display text-[22px] font-semibold">Cuidadores compatíveis</h1>
-      <p className="mt-1 text-[12.5px] text-ink/50">
+      <h1 className="mt-3 text-display font-semibold">Cuidadores compatíveis</h1>
+      <p className="prosa mt-1 text-body text-ink/50">
         {patient?.name} · {attendance.startDate.split("-").reverse().join("/")} às{" "}
         {attendance.startTime} · {attendance.neighborhood}
       </p>
 
       <Card className="mt-4 flex flex-wrap items-center gap-2.5">
-        <span className="text-[12px] text-ink/60">Perfil exigido pelas atividades:</span>
+        <span className="text-note text-ink/60">Perfil exigido pelas atividades:</span>
         <Cracha label={CATEGORY_LABEL[required]} className={CATEGORY_CLASS[required]} />
-        <span className="text-[11.5px] text-ink/50">
+        <span className="text-note text-ink/50">
           {required === "informal"
             ? "Nenhuma atividade exige formação."
             : "Cuidadores de categoria inferior não aparecem nesta lista."}
@@ -79,8 +79,8 @@ export function MatchingPage() {
 
       <Card className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-[12.5px] font-semibold">Publicação aberta</p>
-          <p className="mt-0.5 text-[11.5px] text-ink/50">
+          <p className="text-note font-semibold">Publicação aberta</p>
+          <p className="mt-0.5 text-note text-ink/50">
             Qualquer cuidador compatível pode se candidatar.
           </p>
         </div>
@@ -119,12 +119,12 @@ export function MatchingPage() {
         />
       </div>
 
-      <p className="mt-5 mb-2.5 text-[11.5px] text-ink/45">
+      <p className="mt-5 mb-2.5 text-note text-ink/45">
         {matches.length} {matches.length === 1 ? "cuidador compatível" : "cuidadores compatíveis"}
       </p>
 
       {matches.length === 0 ? (
-        <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-[12.5px] text-ink/45">
+        <p className="rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
           Nenhum cuidador compatível com esses critérios.
         </p>
       ) : (
@@ -137,37 +137,37 @@ export function MatchingPage() {
                 <Avatar name={c.name} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="text-[14px] font-semibold">{c.name}</span>
+                    <span className="text-title font-semibold">{c.name}</span>
                     {isFavorite(state, session?.companyId, c.id) && (
                       <Heart size={13} className="fill-accent text-accent" aria-label="Favorito" />
                     )}
                     {isVerified(c) && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cat-informal">
+                      <span className="inline-flex items-center gap-1 text-meta font-semibold text-cat-informal">
                         <BadgeCheck size={13} /> Verificado
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-[11.5px] text-ink/50">
+                  <p className="mt-0.5 text-note text-ink/50">
                     {c.neighborhoods.join(", ")} · {c.experienceYears} anos
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Cracha label={CATEGORY_LABEL[c.category]} className={CATEGORY_CLASS[c.category]} />
                     {rating.average === null ? (
-                      <span className="text-[11px] text-ink/40">Sem média pública</span>
+                      <span className="text-meta text-ink/40">Sem média pública</span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-ink/70">
+                      <span className="inline-flex items-center gap-1 text-note font-semibold text-ink/70">
                         <Star size={12} className="fill-accent text-accent" />
                         {formatRating(rating.average)}
                       </span>
                     )}
-                    <span className="font-mono text-[12px] text-ink/70">
+                    <span className="font-mono text-note text-ink/70">
                       {formatCurrency(c.shiftRate)}
                     </span>
                   </div>
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">
                     <Link
                       to={`/empresa/cuidadores/${c.id}`}
-                      className="rounded-[10px] border border-linha px-2.5 py-1.5 text-xs font-semibold transition-colors hover:border-accent"
+                      className="rounded-[10px] border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent"
                     >
                       Ver perfil
                     </Link>

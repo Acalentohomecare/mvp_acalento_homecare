@@ -23,7 +23,7 @@ export function ReportsPage() {
 
   if (!state) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-sm text-ink/50">Carregando…</div>
+      <div className="flex min-h-[60vh] items-center justify-center text-body text-ink/50">Carregando…</div>
     );
   }
 
@@ -54,8 +54,8 @@ export function ReportsPage() {
     <div className="mx-auto max-w-2xl px-6 py-7">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-[22px] font-semibold">Relatório de horas</h1>
-          <p className="mt-1 text-[12.5px] text-ink/50">
+          <h1 className="text-display font-semibold">Relatório de horas</h1>
+          <p className="prosa mt-1 text-body text-ink/50">
             Calculado a partir dos check-ins e check-outs registrados.
           </p>
         </div>
@@ -101,21 +101,21 @@ export function ReportsPage() {
           { label: "Valor estimado", value: formatCurrency(totals.value) },
         ].map((item) => (
           <div key={item.label} className="bg-surface-raised px-3.5 py-3">
-            <div className="text-[10px] tracking-wide text-ink/40 uppercase">{item.label}</div>
-            <div className="mt-1 font-mono text-[15px] leading-none">{item.value}</div>
+            <div className="text-meta font-medium tracking-wide text-ink/70 uppercase">{item.label}</div>
+            <div className="mt-1 font-mono text-body leading-none">{item.value}</div>
           </div>
         ))}
       </div>
 
       {rows.length === 0 ? (
-        <p className="mt-5 rounded-[14px] border border-dashed border-linha py-10 text-center text-[12.5px] text-ink/45">
+        <p className="mt-5 rounded-[14px] border border-dashed border-linha py-10 text-center text-body text-ink/45">
           Nenhum atendimento concluído nesse filtro.
         </p>
       ) : (
         <div className="mt-5 overflow-x-auto">
-          <table className="w-full min-w-[540px] text-left text-[12.5px]">
+          <table className="w-full min-w-[540px] text-left text-note">
             <thead>
-              <tr className="border-b border-linha text-[10.5px] tracking-wide text-ink/40 uppercase">
+              <tr className="border-b border-linha text-meta font-medium tracking-wide text-ink/70 uppercase">
                 <th className="py-2 font-semibold">Data</th>
                 <th className="py-2 font-semibold">Cuidador</th>
                 <th className="py-2 font-semibold">Paciente</th>

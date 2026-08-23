@@ -26,7 +26,7 @@ import type { Shift, Weekday } from "../../types";
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <fieldset>
-      <legend className="mb-1 block text-[11.5px] font-semibold text-ink/60">{label}</legend>
+      <legend className="mb-1 block text-label font-medium text-ink/70">{label}</legend>
       {children}
     </fieldset>
   );
@@ -46,7 +46,7 @@ function ChipToggle({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors duration-200 ease-out ${
+      className={`rounded-full px-3 py-1.5 text-note font-semibold transition-colors duration-200 ease-out ${
         active
           ? "bg-ink text-surface"
           : "border border-linha bg-surface-raised text-ink/60 hover:border-accent"
@@ -83,7 +83,7 @@ export function CaregiverProfilePage() {
 
   if (!state || !caregiver) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-ink/50">
+      <div className="flex min-h-screen items-center justify-center text-body text-ink/50">
         Carregando…
       </div>
     );
@@ -119,14 +119,14 @@ export function CaregiverProfilePage() {
         <div className="flex items-start gap-3.5">
           <Avatar name={caregiver.name} size={56} />
           <div className="min-w-0 flex-1">
-            <h1 className="font-display text-[21px] leading-tight font-semibold">{caregiver.name}</h1>
+            <h1 className="text-display font-semibold">{caregiver.name}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Cracha
                 label={CATEGORY_LABEL[caregiver.category]}
                 className={CATEGORY_CLASS[caregiver.category]}
               />
               {isVerified(caregiver) && (
-                <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-cat-informal">
+                <span className="inline-flex items-center gap-1 text-note font-semibold text-cat-informal">
                   <BadgeCheck size={14} /> Verificado
                 </span>
               )}
@@ -136,23 +136,23 @@ export function CaregiverProfilePage() {
 
         <Card className="mt-4 flex items-center gap-3">
           <Camera size={18} className="shrink-0 text-ink/40" />
-          <p className="text-[11.5px] text-ink/50">
+          <p className="text-note text-ink/50">
             A foto de perfil é simulada nesta demonstração — mostramos suas iniciais.
           </p>
         </Card>
 
         <Card className="mt-3">
-          <p className="text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+          <p className="text-body font-semibold text-ink">
             Empresas que aprovaram seu cadastro
           </p>
           {companies.length === 0 ? (
-            <p className="mt-1.5 text-[12.5px] text-ink/50">
+            <p className="mt-1.5 text-note text-ink/50">
               Nenhuma ainda — só recebe convites quem já foi aprovado no quadro de uma empresa.
             </p>
           ) : (
             <ul className="mt-1.5 flex flex-col gap-1">
               {companies.map((co) => (
-                <li key={co.id} className="text-[12.5px] text-ink/75">
+                <li key={co.id} className="text-body text-ink/75">
                   · {co.name}
                 </li>
               ))}
@@ -160,7 +160,7 @@ export function CaregiverProfilePage() {
           )}
         </Card>
 
-        <p className="mt-4 text-[11.5px] text-ink/45">
+        <p className="mt-4 text-note text-ink/45">
           Categoria e CPF não podem ser alterados por aqui: mudar a categoria exige uma nova
           conferência das empresas que têm você no quadro.
         </p>
@@ -204,7 +204,7 @@ export function CaregiverProfilePage() {
               onChange={(e) => setNeighborhoods(e.target.value)}
               placeholder="Centro, Vila Nova"
             />
-            <p className="mt-1 text-[11px] text-ink/40">Separe por vírgula.</p>
+            <p className="mt-1 text-meta text-ink/40">Separe por vírgula.</p>
           </div>
 
           {needsCouncil && (
@@ -223,7 +223,7 @@ export function CaregiverProfilePage() {
                       className={APPROVAL_STATUS_CLASS[caregiver.councilRegistrationStatus]}
                     />
                   )}
-                  <span className="text-[11px] text-ink/40">
+                  <span className="text-meta text-ink/40">
                     Alterar o registro devolve o cadastro para conferência.
                   </span>
                 </div>
@@ -236,7 +236,7 @@ export function CaregiverProfilePage() {
                   onChange={(e) => setSpecialties(e.target.value)}
                   placeholder="Cuidados pós-cirúrgicos, Curativos complexos"
                 />
-                <p className="mt-1 text-[11px] text-ink/40">Separe por vírgula.</p>
+                <p className="mt-1 text-meta text-ink/40">Separe por vírgula.</p>
               </div>
             </>
           )}
@@ -276,7 +276,7 @@ export function CaregiverProfilePage() {
           <Field label="Atividades que realiza">
             <div className="flex flex-col gap-1.5">
               {allowedActivities(caregiver.category).map((activity) => (
-                <label key={activity.id} className="flex items-center gap-2 text-[13px] text-ink/75">
+                <label key={activity.id} className="flex items-center gap-2 text-body text-ink/75">
                   <input
                     type="checkbox"
                     className="size-4 accent-accent"
@@ -287,7 +287,7 @@ export function CaregiverProfilePage() {
                 </label>
               ))}
             </div>
-            <p className="mt-1.5 text-[11px] text-ink/40">
+            <p className="mt-1.5 text-meta text-ink/40">
               A lista mostra apenas o que a categoria {CATEGORY_LABEL[caregiver.category]} autoriza.
             </p>
           </Field>
@@ -296,7 +296,7 @@ export function CaregiverProfilePage() {
             <Button type="submit" variant="primary">
               Salvar alterações
             </Button>
-            {saved && <span className="text-[12.5px] text-cat-informal">Perfil atualizado.</span>}
+            {saved && <span className="text-note text-cat-informal">Perfil atualizado.</span>}
           </div>
         </form>
       </div>
