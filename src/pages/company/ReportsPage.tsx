@@ -1,10 +1,15 @@
 import { useState } from "react";
-import { Download, SlidersHorizontal } from "lucide-react";
-import { Button, Input, Select, TelaCarregando } from "../../components/ui";
+import { SlidersHorizontal } from "lucide-react";
+import { Input, Select, TelaCarregando } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { companyPatients } from "../../services/patients";
-import { buildReport, reportToCsv, reportTotals, type ReportFilters } from "../../services/reports";
+import {
+  buildReport,
+  caregiverReportSummary,
+  reportTotals,
+  type ReportFilters,
+} from "../../services/reports";
 import { formatCurrency } from "../../utils/format";
 import { PAGE_LIST } from "../../components/layout/page";
 
@@ -15,6 +20,8 @@ function hours(value: number): string {
 function brDate(iso: string): string {
   return iso.split("-").reverse().join("/");
 }
+
+type SummarySort = "attendances" | "plannedHours" | "workedHours" | "value";
 
 export function ReportsPage() {
   const { session } = useSession();
@@ -27,12 +34,15 @@ export function ReportsPage() {
   });
   /* Só governa o celular: a partir de `md` os filtros ficam sempre visíveis. */
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  const [summarySort, setSummarySort] = useState<SummarySort>("workedHours");
 
   if (!state) {
     return <TelaCarregando />;
   }
 
   const rows = buildReport(state, session?.companyId, filters);
+  const caregiverSummary = caregiverReportSummary(rows).sort((a, b) => b[summarySort] - a[summarySort]);
+
   const totals = reportTotals(rows);
   const patients = companyPatients(state, session?.companyId);
   const caregiverIds = [
@@ -46,17 +56,6 @@ export function ReportsPage() {
   const set = (patch: Partial<ReportFilters>) => setFilters((f) => ({ ...f, ...patch }));
   const filtrosAtivos = Object.values(filters).filter(Boolean).length;
 
-  const exportCsv = () => {
-    const blob = new Blob([`﻿${reportToCsv(rows)}`], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "relatorio-horas.csv";
-    link.click();
-    // Revogar no mesmo quadro cancela o download em Firefox e Safari antes de ele começar.
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
-  };
-
   return (
     <div className={PAGE_LIST}>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -66,9 +65,6 @@ export function ReportsPage() {
             Calculado a partir dos check-ins e check-outs registrados.
           </p>
         </div>
-        {/* No celular as duas ações dividem uma linha só, embaixo do título; no desktop
-            "Exportar" volta para a direita do título e "Filtros" desaparece — lá os campos
-            ficam sempre abertos. */}
         <div className="flex w-full gap-2 md:w-auto">
           <button
             type="button"
@@ -84,14 +80,6 @@ export function ReportsPage() {
               </span>
             )}
           </button>
-          <Button
-            variant="primary"
-            className="flex-1 md:flex-none"
-            onClick={exportCsv}
-            disabled={rows.length === 0}
-          >
-            <Download size={15} /> Exportar CSV
-          </Button>
         </div>
       </div>
 
@@ -145,6 +133,80 @@ export function ReportsPage() {
           </div>
         ))}
       </div>
+
+      {caregiverSummary.length > 0 && (
+        <section className="mt-6" aria-labelledby="resumo-cuidadores">
+          <div>
+            <h2 id="resumo-cuidadores" className="text-title">Resumo por cuidador</h2>
+            <p className="mt-0.5 text-meta text-ink-subtle">Clique em um nome para ver seus atendimentos.</p>
+          </div>
+          {filters.caregiverId && (
+            <button
+              type="button"
+              className="mt-2 text-note font-semibold text-accent underline underline-offset-2 hover:text-accent-strong"
+              onClick={() => set({ caregiverId: "" })}
+            >
+              Ver todos os cuidadores
+            </button>
+          )}
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-meta text-ink-subtle">
+            <span>Ordenar por</span>
+            {[
+              ["workedHours", "Horas realizadas"],
+              ["plannedHours", "Horas previstas"],
+              ["value", "Valor"],
+              ["attendances", "Atendimentos"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={summarySort === value}
+                className={`rounded-control border px-2.5 py-1.5 transition-colors ${
+                  summarySort === value
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-linha bg-surface-raised text-ink-muted hover:border-accent/45"
+                }`}
+                onClick={() => setSummarySort(value as SummarySort)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 overflow-x-auto rounded-card border border-linha bg-surface-raised">
+            <table className="w-full min-w-[620px] text-left text-note">
+              <caption className="sr-only">Resumo de horas por cuidador</caption>
+              <thead>
+                <tr className="border-b border-linha text-dado text-ink-muted uppercase">
+                  <th scope="col" className="px-3.5 py-2.5 font-semibold">Cuidador</th>
+                  <th scope="col" className="px-3.5 py-2.5 text-right font-semibold">Atendimentos</th>
+                  <th scope="col" className="px-3.5 py-2.5 text-right font-semibold">Previstas</th>
+                  <th scope="col" className="px-3.5 py-2.5 text-right font-semibold">Realizadas</th>
+                  <th scope="col" className="px-3.5 py-2.5 text-right font-semibold">Valor total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {caregiverSummary.map((summary) => (
+                  <tr key={summary.caregiverId} className="border-b border-linha last:border-0">
+                    <td className="px-3.5 py-2.5">
+                      <button
+                        type="button"
+                        className="font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors hover:decoration-accent/40"
+                        onClick={() => set({ caregiverId: summary.caregiverId })}
+                      >
+                        {summary.caregiverName}
+                      </button>
+                    </td>
+                    <td className="px-3.5 py-2.5 text-right numero">{summary.attendances}</td>
+                    <td className="px-3.5 py-2.5 text-right numero">{hours(summary.plannedHours)}</td>
+                    <td className="px-3.5 py-2.5 text-right numero">{hours(summary.workedHours)}</td>
+                    <td className="px-3.5 py-2.5 text-right numero">{formatCurrency(summary.value)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {rows.length === 0 ? (
         <p className="mt-5 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">

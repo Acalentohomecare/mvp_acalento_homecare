@@ -1,18 +1,18 @@
 import type { AppState, Attendance, Caregiver, Shift } from "../types";
 import { CATEGORY_RANK } from "../constants/activities";
-import { attendanceRequiredCategory } from "./attendances";
 import { caregiverRating } from "./caregivers";
 import { rosterCaregivers } from "./roster";
 
 /**
  * Quem pode ser oferecido para este atendimento:
  * R1 — o cuidador precisa estar aprovado no quadro desta empresa;
- * R2 — atendimento que exige formação nunca lista cuidador de categoria inferior;
+ * R2 — atendimento que exige formação nunca lista cuidador de categoria inferior a
+ * `attendance.requiredCategory` (escolhida por quem publicou);
  * R3 — técnico/superior só entra com o registro no conselho conferido.
  * Ordenação: favoritos, proximidade (bairro), histórico com a empresa, avaliação.
  */
 export function compatibleCaregivers(state: AppState, attendance: Attendance): Caregiver[] {
-  const required = attendanceRequiredCategory(state, attendance.activityIds);
+  const required = attendance.requiredCategory;
 
   const pool = rosterCaregivers(state, attendance.companyId).filter((c) => {
     if (CATEGORY_RANK[c.category] < CATEGORY_RANK[required]) return false;

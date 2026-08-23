@@ -5,7 +5,6 @@ import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL, ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
 import { CATEGORY_LABEL } from "../../constants/caregiver";
-import { attendanceRequiredCategory } from "../../services/attendances";
 import {
   acceptInvitation,
   applyToOpenAttendance,
@@ -187,7 +186,7 @@ export function CaregiverInvitationsPage() {
               <Card key={a.id}>
                 {summary(a)}
                 <p className="mt-2 text-meta text-ink-subtle">
-                  Perfil exigido: {CATEGORY_LABEL[attendanceRequiredCategory(state, a.activityIds)]}
+                  Perfil exigido: {CATEGORY_LABEL[a.requiredCategory]}
                 </p>
               </Card>
             ))}

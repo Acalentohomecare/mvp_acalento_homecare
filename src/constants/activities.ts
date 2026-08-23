@@ -19,27 +19,15 @@ export const ACTIVITIES: Activity[] = [
   { id: "plano_cuidado", name: "Plano de cuidado", minCategory: "superior" },
 ];
 
-/** Hierarquia de formação: uma categoria executa tudo que as anteriores executam. */
+/**
+ * Hierarquia de formação: uma categoria executa tudo que as anteriores executam.
+ *
+ * Só governa o que um cuidador pode listar como atividade própria (`allowedActivities`, usada no
+ * perfil do cuidador) e a comparação de categoria no matching. O perfil necessário de um
+ * atendimento não vem mais daqui — é escolhido por quem publica (`Attendance.requiredCategory`).
+ */
 export const CATEGORY_RANK: Record<Activity["minCategory"], number> = {
   informal: 0,
   tecnico: 1,
   superior: 2,
 };
-
-/**
- * Categoria mínima exigida por um conjunto de atividades (regra central do produto, CLAUDE.md §24).
- *
- * Recebe o catálogo por parâmetro — não só o `ACTIVITIES` fixo — porque uma empresa pode cadastrar
- * atividades próprias (`services/activities.ts`), e a regra precisa valer para elas também.
- */
-export function requiredCategory(
-  activityIds: string[],
-  catalog: Activity[] = ACTIVITIES,
-): Activity["minCategory"] {
-  let maxRank = 0;
-  for (const id of activityIds) {
-    const activity = catalog.find((a) => a.id === id);
-    if (activity) maxRank = Math.max(maxRank, CATEGORY_RANK[activity.minCategory]);
-  }
-  return (Object.keys(CATEGORY_RANK) as Activity["minCategory"][])[maxRank];
-}

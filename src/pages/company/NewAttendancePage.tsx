@@ -12,12 +12,7 @@ import {
   ATTENDANCE_TYPE_LABEL,
   ATTENDANCE_TYPE_ORDER,
 } from "../../constants/attendance";
-import {
-  attendanceRequiredCategory,
-  companyAttendances,
-  createAttendance,
-  todayISO,
-} from "../../services/attendances";
+import { companyAttendances, createAttendance, todayISO } from "../../services/attendances";
 import { allActivities, createCustomActivity } from "../../services/activities";
 import { companyPatients, createPatient, splitAddress } from "../../services/patients";
 import { formatCurrency } from "../../utils/format";
@@ -63,6 +58,7 @@ export function NewAttendancePage() {
   const [recurring, setRecurring] = useState(false);
   const [recurrenceDescription, setRecurrenceDescription] = useState("");
   const [activityIds, setActivityIds] = useState<string[]>([]);
+  const [requiredCategory, setRequiredCategory] = useState<CaregiverCategory | "">("");
   const [value, setValue] = useState("180");
   const [error, setError] = useState("");
 
@@ -96,7 +92,6 @@ export function NewAttendancePage() {
   const isNewPatient = patientId === NEW_PATIENT;
   const selectedPatient = patients.find((p) => p.id === patientId);
   const activities = allActivities(state);
-  const category = attendanceRequiredCategory(state, activityIds);
   const fixedDuration = ATTENDANCE_TYPE_FIXED_DURATION[type];
 
   const addCustomActivity = () => {
@@ -147,6 +142,7 @@ export function NewAttendancePage() {
     setRecurring(source.recurring);
     setRecurrenceDescription(source.recurrenceDescription ?? "");
     setActivityIds(source.activityIds);
+    setRequiredCategory(source.requiredCategory);
     setValue(String(source.value));
   };
 
@@ -157,6 +153,7 @@ export function NewAttendancePage() {
     if (isNewPatient && (!pName.trim() || !pAge)) return setError("Informe nome e idade do paciente.");
     if (!neighborhood.trim() || !street.trim()) return setError("Informe o endereço do atendimento.");
     if (!startDate || !startTime) return setError("Informe data e horário.");
+    if (!requiredCategory) return setError("Escolha o perfil necessário para o atendimento.");
     if (activityIds.length === 0) return setError("Marque pelo menos uma atividade.");
     if (!Number(value)) return setError("Informe o valor oferecido.");
     setError("");
@@ -199,6 +196,7 @@ export function NewAttendancePage() {
           recurring,
           recurrenceDescription: recurrenceDescription.trim() || undefined,
           activityIds,
+          requiredCategory: requiredCategory as CaregiverCategory,
           value: Number(value),
         },
         publish,
@@ -221,15 +219,15 @@ export function NewAttendancePage() {
 
       <h1 className="mt-3 text-display">Novo atendimento</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">
-        As atividades marcadas definem sozinhas o perfil profissional exigido.
+        Escolha o perfil necessário e as atividades que o cuidador vai realizar.
       </p>
 
       {/*
         No desktop o formulário ganha um resumo ao lado. Não é o formulário partido em duas
         colunas — isso quebraria o caminho de preenchimento; é conteúdo derivado, que só existe
-        aqui: o que vai ser publicado, e principalmente o **perfil exigido**, que muda enquanto
-        as atividades são marcadas. Numa apresentação, é a regra agindo à vista de quem assiste,
-        sem ninguém precisar rolar a tela para mostrá-la.
+        aqui: o que vai ser publicado, e principalmente o **perfil necessário**, a decisão que mais
+        pesa no formulário — é ela que decide quem pode ser convidado. Numa apresentação, dá para
+        acompanhar a escolha sem rolar a tela para mostrá-la.
       */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
       <div className="min-w-0">
@@ -332,6 +330,28 @@ export function NewAttendancePage() {
           </div>
         </Field>
 
+        {/*
+          Quem decide o perfil necessário é quem publica — não é mais calculado a partir das
+          atividades marcadas. Por isso mora aqui, junto das outras decisões sobre o atendimento,
+          e não como um resultado abaixo da lista de atividades.
+        */}
+        <Field label="Perfil necessário">
+          <div className="flex flex-wrap gap-1.5">
+            {CATEGORY_ORDER.map((cat) => (
+              <Chip
+                key={cat}
+                selecionado={requiredCategory === cat}
+                onClick={() => setRequiredCategory(cat)}
+              >
+                {CATEGORY_LABEL[cat]}
+              </Chip>
+            ))}
+          </div>
+          <p className="mt-1.5 text-meta text-ink-subtle">
+            Só cuidadores dessa categoria ou acima aparecem para convite ou candidatura.
+          </p>
+        </Field>
+
         <div className="grid grid-cols-2 gap-3">
           <Input label="Bairro" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} />
           <Input label="Número" value={number} onChange={(e) => setNumber(e.target.value)} />
@@ -378,7 +398,7 @@ export function NewAttendancePage() {
           )}
         </div>
 
-        <Field label="Atividades exigidas">
+        <Field label="Atividades do atendimento">
           {/* Onze itens em coluna única viram rolagem à toa quando há largura de sobra. */}
           <div className="flex flex-col gap-1.5 lg:grid lg:grid-cols-2 lg:gap-x-6">
             {activities.map((activity) => (
@@ -459,18 +479,6 @@ export function NewAttendancePage() {
           )}
         </Field>
 
-        <Card className="flex flex-wrap items-center gap-2.5 lg:hidden">
-          <span className="text-note text-ink-muted">Perfil necessário:</span>
-          <Cracha label={CATEGORY_LABEL[category]} className={CATEGORY_CLASS[category]} />
-          <span className="text-note text-ink-subtle">
-            {activityIds.length === 0
-              ? "Marque as atividades para o sistema definir o perfil."
-              : category === "informal"
-                ? "Nenhuma atividade exige formação — cuidador informal pode atender."
-                : `As atividades marcadas exigem formação de nível ${CATEGORY_LABEL[category].toLowerCase()}.`}
-          </span>
-        </Card>
-
         <Input
           label="Valor oferecido (R$)"
           type="number"
@@ -538,21 +546,23 @@ export function NewAttendancePage() {
             </Resumo>
           </dl>
 
-          {/* A regra agindo. É o que esta tela existe para mostrar, então fica destacada do resto
-              do resumo por uma divisória, não por mais uma caixa. */}
+          {/* A decisão que mais pesa no formulário — quem pode ser convidado depende dela. Fica
+              destacada do resto do resumo por uma divisória, não por mais uma caixa. */}
           <div className="mt-3.5 border-t border-linha pt-3.5">
             <p className="text-heading text-ink">
               Perfil necessário
             </p>
             <div className="mt-2">
-              <Cracha label={CATEGORY_LABEL[category]} className={CATEGORY_CLASS[category]} />
+              {requiredCategory ? (
+                <Cracha label={CATEGORY_LABEL[requiredCategory]} className={CATEGORY_CLASS[requiredCategory]} />
+              ) : (
+                <span className="text-note text-ink-subtle">Não escolhido</span>
+              )}
             </div>
             <p className="mt-2 text-note text-ink-muted">
-              {activityIds.length === 0
-                ? "Marque as atividades para o sistema definir o perfil."
-                : category === "informal"
-                  ? "Nenhuma atividade exige formação — cuidador informal pode atender."
-                  : `As atividades marcadas exigem formação de nível ${CATEGORY_LABEL[category].toLowerCase()}.`}
+              {requiredCategory
+                ? "Só cuidadores dessa categoria ou acima aparecem para convite ou candidatura."
+                : "Escolha o perfil necessário no formulário."}
             </p>
           </div>
         </Card>

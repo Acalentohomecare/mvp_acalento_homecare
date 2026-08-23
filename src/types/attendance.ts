@@ -1,4 +1,4 @@
-import type { AttendanceStatus, AttendanceType } from "./enums";
+import type { AttendanceStatus, AttendanceType, CaregiverCategory } from "./enums";
 
 export interface AttendanceCancellation {
   by: "company" | "caregiver";
@@ -21,6 +21,8 @@ export interface Attendance {
   recurring: boolean;
   recurrenceDescription?: string;
   activityIds: string[];
+  /** Escolhido por quem publica o atendimento — não é derivado das atividades marcadas. */
+  requiredCategory: CaregiverCategory;
   value: number;
   status: AttendanceStatus;
   openApplications: boolean;

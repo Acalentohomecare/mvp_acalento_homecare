@@ -5,7 +5,6 @@ import { ACTION_LINK_CLASS, Avatar, Button, Card, Cracha, Input, Select, TelaCar
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { CATEGORY_CLASS, CATEGORY_LABEL, SHIFT_LABEL, SHIFT_ORDER } from "../../constants/caregiver";
-import { attendanceRequiredCategory } from "../../services/attendances";
 import { caregiverRating, isFavorite, isVerified } from "../../services/caregivers";
 import { compatibleCaregivers, filterMatches } from "../../services/matching";
 import {
@@ -44,7 +43,7 @@ export function MatchingPage() {
   }
 
   const patient = state.patients.find((p) => p.id === attendance.patientId);
-  const required = attendanceRequiredCategory(state, attendance.activityIds);
+  const required = attendance.requiredCategory;
   const invitations = attendanceInvitations(state, attendance.id);
   const invitedIds = invitations.filter((i) => i.status !== "rejected").map((i) => i.caregiverId);
   const matches = filterMatches(compatibleCaregivers(state, attendance), { query, shift, maxRate });
@@ -60,11 +59,11 @@ export function MatchingPage() {
       </p>
 
       <Card className="mt-4 flex flex-wrap items-center gap-2.5">
-        <span className="text-note text-ink-muted">Perfil exigido pelas atividades:</span>
+        <span className="text-note text-ink-muted">Perfil necessário:</span>
         <Cracha label={CATEGORY_LABEL[required]} className={CATEGORY_CLASS[required]} />
         <span className="text-note text-ink-subtle">
           {required === "informal"
-            ? "Nenhuma atividade exige formação."
+            ? "Definido por quem publicou o atendimento."
             : "Cuidadores de categoria inferior não aparecem nesta lista."}
         </span>
       </Card>

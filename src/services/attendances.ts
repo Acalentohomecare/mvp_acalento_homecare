@@ -6,9 +6,6 @@ import type {
   CaregiverCategory,
   Patient,
 } from "../types";
-import { requiredCategory } from "../constants/activities";
-import { allActivities } from "./activities";
-
 /** Tolerância antes de considerar o check-in atrasado (mesma regra da Etapa 12). */
 export const CHECKIN_TOLERANCE_MINUTES = 15;
 
@@ -147,11 +144,6 @@ export function recentActivity(
   return entries.sort((x, y) => y.at.localeCompare(x.at)).slice(0, limit);
 }
 
-/** A categoria exigida vem só das atividades marcadas — é a regra central do produto (R2). */
-export function attendanceRequiredCategory(state: AppState, activityIds: string[]): CaregiverCategory {
-  return requiredCategory(activityIds, allActivities(state));
-}
-
 export interface NewAttendanceInput {
   companyId: string;
   patientId: string;
@@ -165,6 +157,8 @@ export interface NewAttendanceInput {
   recurring: boolean;
   recurrenceDescription?: string;
   activityIds: string[];
+  /** Escolhido por quem publica — ver a nota em `Attendance.requiredCategory`. */
+  requiredCategory: CaregiverCategory;
   value: number;
 }
 
@@ -187,6 +181,7 @@ export function createAttendance(
     recurring: input.recurring,
     recurrenceDescription: input.recurring ? input.recurrenceDescription : undefined,
     activityIds: input.activityIds,
+    requiredCategory: input.requiredCategory,
     value: input.value,
     status: publish ? "open" : "draft",
     // A escolha entre convite direto e publicação aberta acontece na Etapa 9.

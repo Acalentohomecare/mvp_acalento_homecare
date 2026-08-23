@@ -10,6 +10,7 @@ export interface ReportFilters {
 export interface ReportRow {
   attendanceId: string;
   date: string;
+  caregiverId: string;
   caregiverName: string;
   patientName: string;
   plannedHours: number;
@@ -44,6 +45,7 @@ export function buildReport(
     .map((a) => ({
       attendanceId: a.id,
       date: a.startDate,
+      caregiverId: a.confirmedCaregiverId ?? "",
       caregiverName:
         state.caregivers.find((c) => c.id === a.confirmedCaregiverId)?.name ?? "—",
       patientName: state.patients.find((p) => p.id === a.patientId)?.name ?? "—",
@@ -54,6 +56,15 @@ export function buildReport(
 }
 
 export interface ReportTotals {
+  attendances: number;
+  plannedHours: number;
+  workedHours: number;
+  value: number;
+}
+
+export interface CaregiverReportSummary {
+  caregiverId: string;
+  caregiverName: string;
   attendances: number;
   plannedHours: number;
   workedHours: number;
@@ -72,15 +83,27 @@ export function reportTotals(rows: ReportRow[]): ReportTotals {
   );
 }
 
-export function reportToCsv(rows: ReportRow[]): string {
-  const header = ["Data", "Cuidador", "Paciente", "Horas previstas", "Horas realizadas", "Valor"];
-  const body = rows.map((r) => [
-    r.date,
-    r.caregiverName,
-    r.patientName,
-    r.plannedHours.toFixed(2).replace(".", ","),
-    r.workedHours.toFixed(2).replace(".", ","),
-    r.value.toFixed(2).replace(".", ","),
-  ]);
-  return [header, ...body].map((line) => line.map((cell) => `"${cell}"`).join(";")).join("\n");
+export function caregiverReportSummary(rows: ReportRow[]): CaregiverReportSummary[] {
+  const summaries = new Map<string, CaregiverReportSummary>();
+
+  rows.forEach((row) => {
+    const current = summaries.get(row.caregiverId) ?? {
+      caregiverId: row.caregiverId,
+      caregiverName: row.caregiverName,
+      attendances: 0,
+      plannedHours: 0,
+      workedHours: 0,
+      value: 0,
+    };
+
+    summaries.set(row.caregiverName, {
+      ...current,
+      attendances: current.attendances + 1,
+      plannedHours: current.plannedHours + row.plannedHours,
+      workedHours: current.workedHours + row.workedHours,
+      value: current.value + row.value,
+    });
+  });
+
+  return [...summaries.values()];
 }
