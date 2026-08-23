@@ -2,40 +2,86 @@
 
 Demo para apresentações comerciais e demonstrações para empresas de Home Care.
 
+> Esta aplicação é uma **demo frontend**. Não existe backend, banco de dados ou autenticação real.
+> Todos os dados são fictícios.
+
 ## O que é
 
-MVP de demonstração de uma plataforma de conexão em Home Care (empresas de home care ↔
-cuidadores informais e profissionais técnicos/superior), construído como um artifact React
-single-file, sem backend real.
+Demonstração de uma plataforma de conexão em Home Care: empresas de home care ↔ cuidadores
+informais e profissionais (técnico/superior). Toda a operação é simulada no navegador.
 
-## Estrutura
+## Perfis
+
+A demo tem **dois perfis**: **Empresa** e **Cuidador**. Não existe perfil de administrador de
+plataforma — quem confere documentos e aprova o cuidador que vai assumir o plantão é a própria
+empresa, no seu quadro (`src/services/roster.ts`).
+
+O status de aprovação é **por empresa**: o mesmo cuidador pode estar aprovado em uma e em análise
+em outra.
+
+## Stack
+
+React 19 · TypeScript · Vite · Tailwind CSS · React Router · Lucide.
+
+## Instalação
+
+```bash
+npm install
+npm start        # vite dev server
+npm run build    # tsc -b && vite build
+npm run lint     # oxlint
+```
+
+## Contas de demonstração
+
+| Perfil   | E-mail              | Senha  |
+| -------- | ------------------- | ------ |
+| Empresa  | `empresa@demo.com`  | 123456 |
+| Cuidador | `cuidador@demo.com` | 123456 |
+
+Contas extras de cuidador (`beatriz@`, `marcos@`, `juliana@`, `fernando@`, `debora@demo.com`) e
+uma segunda empresa (`empresa2@demo.com`) existem para explorar categorias e quadros diferentes.
+
+## Arquitetura frontend
 
 ```
-mvp_acalento_homecare/
-├── README.md
-├── app_acalento_homecare.jsx          — app completo da demo (Etapas 3–19)
-├── componentes_base_design_system.jsx — showcase dos componentes-base (Etapa 2)
-└── docs/
-    ├── IMPLEMENTATION_PLAN.md — plano oficial de execução (todas as etapas, regras, decisões)
-    ├── DESIGN_SYSTEM.md       — paleta, tipografia, layout, elemento de assinatura
-    └── DEMO_GUIDE.md          — roteiro de apresentação e checklist de validação (R1–R12)
+src/
+├── app/          — providers de estado e sessão, guarda de rotas
+├── components/   — ui/ (design system), layout/, shared/
+├── pages/        — telas por perfil (company/, caregiver/, shared/)
+├── layouts/      — casca de navegação de cada perfil
+├── services/     — regras de negócio simuladas (roster, matching, invitations, …)
+├── mocks/        — dataset inicial da demonstração
+├── types/        — domínio e enums
+├── hooks/ utils/ constants/
 ```
 
-## Como usar
+As telas não sabem de onde vêm os dados: falam com os serviços, que hoje operam sobre um estado
+em memória persistido no `localStorage` e amanhã podem virar uma `ApiService`.
 
-**Estado atual (ver `docs/PROJECT_AUDIT.md`):** este repositório ainda não é um projeto npm
-executável. Os arquivos `.jsx` (`app_acalento_homecare.jsx`, `componentes_base_design_system.jsx`)
-foram construídos como artifacts React de arquivo único para o ambiente de artifacts do Claude.ai,
-e não rodam com `npm install` / `npm run dev` como o `CLAUDE.md` deste projeto exige. Eles servem
-hoje como **protótipo de referência** (lógica de negócio, UX e fluxos já validados) para a
-reimplementação em Vite + React + TypeScript + Tailwind, prevista como **Etapa 0** em
-`docs/IMPLEMENTATION_PLAN.md`.
+## Mocks e persistência
 
-Enquanto a Etapa 0 não é feita, a forma de "usar" o projeto é abrir `app_acalento_homecare.jsx`
-no ambiente de artifacts do Claude.ai e seguir o roteiro em `docs/DEMO_GUIDE.md`.
+O dataset inicial vive em `src/mocks/` (empresas, cuidadores, vínculos de quadro, pacientes,
+atendimentos, convites, candidaturas, avaliações, notificações, mensagens, auditoria).
+
+`src/services/storage.ts` é o **único** módulo que conhece o `localStorage`: guarda o estado da
+demo (`acalento:app-state:v2`) e a sessão simulada. Não é banco de produção.
+
+## Reset da demo
+
+**Empresa → Configurações → Restaurar dados da demonstração.** Pede confirmação, apaga tudo o que
+foi feito na apresentação, restaura o dataset inicial e desconecta.
+
+## Limitações
+
+Sem backend, banco, autenticação real, push, WebSocket, GPS, pagamentos ou integrações externas.
+Upload de documentos, foto de perfil e localização de check-in são simulados.
 
 ## Origem
 
 Baseado no documento de produto `MVP_Home_Care.docx` (Plataforma de Conexão em Home Care —
-MVP v1.0, agosto de 2026). Ver `docs/IMPLEMENTATION_PLAN.md` para a análise completa e o log
-de decisões de cada revisão do plano.
+MVP v1.0). Ver `docs/IMPLEMENTATION_PLAN.md` para a análise completa e o log de decisões.
+
+Os arquivos `app_acalento_homecare.jsx` e `componentes_base_design_system.jsx` na raiz são o
+**protótipo original** em artifact single-file, mantidos apenas como referência histórica — não
+fazem parte do build e não refletem o modelo atual.

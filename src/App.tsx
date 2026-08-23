@@ -19,17 +19,16 @@ import { MatchingPage } from "./pages/company/MatchingPage";
 import { ApplicationsPage } from "./pages/company/ApplicationsPage";
 import { CompanyCaregiversPage } from "./pages/company/CaregiversPage";
 import { CompanyCaregiverProfilePage } from "./pages/company/CaregiverProfilePage";
+import { CompanySettingsPage } from "./pages/company/SettingsPage";
 import { CaregiverDashboardPage } from "./pages/caregiver/DashboardPage";
 import { CaregiverProfilePage } from "./pages/caregiver/ProfilePage";
 import { CaregiverInvitationsPage } from "./pages/caregiver/InvitationsPage";
-import { AdminApprovalsPage } from "./pages/admin/ApprovalsPage";
 
 function IndexRedirect() {
   const { session } = useSession();
   if (!session) return <Navigate to="/login" replace />;
   if (session.role === "company") return <Navigate to="/empresa" replace />;
-  if (session.role === "caregiver") return <Navigate to="/cuidador" replace />;
-  return <Navigate to="/admin" replace />;
+  return <Navigate to="/cuidador" replace />;
 }
 
 function AppRoutes() {
@@ -62,6 +61,7 @@ function AppRoutes() {
         <Route path="/empresa/agenda" element={<SchedulePage />} />
         <Route path="/empresa/relatorios" element={<ReportsPage />} />
         <Route path="/empresa/notificacoes" element={<NotificationsPage />} />
+        <Route path="/empresa/configuracoes" element={<CompanySettingsPage />} />
         <Route path="/empresa/cuidadores" element={<CompanyCaregiversPage />} />
         <Route path="/empresa/cuidadores/:caregiverId" element={<CompanyCaregiverProfilePage />} />
       </Route>
@@ -79,14 +79,6 @@ function AppRoutes() {
         <Route path="/cuidador/notificacoes" element={<NotificationsPage />} />
         <Route path="/cuidador/atendimentos/:attendanceId" element={<AttendanceDetailPage />} />
       </Route>
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminApprovalsPage />
-          </ProtectedRoute>
-        }
-      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

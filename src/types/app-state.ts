@@ -10,6 +10,7 @@ import type { Invitation } from "./invitation";
 import type { Message } from "./message";
 import type { Notification } from "./notification";
 import type { Patient } from "./patient";
+import type { CaregiverLink } from "./roster";
 import type { AttendanceRecord } from "./record";
 import type { User } from "./user";
 
@@ -18,6 +19,8 @@ export interface AppState {
   users: User[];
   companies: Company[];
   caregivers: Caregiver[];
+  /** Quem cada empresa aprovou para o seu quadro (R1). */
+  caregiverLinks: CaregiverLink[];
   patients: Patient[];
   attendances: Attendance[];
   invitations: Invitation[];

@@ -5,7 +5,6 @@ import { AttendanceCard } from "../../components/shared/AttendanceCard";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
-  canPublishAttendance,
   companyAttendances,
   isAwaitingCaregiver,
 } from "../../services/attendances";
@@ -84,14 +83,12 @@ export function CompanyAttendancesPage() {
             Todo o histórico da {company?.name ?? "empresa"}.
           </p>
         </div>
-        {canPublishAttendance(company) && (
-          <Link
-            to="/empresa/atendimentos/novo"
-            className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-[13.5px] font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
-          >
-            <Plus size={15} /> Novo atendimento
-          </Link>
-        )}
+        <Link
+          to="/empresa/atendimentos/novo"
+          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-[13.5px] font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
+        >
+          <Plus size={15} /> Novo atendimento
+        </Link>
       </div>
 
       <div className="mt-5 flex flex-wrap gap-1.5">

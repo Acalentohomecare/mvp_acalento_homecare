@@ -18,11 +18,10 @@ export interface Caregiver {
   councilRegistrationStatus?: ApprovalStatus;
   /** Só se aplica a categoria "tecnico" ou "superior" (ex.: "Cuidados pós-cirúrgicos"). */
   specialties?: string[];
-  approvalStatus: ApprovalStatus;
-  rejectionReason?: string;
   activityIds: string[];
   availability: CaregiverAvailability;
   shiftRate: number;
+  /** Documento e selfie já conferidos por alguma empresa — base do selo "Verificado". */
   verified: boolean;
   bio: string;
   experienceYears: number;

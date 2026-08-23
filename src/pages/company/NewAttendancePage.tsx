@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Copy, Info } from "lucide-react";
 import { Button, Card, Cracha, Input, Select, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
@@ -14,7 +14,6 @@ import {
 import { CATEGORY_CLASS, CATEGORY_LABEL } from "../../constants/caregiver";
 import {
   attendanceRequiredCategory,
-  canPublishAttendance,
   companyAttendances,
   createAttendance,
   todayISO,
@@ -90,9 +89,6 @@ export function NewAttendancePage() {
   }
 
   const company = state.companies.find((c) => c.id === session?.companyId);
-
-  // R11: empresa suspensa mantém o histórico, mas não chega a esta tela.
-  if (!canPublishAttendance(company)) return <Navigate to="/empresa" replace />;
 
   const patients = companyPatients(state, session?.companyId);
   const previous = companyAttendances(state, session?.companyId)

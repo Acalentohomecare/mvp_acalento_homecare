@@ -7,6 +7,13 @@
 > As correções de status já aplicadas ao plano estão na seção 7; a próxima etapa recomendada está
 > na seção 8.
 
+> **Documento histórico.** Esta auditoria descreve o protótipo em artifact single-file
+> (`app_acalento_homecare.jsx`), anterior à reimplementação em `src/`. Onde ela cita "quatro
+> perfis" e "área de administração", isso já não vale: a Revisão 5 do `IMPLEMENTATION_PLAN.md`
+> removeu o perfil de Administrador — a aprovação do cuidador que vai assumir o plantão passou a
+> ser responsabilidade da Empresa, com quadro próprio por empresa. O texto abaixo fica preservado
+> como registro do que foi auditado na época.
+
 ---
 
 ## 1. Resumo executivo

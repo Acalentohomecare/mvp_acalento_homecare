@@ -26,15 +26,16 @@ detalhadas na seção 6 (Log de Decisões). A partir daqui, este documento refle
 
 ### 1.1 Perfis de usuário (conforme o documento)
 
-Quatro perfis. Os três primeiros usam o aplicativo (mobile first); o último usa uma área de
-administração simples.
+Três perfis, todos dentro do aplicativo (mobile first; o perfil da empresa também é bem resolvido
+em desktop). **Não existe perfil de administrador de plataforma:** a conferência de documentos e a
+aprovação do cuidador que vai assumir o plantão são responsabilidade da Empresa, e o status de
+aprovação é por empresa (cada uma mantém o seu quadro).
 
 | Perfil | Quem é | O que faz |
 |---|---|---|
-| **Empresa (gestor)** | Dono/coordenador da empresa de home care | Cadastra a empresa, publica atendimentos, escolhe o cuidador, acompanha a escala, fecha as horas do período. |
+| **Empresa (gestor)** | Dono/coordenador da empresa de home care | Cadastra a empresa, confere documentos e aprova/recusa/bloqueia cuidadores no seu quadro, publica atendimentos, escolhe o cuidador, acompanha a escala, fecha as horas do período. |
 | **Cuidador informal** | Pessoa sem formação técnica/superior | Cria perfil, envia documentos, informa disponibilidade e região, recebe convites, aceita plantões, registra o atendimento. |
 | **Cuidador com formação** (técnico ou nível superior) | Técnico de enfermagem, enfermeiro, fisioterapeuta, fonoaudiólogo, nutricionista, terapeuta ocupacional | Mesmo fluxo do cuidador informal + cadastro do registro no conselho de classe e especialidades. |
-| **Administrador** | Time da própria plataforma | Confere documentos, aprova/recusa cadastros, bloqueia em caso de problema, acompanha números de uso. |
 
 **Correção importante em relação à Revisão 1:** não existe perfil "Paciente/Família" nesta primeira
 versão — o paciente é apenas um conjunto de informações dentro do atendimento (idade, mobilidade,
@@ -81,10 +82,10 @@ candidatar — o sistema aplica isso sozinho, sem a empresa precisar lembrar.
     de antecedência fica marcado no histórico das duas partes.
 
 Comunicação e avisos (mensagens ligadas a um atendimento específico + notificações de convite,
-confirmação, cancelamento, lembrete, falta de check-in) e a fila de aprovação de cadastros pelo
-Administrador correm em paralelo a esse fluxo central.
+confirmação, cancelamento, lembrete, falta de check-in) e a fila de aprovação de cadastros pela
+própria Empresa correm em paralelo a esse fluxo central.
 
-### 1.4 Telas (lista oficial do documento, seção 7 — 17 telas do app + área de administração)
+### 1.4 Telas (lista oficial do documento, seção 7 — 17 telas do app)
 
 | Nº | Tela | Para que serve |
 |---|---|---|
@@ -105,15 +106,15 @@ Administrador correm em paralelo a esse fluxo central.
 | 15 | Avaliação | Nota e comentário ao final. |
 | 16 | Relatório de horas | Fechar período e exportar. |
 | 17 | Perfil e configurações | Editar dados, disponibilidade, avisos. |
-| — | Área de administração | Fila de aprovação, bloqueio, números básicos de uso (é para computador, uso interno). |
+| — | Quadro de cuidadores (dentro da tela 06, no perfil da Empresa) | Fila de cadastros em análise, aprovar/recusar/bloquear, inativos. |
 
 ### 1.5 Regras de negócio (R1–R12, direto do documento — substituem as regras genéricas da Rev. 1)
 
 | Nº | Regra |
 |---|---|
-| R1 | Cuidador com cadastro não aprovado não recebe convite e não aparece em nenhuma busca. |
+| R1 | Cuidador não aprovado **pela empresa** não recebe convite dela e não aparece na busca dela. O status de aprovação é por empresa — cada uma mantém o seu quadro; quem não foi aprovado por ninguém nem entra nas telas internas. |
 | R2 | Atendimento que exige formação nunca é oferecido a cuidador informal. |
-| R3 | Profissional técnico/superior só é considerado apto após conferência do registro no conselho de classe. |
+| R3 | Profissional técnico/superior só é considerado apto após conferência do registro no conselho de classe — conferência feita pela empresa, junto com a aprovação do cadastro. |
 | R4 | Um cuidador não pode aceitar dois atendimentos com horários que se sobrepõem. |
 | R5 | O endereço completo do paciente só é liberado após a confirmação do cuidador escolhido. |
 | R6 | O check-out só é permitido depois do check-in do mesmo atendimento. |
@@ -121,8 +122,8 @@ Administrador correm em paralelo a esse fluxo central.
 | R8 | Cancelamento com menos de 12h de antecedência fica marcado no histórico das duas partes. |
 | R9 | A avaliação só pode ser feita depois do atendimento concluído. |
 | R10 | A média de avaliação só aparece no perfil a partir da 3ª avaliação recebida. |
-| R11 | Empresa com cadastro suspenso não publica novos atendimentos, mas mantém acesso ao histórico. |
-| R12 | Todo cancelamento, bloqueio e alteração de cadastro fica registrado com data, hora e responsável. |
+| R11 | ~~Empresa com cadastro suspenso não publica novos atendimentos.~~ **Removida (Revisão 5):** dependia de um administrador de plataforma, papel que não existe no modelo do documento. |
+| R12 | Todo cancelamento, bloqueio e alteração de cadastro fica registrado com data, hora e responsável (visível em Empresa → Configurações → Registro de atividade). |
 
 ### 1.6 Dados mockados necessários (atualizado)
 
@@ -132,7 +133,8 @@ documentos simulados, disponibilidade por dia/turno, valor pretendido, selo veri
 da empresa), Atendimentos (tipo, endereço, data/horário, repetição, atividades exigidas, infos do
 paciente, valor, status no ciclo de vida), Convites, Candidaturas, Agendamentos/Escala, Check-
 ins/Check-outs, Registros de atendimento (tarefas, observações, fotos simuladas), Avaliações,
-Conversas/Mensagens, Notificações, Fila de aprovação (Administrador).
+Conversas/Mensagens, Notificações, Vínculos de quadro (empresa ↔ cuidador, com status de aprovação
+e motivo da recusa).
 
 ### 1.7 Componentes reutilizáveis
 
@@ -145,7 +147,7 @@ de cadastro em etapas, Modal/Drawer, Calendário/Agenda, Chat vinculado a atendi
 
 ```
 Dados mockados
-  → Cadastro/Autenticação simulada (Empresa e Cuidador) → Aprovação (Admin)
+  → Cadastro/Autenticação simulada (Empresa e Cuidador) → Aprovação no quadro (Empresa)
        → Perfil do Cuidador (categoria, documentos, disponibilidade)
             → Publicação de Atendimento (Empresa)
                  → Busca e Sugestão de Cuidadores (filtro por categoria/R2/R3)
@@ -157,7 +159,7 @@ Dados mockados
   → Mensagens (paralelo, depende só de perfis existirem)
   → Notificações (depende dos eventos gerados pelos fluxos acima)
   → Relatório de horas / Fechamento (depende de check-in/out ao longo do período)
-  → Área de Administração / Persistência / Reset (transversal)
+  → Configurações da Empresa / Persistência / Reset (transversal)
 ```
 
 ### 1.9 Elementos do Design System
@@ -167,8 +169,8 @@ Mobile first: textos grandes, poucos campos por tela, botões fáceis de tocar. 
 pequenas, componentes com boa área de toque, badges de categoria de cuidador bem diferenciados
 visualmente (informal/técnico/superior), grid responsivo. Como o entregável é um artifact web (ver
 seção 2), a experiência mobile first será emulada com um layout otimizado para largura estreita
-(estilo "moldura de celular" nas telas do app) e uma área de administração em formato desktop,
-já que o próprio documento trata a administração como "uso interno, computador".
+(estilo "moldura de celular" nas telas do app), com o perfil da Empresa também bem resolvido em
+desktop — é onde a coordenação trabalha.
 
 ### 1.10 Funcionalidades essenciais para a apresentação comercial
 
@@ -187,8 +189,8 @@ Direto da seção 6 do documento (fora do escopo do próprio MVP):
 - Aplicativo para a família acompanhar.
 - Ligação por vídeo / teleatendimento.
 - Integração com sistemas de gestão e contabilidade.
-- Consulta automática ao conselho de classe (aprovação manual pelo Admin, simulada).
-- Versão completa para computador (exceto a área de administração).
+- Consulta automática ao conselho de classe (a conferência é manual, feita pela empresa).
+- Versão completa para computador (o perfil da Empresa já é utilizável em desktop).
 - Contrato assinado digitalmente.
 
 Adicionais, por ser uma demo (não um produto real):
@@ -223,8 +225,7 @@ Adicionais, por ser uma demo (não um produto real):
 - Persistência: API `window.storage` (dados pessoais, não compartilhados), com reset restaurando
   o seed original.
 - Estilo: Tailwind (classes core) seguindo o skill `frontend-design`, com um "frame" de celular
-  para as telas do app (mobile first) e um layout desktop convencional para a área de
-  administração.
+  para as telas do app (mobile first) e um layout desktop convencional para o perfil da Empresa.
 
 ### 2.2 Por que não usar o pipeline `web-artifacts-builder` (Vite + Parcel + shadcn)
 
@@ -237,8 +238,8 @@ single-file, sem bundling local.
 `Empresa`, `Cuidador` (com `categoria`: informal | tecnico | superior, e campos condicionais de
 registro profissional), `Atendimento` (com `atividadesExigidas`, infos do paciente embutidas,
 status do ciclo de vida), `Convite`, `Candidatura`, `Agendamento`, `RegistroAtendimento`,
-`Avaliacao`, `Conversa`/`Mensagem`, `Notificacao`, `FilaAprovacao` (Admin), `Favorito` (Empresa →
-Cuidador).
+`Avaliacao`, `Conversa`/`Mensagem`, `Notificacao`, `VinculoQuadro` (Empresa → Cuidador, com status
+de aprovação), `Favorito` (Empresa → Cuidador).
 
 ---
 
@@ -340,7 +341,7 @@ Identidade visual mobile first: cores, tipografia, componentes base, badges de c
 ### Escopo
 Paleta (light mode), escala tipográfica legível em tela pequena, botão/input/card/badge/modal,
 badges diferenciados por categoria de cuidador e por status de atendimento, "frame" de celular
-para as telas do app, layout desktop para a área de administração.
+para as telas do app, layout desktop para o perfil da Empresa.
 
 ### Fora do escopo
 Dark mode, temas customizáveis.
@@ -484,10 +485,17 @@ acesso quando não aprovado.
 
 ---
 
-## Etapa 5 — Área de Administração: Aprovação de Cadastros
+## Etapa 5 — Aprovação de Cadastros (quadro da Empresa)
+
+> **Reescrita na Revisão 5.** O que está descrito abaixo como "área de administração" foi
+> substituído: não existe perfil de administrador de plataforma. A fila de aprovação vive dentro
+> de **Empresa → Cuidadores**, em três abas (Meu quadro / Em análise / Inativos), e o status de
+> aprovação passou a ser por empresa (`CaregiverLink` em `src/types/roster.ts`,
+> `src/services/roster.ts`). O texto histórico fica preservado para rastreabilidade.
 
 ### Objetivo
-Fila de aprovação de documentos, aprovar/recusar com motivo, bloqueio de empresa/cuidador.
+Fila de aprovação de documentos, aprovar/recusar com motivo, bloqueio de cuidador — pela empresa
+que vai colocá-lo em plantão.
 
 ### Escopo
 Tela de administração (desktop) com fila de cadastros pendentes, ação aprovar/recusar (com
@@ -1217,7 +1225,12 @@ Favoritar, navegar para outra tela, voltar e confirmar que o favorito permanece.
 
 ---
 
-## Etapa 18 — Área de Administração: Números de Uso
+## Etapa 18 — Números de Uso
+
+> **Revertida na Revisão 5.** Os "números de uso" eram uma visão global de plataforma, própria de
+> um administrador — papel que não existe no modelo. `services/metrics.ts` e a tela foram
+> removidos; a empresa continua com os seus próprios números no Início e no Relatório de horas.
+> O texto histórico fica preservado para rastreabilidade.
 
 ### Objetivo
 Completar a área de administração com números básicos.
@@ -1518,3 +1531,9 @@ ver Etapa 0.**
 | Revisão 4 (auditoria) | Status de execução das Etapas 1–22 corrigido: Etapa 1 mantida `[x]` (conteúdo); Etapa 2 rebaixada a `[!]` (doc válido, implementação em CSS não-Tailwind); Etapas 3–19 rebaixadas a `[~]` (lógica/UX prototipadas, nunca executadas em navegador, arquitetura a ser substituída); Etapa 20 rebaixada a `[ ]` (responsividade real nunca implementada, só moldura decorativa); Etapa 21 rebaixada a `[!]` (validação foi só leitura de código, por admissão do próprio `DEMO_GUIDE.md`); Etapa 22 rebaixada a `[~]` (guia bom, mas descreve abrir "o artifact" em vez de `npm run dev`) | Nenhuma etapa rodou de fato em um projeto executável — não existia `package.json`. A regra de conclusão exige implementada + executando + testada + validada + critérios atendidos, não só "código escrito" | Etapas 1–22 |
 | Revisão 4 (auditoria) | `window.storage` (usado em `app_acalento_homecare.jsx`) identificado como API específica do ambiente de artifacts do Claude.ai, não uma API de navegador padrão — precisa virar `localStorage` na reimplementação, conforme já era a orientação do `CLAUDE.md` seção 15 | Rodando fora do ambiente de artifacts (ex.: em um navegador comum via Vite), `window.storage` é `undefined` e o app quebraria ao tentar persistir | Etapa 19 (Persistência), Etapa 0 |
 | Revisão 4 (auditoria) | Confirmado que a implementação atual usa 0 classes Tailwind, apesar da seção 2.1 deste documento afirmar "Tailwind (classes core)" — todo o CSS é customizado via `<style>{STYLE}</style>` com prefixo `ac-*` | Levantamento direto no código (`grep` por classes Tailwind retornou 0 ocorrências em ambos os arquivos `.jsx`) | Etapa 2, Etapa 0, seção 2.1 (mantida como registro histórico da intenção original, não da realidade entregue) |
+| Revisão 5 | **Perfil de Administrador removido do modelo.** `UserRole` passou a ser `company | caregiver`; rota `/admin`, `src/pages/admin/`, `src/features/admin/`, `src/services/admin.ts`, `src/services/metrics.ts` e a conta `admin@demo.com` foram excluídos | O `MVP_Home_Care.docx` não descreve um administrador de plataforma aprovando o cuidador responsável pelo plantão; quem precisa desse controle é a empresa | Etapas 4, 5, 18, 19; seções 1.1, 1.4, 1.5, 1.6, 1.8, 2.1, 2.3 |
+| Revisão 5 | **Aprovação do cuidador virou responsabilidade da Empresa, com quadro próprio por empresa.** Novo tipo `CaregiverLink` (`companyId` × `caregiverId` × status) e `src/services/roster.ts`; `Caregiver.approvalStatus`/`rejectionReason` deixaram de existir. Ausência de vínculo = "em análise" na fila daquela empresa | Dá à empresa o controle de quem pode assumir os seus plantões, e permite que o mesmo cuidador esteja aprovado em uma empresa e em análise em outra | R1, R3, R12; Etapas 5, 9, 10, 17 |
+| Revisão 5 | Fila de aprovação passou a viver em **Empresa → Cuidadores**, em três abas (Meu quadro / Em análise / Inativos); aprovar/recusar/bloquear também no perfil do cuidador | Mantém o controle no fluxo de trabalho de quem escala o plantão, sem criar uma área separada | Etapa 5, Etapa 9 |
+| Revisão 5 | Criada **Empresa → Configurações** com dados da empresa, registro de atividade (R12, filtrado por empresa) e o reset da demonstração | O reset e a auditoria viviam na área de administração removida; o `CLAUDE.md` §16 já pedia o reset em "Configurações" | Etapa 18, Etapa 19 |
+| Revisão 5 | **R11 removida** (empresa suspensa não publica): `Company.approvalStatus` e `canPublishAttendance` excluídos | A suspensão dependia de um administrador de plataforma; sem esse papel a regra não tem ator | R11; Etapas 5, 8, 10 |
+| Revisão 5 | Chave do `localStorage` promovida a `acalento:app-state:v2` | O estado v1 guarda cuidadores com `approvalStatus` global e sem `caregiverLinks`; migrar não vale a pena numa demo, então a v2 recarrega o seed novo | Etapa 19 |

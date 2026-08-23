@@ -19,6 +19,7 @@ import {
   requiresCouncil,
   updateCaregiverProfile,
 } from "../../services/caregivers";
+import { caregiverCompanies } from "../../services/roster";
 import type { Shift, Weekday } from "../../types";
 
 /** Grupo de controles (chips/checkboxes) — fieldset/legend para leitores de tela. */
@@ -89,6 +90,7 @@ export function CaregiverProfilePage() {
   }
 
   const needsCouncil = requiresCouncil(caregiver.category);
+  const companies = caregiverCompanies(state, caregiver.id);
 
   const toggle = <T,>(list: T[], value: T): T[] =>
     list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
@@ -139,9 +141,28 @@ export function CaregiverProfilePage() {
           </p>
         </Card>
 
+        <Card className="mt-3">
+          <p className="text-[11px] font-semibold tracking-wide text-ink/40 uppercase">
+            Empresas que aprovaram seu cadastro
+          </p>
+          {companies.length === 0 ? (
+            <p className="mt-1.5 text-[12.5px] text-ink/50">
+              Nenhuma ainda — só recebe convites quem já foi aprovado no quadro de uma empresa.
+            </p>
+          ) : (
+            <ul className="mt-1.5 flex flex-col gap-1">
+              {companies.map((co) => (
+                <li key={co.id} className="text-[12.5px] text-ink/75">
+                  · {co.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
         <p className="mt-4 text-[11.5px] text-ink/45">
           Categoria e CPF não podem ser alterados por aqui: mudar a categoria exige uma nova
-          conferência do administrador.
+          conferência das empresas que têm você no quadro.
         </p>
 
         {/* onChange no form cobre inputs/textarea/checkbox; os chips avisam por conta própria. */}

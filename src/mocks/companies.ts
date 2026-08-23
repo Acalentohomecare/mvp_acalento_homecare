@@ -8,7 +8,6 @@ export const COMPANIES: Company[] = [
     city: "Cidade Média - Centro",
     phone: "(11) 99999-0000",
     email: "contato@vidaplena.com.br",
-    approvalStatus: "approved",
     favoriteCaregiverIds: ["cg1", "cg8"],
   },
   {
@@ -18,7 +17,6 @@ export const COMPANIES: Company[] = [
     city: "Cidade Média - Zona Norte",
     phone: "(11) 98888-1111",
     email: "contato@cuidarbem.com.br",
-    approvalStatus: "approved",
     favoriteCaregiverIds: [],
   },
 ];

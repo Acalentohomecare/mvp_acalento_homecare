@@ -4,7 +4,6 @@ import type {
   AttendanceStatus,
   AttendanceType,
   CaregiverCategory,
-  Company,
   Patient,
 } from "../types";
 import { requiredCategory } from "../constants/activities";
@@ -111,11 +110,6 @@ export function activeCaregiverIds(list: Attendance[]): string[] {
     .filter((a) => (a.status === "confirmed" || a.status === "in_progress") && a.confirmedCaregiverId)
     .map((a) => a.confirmedCaregiverId as string);
   return [...new Set(ids)];
-}
-
-/** R11: empresa suspensa mantém o histórico, mas não publica novos atendimentos. */
-export function canPublishAttendance(company: Company | undefined): boolean {
-  return company?.approvalStatus === "approved";
 }
 
 export interface RecentActivityEntry {

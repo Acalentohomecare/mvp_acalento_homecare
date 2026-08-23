@@ -333,7 +333,7 @@ Não sacrificar a experiência mobile para conseguir uma interface desktop bonit
 
 9. Perfis do sistema
 
-A demo representa quatro perfis:
+A demo representa três perfis:
 
 Empresa
 
@@ -348,6 +348,10 @@ cadastrar pacientes;
 cadastrar/gerenciar cuidadores;
 
 visualizar cuidadores;
+
+conferir documentos e aprovar/recusar cadastros de cuidadores no seu quadro;
+
+bloquear/reativar cuidadores do seu quadro;
 
 publicar atendimentos;
 
@@ -405,25 +409,14 @@ registro profissional;
 
 especialidade;
 
-status de aprovação.
+status de aprovação em cada empresa.
 
-Administrador
+Não existe perfil de Administrador de plataforma.
 
-Pode:
-
-visualizar empresas;
-
-visualizar cuidadores;
-
-aprovar/recusar cadastros;
-
-bloquear usuários;
-
-visualizar atendimentos;
-
-visualizar métricas;
-
-acompanhar pendências.
+A conferência de documentos, a aprovação, a recusa e o bloqueio de cuidadores são
+responsabilidade da Empresa — é ela que controla quem pode assumir os seus plantões. O status de
+aprovação é por empresa (quadro próprio): o mesmo cuidador pode estar aprovado em uma e em
+análise em outra.
 
 10. Login da demo
 
@@ -437,10 +430,6 @@ empresa@demo.com
 
 Cuidador
 cuidador@demo.com
-123456
-
-Administrador
-admin@demo.com
 123456
 
 Ao efetuar login:
@@ -493,21 +482,8 @@ Perfil;
 
 Notificações.
 
-Administrador
-
-Dashboard;
-
-Aprovações;
-
-Empresas;
-
-Cuidadores;
-
-Atendimentos;
-
-Usuários;
-
-Configurações.
+A tela de Cuidadores da Empresa reúne o quadro aprovado, a fila de cadastros em análise e os
+inativos (recusados/bloqueados) — é onde a empresa aprova quem vai assumir os plantões.
 
 Desktop: sidebar limpa.
 
@@ -536,8 +512,7 @@ src/
 │   ├── schedules/
 │   ├── evaluations/
 │   ├── notifications/
-│   ├── messages/
-│   └── admin/
+│   └── messages/
 ├── mocks/
 ├── services/
 ├── hooks/
@@ -567,6 +542,7 @@ src/mocks/
 ├── evaluations.ts
 ├── notifications.ts
 ├── messages.ts
+├── caregiver-links.ts
 └── dashboard.ts
 
 Os dados devem parecer reais, mas ser completamente fictícios.
@@ -575,11 +551,11 @@ Criar dados suficientes para uma apresentação convincente.
 
 Base inicial mínima:
 
-1 administrador;
-
 2 empresas;
 
 10 cuidadores;
+
+vínculos de quadro (empresa ↔ cuidador) cobrindo aprovado, em análise, recusado e bloqueado;
 
 8 pacientes;
 
@@ -676,6 +652,7 @@ Notification
 Message
 Document
 Schedule
+CaregiverLink
 
 Criar enums/unions para:
 
@@ -714,7 +691,10 @@ A média pública só aparece após três avaliações.
 
 Empresa só enxerga seus próprios dados.
 
-Administrador possui visão global.
+Cada empresa aprova o próprio quadro: cuidador só aparece na busca, recebe convite ou se candidata
+em empresa que já aprovou o cadastro dele.
+
+Cuidador sem nenhuma aprovação não acessa as telas internas — fica na tela de cadastro em análise.
 
 19. Fluxo principal de apresentação
 
@@ -764,17 +744,17 @@ Avaliação
 ↓
 Relatório
 
-Fluxo administrativo:
+Fluxo de aprovação do quadro (feito pela própria Empresa):
 
-Login Admin
+Login Empresa
 ↓
-Aprovações
+Cuidadores → Em análise
 ↓
 Visualizar cuidador
 ↓
-Aprovar
+Aprovar para o quadro
 ↓
-Cuidador passa a aparecer como disponível
+Cuidador passa a aparecer na busca e pode ser convidado para os plantões
 
 20. Funcionalidades da demo
 
@@ -798,6 +778,8 @@ alertas;
 
 check-ins pendentes;
 
+cadastros de cuidadores aguardando aprovação da empresa;
+
 próximos atendimentos;
 
 atividade recente.
@@ -819,22 +801,6 @@ horas realizadas;
 avaliação;
 
 próximos compromissos.
-
-Dashboard admin
-
-Mostrar:
-
-empresas;
-
-cuidadores;
-
-aprovações;
-
-atendimentos;
-
-pendências;
-
-métricas básicas.
 
 21. Pacientes
 
@@ -1201,45 +1167,50 @@ valor estimado.
 
 Exportação pode gerar CSV local.
 
-34. Área administrativa
+34. Quadro de cuidadores (aprovações da Empresa)
 
-Criar:
+Não existe área administrativa de plataforma. O controle é da Empresa, dentro da tela de
+Cuidadores, em três abas:
 
-Aprovações
+Meu quadro
 
-pendentes;
+listar;
 
-aprovar;
+pesquisar/filtrar;
 
-recusar;
+visualizar perfil;
+
+favoritar;
 
 bloquear.
 
-Empresas
+Em análise
 
-listar;
+fila de cadastros ainda não decididos;
 
-visualizar;
+visualizar perfil;
 
-bloquear quando necessário.
+aprovar para o quadro;
 
-Cuidadores
+recusar com motivo.
 
-listar;
+Inativos
 
-visualizar;
+recusados e bloqueados;
 
-estado de aprovação.
+motivo da decisão;
 
-Atendimentos
+reconsiderar.
 
-listar;
+Em Configurações da Empresa:
 
-visualizar.
+dados da empresa;
 
-Métricas
+registro de atividade da empresa (R12);
 
-números básicos da plataforma.
+restaurar dados da demonstração.
+
+Toda decisão gera notificação para o cuidador e entrada no registro de atividade.
 
 35. Dados e privacidade na demo
 
@@ -1573,7 +1544,7 @@ Notificações.
 
 Relatórios.
 
-Área administrativa.
+Quadro de cuidadores (aprovações da Empresa).
 
 Reset da demo.
 

@@ -1,15 +1,14 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, FileText, Plus } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import { AttendanceCard } from "../../components/shared/AttendanceCard";
-import { Card } from "../../components/ui";
+import { rosterQueue } from "../../services/roster";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
   activeCaregiverIds,
   applicationsToReview,
   awaitingCaregiverAttendances,
-  canPublishAttendance,
   companyAttendances,
   completedHours,
   draftAttendances,
@@ -72,7 +71,7 @@ export function CompanyDashboardPage() {
   const lateCheckins = pendingCheckins(all);
   const alerts = state.dashboardAlerts.filter((a) => a.companyId === session?.companyId);
   const activity = recentActivity(all, patients);
-  const canPublish = canPublishAttendance(company);
+  const awaitingApproval = rosterQueue(state, session?.companyId);
 
   const patientName = (id: string) => patients.find((p) => p.id === id)?.name ?? "Paciente";
   const caregiverName = (id?: string) =>
@@ -87,6 +86,15 @@ export function CompanyDashboardPage() {
   ];
 
   const pendencies = [
+    // O quadro é responsabilidade da empresa: cadastro parado na fila trava os plantões.
+    ...(awaitingApproval.length > 0
+      ? [
+          {
+            id: "roster",
+            text: `${awaitingApproval.length} cuidador(es) aguardando sua aprovação para entrar no quadro.`,
+          },
+        ]
+      : []),
     ...lateCheckins.map((a) => ({
       id: `chk-${a.id}`,
       text: `Check-in pendente — ${patientName(a.patientId)}, ${a.startTime}.`,
@@ -109,25 +117,13 @@ export function CompanyDashboardPage() {
           <h1 className="font-display text-[22px] font-semibold">Início</h1>
           <p className="mt-1 text-[12.5px] text-ink/50">{company?.name}</p>
         </div>
-        {canPublish && (
-          <Link
-            to="/empresa/atendimentos/novo"
-            className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-[13.5px] font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
-          >
-            <Plus size={15} /> Novo atendimento
-          </Link>
-        )}
+        <Link
+          to="/empresa/atendimentos/novo"
+          className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-[13.5px] font-semibold text-accent-ink transition-transform duration-[80ms] active:scale-[0.96]"
+        >
+          <Plus size={15} /> Novo atendimento
+        </Link>
       </div>
-
-      {!canPublish && (
-        <Card className="mt-4 flex items-start gap-2.5 border-status-cancelado/40">
-          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-status-cancelado" />
-          <p className="text-[12.5px] text-ink/70">
-            Cadastro suspenso: você mantém acesso ao histórico, mas não pode publicar novos
-            atendimentos até a regularização.
-          </p>
-        </Card>
-      )}
 
       <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-linha bg-linha sm:grid-cols-5">
         {numbers.map((n) => (

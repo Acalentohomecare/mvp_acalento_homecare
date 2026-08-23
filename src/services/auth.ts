@@ -29,6 +29,9 @@ const DEFAULT_ACTIVITIES: Record<CaregiverCategory, string[]> = {
  * Cadastro simulado de um novo cuidador (CLAUDE.md §41). Retorna o próximo AppState em vez de
  * mutar — quem chama decide como persistir (via AppStateProvider), mantendo uma única fonte
  * de verdade para o estado.
+ *
+ * O cuidador nasce sem vínculo — ou seja, em análise na fila de todas as empresas. Quem aprova
+ * é a empresa que vai colocá-lo em plantão (`services/roster.ts`).
  */
 export function registerCaregiver(
   state: AppState,
@@ -47,7 +50,6 @@ export function registerCaregiver(
     category: input.category,
     councilRegistration: requiresCouncil ? "Em conferência" : undefined,
     councilRegistrationStatus: requiresCouncil ? "pending" : undefined,
-    approvalStatus: "pending",
     activityIds: DEFAULT_ACTIVITIES[input.category],
     availability: { days: ["mon", "tue", "wed"], shifts: ["morning"] },
     shiftRate: 180,

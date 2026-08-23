@@ -9,7 +9,6 @@ import { login } from "../services/auth";
 const DEMO_ACCOUNTS = [
   { label: "Empresa", email: "empresa@demo.com" },
   { label: "Cuidador", email: "cuidador@demo.com" },
-  { label: "Administrador", email: "admin@demo.com" },
 ];
 
 export function LoginPage() {

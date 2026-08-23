@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BadgeCheck, Heart, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha } from "../../components/ui";
+import { Avatar, Button, Card, Cracha, Modal, Textarea } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import {
   APPROVAL_STATUS_CLASS,
@@ -21,9 +21,15 @@ import {
   isFavorite,
   isVerified,
   requiresCouncil,
-  searchableCaregivers,
   toggleFavorite,
 } from "../../services/caregivers";
+import {
+  approveCaregiver,
+  blockCaregiver,
+  reactivateCaregiver,
+  rejectCaregiver,
+  rosterStatus,
+} from "../../services/roster";
 import { caregiverHistory } from "../../services/evaluations";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL } from "../../constants/attendance";
 import { useSession } from "../../hooks/useSession";
@@ -57,6 +63,8 @@ export function CompanyCaregiverProfilePage() {
   const { caregiverId } = useParams();
   const { state, setState } = useAppState();
   const { session } = useSession();
+  const [prompt, setPrompt] = useState<"reject" | "block" | null>(null);
+  const [reason, setReason] = useState("");
 
   if (!state) {
     return (
@@ -66,15 +74,12 @@ export function CompanyCaregiverProfilePage() {
     );
   }
 
-  // R1: perfil de cuidador não aprovado não é acessível pela empresa, nem por URL direta.
-  const caregiver = searchableCaregivers(state).find((c) => c.id === caregiverId);
+  const caregiver = state.caregivers.find((c) => c.id === caregiverId);
 
   if (!caregiver) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-10 text-center">
-        <p className="text-[13px] text-ink/60">
-          Este cuidador não está disponível para busca no momento.
-        </p>
+        <p className="text-[13px] text-ink/60">Cuidador não encontrado.</p>
         <Link to="/empresa/cuidadores" className="mt-4 inline-block text-[12.5px] underline">
           Voltar à lista
         </Link>
@@ -82,6 +87,9 @@ export function CompanyCaregiverProfilePage() {
     );
   }
 
+  const companyId = session?.companyId;
+  const status = rosterStatus(state, companyId, caregiver.id);
+  const inRoster = status === "approved";
   const rating = caregiverRating(state.evaluations, caregiver.id);
   const evaluations = caregiverEvaluations(state.evaluations, caregiver.id);
   const history = caregiverHistory(state, caregiver.id, session?.companyId ?? "");
@@ -89,6 +97,24 @@ export function CompanyCaregiverProfilePage() {
   const needsCouncil = requiresCouncil(caregiver.category);
   const days = WEEKDAY_ORDER.filter((d) => caregiver.availability.days.includes(d));
   const shifts = SHIFT_ORDER.filter((s) => caregiver.availability.shifts.includes(s));
+
+  const openPrompt = (kind: "reject" | "block") => {
+    setPrompt(kind);
+    setReason("");
+  };
+
+  const confirmPrompt = () => {
+    if (!prompt || !companyId) return;
+    const motive =
+      reason.trim() || (prompt === "reject" ? "Documentos não conferem." : "Bloqueado pela empresa.");
+    setState((s) =>
+      prompt === "reject"
+        ? rejectCaregiver(s, companyId, caregiver.id, motive)
+        : blockCaregiver(s, companyId, caregiver.id, motive),
+    );
+    setPrompt(null);
+    setReason("");
+  };
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-7">
@@ -109,6 +135,10 @@ export function CompanyCaregiverProfilePage() {
                 label={CATEGORY_LABEL[caregiver.category]}
                 className={CATEGORY_CLASS[caregiver.category]}
               />
+              <Cracha
+                label={APPROVAL_STATUS_LABEL[status]}
+                className={APPROVAL_STATUS_CLASS[status]}
+              />
               {isVerified(caregiver) && (
                 <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-cat-informal">
                   <BadgeCheck size={14} /> Verificado
@@ -118,16 +148,59 @@ export function CompanyCaregiverProfilePage() {
           </div>
         </div>
 
-        <Button
-          variant={favorite ? "secondary" : "ghost"}
-          size="sm"
-          className="mt-3"
-          aria-pressed={favorite}
-          onClick={() => setState((s) => toggleFavorite(s, session?.companyId ?? "", caregiver.id))}
-        >
-          <Heart size={13} className={favorite ? "fill-surface" : ""} />
-          {favorite ? "Nos favoritos" : "Favoritar"}
-        </Button>
+        {/* Controle do quadro: é a empresa que decide quem pode assumir os plantões dela. */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {inRoster && (
+            <Button
+              variant={favorite ? "secondary" : "ghost"}
+              size="sm"
+              aria-pressed={favorite}
+              onClick={() => companyId && setState((s) => toggleFavorite(s, companyId, caregiver.id))}
+            >
+              <Heart size={13} className={favorite ? "fill-surface" : ""} />
+              {favorite ? "Nos favoritos" : "Favoritar"}
+            </Button>
+          )}
+
+          {status === "pending" && (
+            <>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => companyId && setState((s) => approveCaregiver(s, companyId, caregiver.id))}
+              >
+                Aprovar para o quadro
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => openPrompt("reject")}>
+                Recusar
+              </Button>
+            </>
+          )}
+
+          {inRoster && (
+            <Button variant="ghost" size="sm" onClick={() => openPrompt("block")}>
+              Bloquear
+            </Button>
+          )}
+
+          {(status === "rejected" || status === "blocked") && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => companyId && setState((s) => reactivateCaregiver(s, companyId, caregiver.id))}
+            >
+              Reconsiderar e aprovar
+            </Button>
+          )}
+        </div>
+
+        {status !== "approved" && (
+          <p className="mt-3 text-[12px] text-ink/50">
+            {status === "pending"
+              ? "Este cadastro ainda não faz parte do seu quadro — aprove para poder convidá-lo."
+              : "Fora do seu quadro: não aparece na busca nem recebe convites desta empresa."}
+          </p>
+        )}
 
         <p className="mt-4 text-[13.5px] leading-relaxed text-ink/75">{caregiver.bio}</p>
 
@@ -253,6 +326,32 @@ export function CompanyCaregiverProfilePage() {
           )}
         </Section>
       </div>
+
+      {prompt && (
+        <Modal
+          title={`${prompt === "reject" ? "Recusar" : "Bloquear"} ${caregiver.name}`}
+          onClose={() => setPrompt(null)}
+        >
+          <Textarea
+            className="mb-4 h-20"
+            placeholder={
+              prompt === "reject"
+                ? "Ex.: documento de identidade ilegível."
+                : "Ex.: denúncia em análise."
+            }
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setPrompt(null)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" size="sm" onClick={confirmPrompt}>
+              {prompt === "reject" ? "Recusar cadastro" : "Bloquear"}
+            </Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { User } from "../types";
 
 /**
- * Contas de demonstração (CLAUDE.md §10). As três oficiais usam exatamente os e-mails
+ * Contas de demonstração (CLAUDE.md §10). As duas oficiais usam exatamente os e-mails
  * documentados; as demais contas de cuidador existem para explorar as diferentes categorias.
  */
 export const USERS: User[] = [
@@ -13,5 +13,4 @@ export const USERS: User[] = [
   { id: "us6", name: "Juliana Prado", email: "juliana@demo.com", password: "123456", role: "caregiver", caregiverId: "cg5" },
   { id: "us7", name: "Fernando Lima", email: "fernando@demo.com", password: "123456", role: "caregiver", caregiverId: "cg8" },
   { id: "us8", name: "Débora Nascimento", email: "debora@demo.com", password: "123456", role: "caregiver", caregiverId: "cg9" },
-  { id: "us9", name: "Administrador Acalento", email: "admin@demo.com", password: "123456", role: "admin" },
 ];

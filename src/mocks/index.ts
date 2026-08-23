@@ -1,6 +1,7 @@
 export { USERS } from "./users";
 export { COMPANIES } from "./companies";
 export { CAREGIVERS } from "./caregivers";
+export { CAREGIVER_LINKS } from "./caregiver-links";
 export { PATIENTS } from "./patients";
 export { ATTENDANCES } from "./attendances";
 export { INVITATIONS } from "./invitations";

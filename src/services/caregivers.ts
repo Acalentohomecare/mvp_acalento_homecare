@@ -31,14 +31,9 @@ export function caregiverRating(evaluations: Evaluation[], caregiverId: string):
   return { count, average: received.reduce((sum, e) => sum + e.rating, 0) / count };
 }
 
-/** R1: cuidador com cadastro não aprovado não aparece em nenhuma busca. */
-export function searchableCaregivers(state: AppState): Caregiver[] {
-  return state.caregivers.filter((c) => c.approvalStatus === "approved");
-}
-
-/** O selo de verificado depende do cadastro aprovado, não só da flag do cuidador. */
+/** O selo de verificado significa que alguma empresa já conferiu documento e selfie (R1). */
 export function isVerified(caregiver: Caregiver): boolean {
-  return caregiver.verified && caregiver.approvalStatus === "approved";
+  return caregiver.verified;
 }
 
 export function requiresCouncil(category: CaregiverCategory): boolean {
@@ -117,7 +112,7 @@ export interface CaregiverProfilePatch {
 
 /**
  * Edição do próprio perfil pelo cuidador (tela 17). Duas regras entram aqui:
- * R3 — alterar o registro no conselho devolve o registro para conferência do administrador;
+ * R3 — alterar o registro no conselho devolve o registro para conferência das empresas;
  * R12 — toda alteração de cadastro fica registrada com data, hora e responsável.
  */
 export function updateCaregiverProfile(
@@ -159,6 +154,7 @@ export function updateCaregiverProfile(
           ? `${caregiver.name} atualizou o perfil e alterou o registro no conselho — volta para conferência.`
           : `${caregiver.name} atualizou o perfil.`,
         createdAt: new Date().toISOString(),
+        caregiverId,
       },
     ],
   };

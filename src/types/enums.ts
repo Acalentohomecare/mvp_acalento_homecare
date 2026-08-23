@@ -1,4 +1,5 @@
-export type UserRole = "company" | "caregiver" | "admin";
+/** A demo tem dois perfis: a empresa que opera o Home Care e o cuidador. Não existe administrador de plataforma. */
+export type UserRole = "company" | "caregiver";
 
 export type CaregiverCategory = "informal" | "tecnico" | "superior";
 

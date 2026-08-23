@@ -1,5 +1,3 @@
-import type { ApprovalStatus } from "./enums";
-
 export interface Company {
   id: string;
   name: string;
@@ -7,6 +5,5 @@ export interface Company {
   city: string;
   phone: string;
   email: string;
-  approvalStatus: ApprovalStatus;
   favoriteCaregiverIds: string[];
 }

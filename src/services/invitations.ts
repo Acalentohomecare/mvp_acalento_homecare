@@ -1,4 +1,5 @@
 import type { AppState, Application, Attendance, Invitation, NotificationType } from "../types";
+import { isInRoster } from "./roster";
 
 function notify(
   state: AppState,
@@ -80,6 +81,10 @@ export function conflictingAttendance(
 // ---------- Empresa: convidar / publicação aberta ----------
 
 export function sendInvitation(state: AppState, attendanceId: string, caregiverId: string): AppState {
+  const target = attendanceById(state, attendanceId);
+  // R1: convite só sai para quem a empresa já aprovou no quadro dela.
+  if (!target || !isInRoster(state, target.companyId, caregiverId)) return state;
+
   const already = state.invitations.some(
     (i) => i.attendanceId === attendanceId && i.caregiverId === caregiverId && i.status !== "rejected",
   );
@@ -93,10 +98,9 @@ export function sendInvitation(state: AppState, attendanceId: string, caregiverI
     createdAt: new Date().toISOString(),
   };
 
-  const attendance = attendanceById(state, attendanceId);
   const next: AppState = { ...state, invitations: [...state.invitations, invitation] };
   const withStatus =
-    attendance?.status === "open" ? patchAttendance(next, attendanceId, { status: "invited" }) : next;
+    target.status === "open" ? patchAttendance(next, attendanceId, { status: "invited" }) : next;
 
   return notify(withStatus, "caregiver", caregiverId, "invitation", "Você recebeu um convite para um atendimento.");
 }
@@ -112,7 +116,10 @@ export function caregiverInvitations(state: AppState, caregiverId: string | unde
   return state.invitations.filter((i) => i.caregiverId === caregiverId && i.status === "sent");
 }
 
-/** Atendimentos de publicação aberta em que o cuidador ainda não se candidatou. */
+/**
+ * Atendimentos de publicação aberta em que o cuidador ainda não se candidatou.
+ * R1: só entram os de empresas que já aprovaram o cuidador no quadro delas.
+ */
 export function openOpportunities(state: AppState, caregiverId: string | undefined): Attendance[] {
   if (!caregiverId) return [];
   const appliedTo = state.applications
@@ -120,7 +127,12 @@ export function openOpportunities(state: AppState, caregiverId: string | undefin
     .map((ap) => ap.attendanceId);
 
   return state.attendances.filter(
-    (a) => a.openApplications && a.status !== "cancelled" && !a.confirmedCaregiverId && !appliedTo.includes(a.id),
+    (a) =>
+      a.openApplications &&
+      a.status !== "cancelled" &&
+      !a.confirmedCaregiverId &&
+      !appliedTo.includes(a.id) &&
+      isInRoster(state, a.companyId, caregiverId),
   );
 }
 
@@ -207,6 +219,11 @@ export function applyToOpenAttendance(
   const attendance = attendanceById(state, attendanceId);
   if (!attendance) return { nextState: state };
 
+  // R1: a candidatura só vale para empresa que já aprovou o cuidador no quadro dela.
+  if (!isInRoster(state, attendance.companyId, caregiverId)) {
+    return { nextState: state, error: "Esta empresa ainda não aprovou seu cadastro." };
+  }
+
   const conflict = conflictingAttendance(state, caregiverId, attendance);
   if (conflict) {
     return {
@@ -274,6 +291,9 @@ export function cancelAttendance(
 
   const now = new Date();
   const [start] = interval(attendance);
+  const companyName = state.companies.find((c) => c.id === attendance.companyId)?.name ?? "Empresa";
+  const caregiverName =
+    state.caregivers.find((c) => c.id === attendance.confirmedCaregiverId)?.name ?? "Cuidador";
   const noticeHours = Math.max(Math.round((start - now.getTime()) / 3_600_000), 0);
 
   let next = patchAttendance(state, attendanceId, {
@@ -288,11 +308,13 @@ export function cancelAttendance(
       {
         id: `log_${Date.now()}`,
         action: "Cancelamento",
-        actor: by === "company" ? "Empresa" : "Cuidador",
+        actor: by === "company" ? companyName : caregiverName,
         detail: `Atendimento ${attendanceId} cancelado com ${noticeHours}h de antecedência${
           noticeHours < SHORT_NOTICE_HOURS ? " (< 12h)" : ""
         }: ${reason}`,
         createdAt: now.toISOString(),
+        companyId: attendance.companyId,
+        caregiverId: attendance.confirmedCaregiverId,
       },
     ],
   };

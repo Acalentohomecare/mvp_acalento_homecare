@@ -49,11 +49,12 @@ stepper, que reduz a dependência de cor pura para comunicar estado)
 | Concluído | `#6B8F71` |
 | Cancelado | `#B24C3A` |
 
-### Cores de status de cadastro (Etapa 5 — aprovação de empresa/cuidador)
+### Cores de status de cadastro (aprovação do cuidador no quadro da empresa)
 
 Reaproveita as cores acima (mesmo significado) e soma uma cor nova só para "bloqueado", que
-precisa ser visualmente distinta de "recusado" (uma recusa é uma decisão pontual no cadastro;
-um bloqueio é uma ação administrativa posterior, sobre um cadastro já aprovado — R11/R12).
+precisa ser visualmente distinta de "recusado" (uma recusa é uma decisão pontual sobre o cadastro
+que chegou; um bloqueio é uma decisão posterior da empresa sobre alguém que já estava no quadro —
+R12).
 
 | Status de cadastro | Token | Hex |
 |---|---|---|
@@ -87,22 +88,25 @@ Escala: `display-lg` 28px/34, `display` 22px/28, `title` 18px/24, `body` 15px/22
 - **Telas do app (01–17):** emolduradas em um "frame" de celular (chassi arredondado, notch,
   indicador de home) — a demo inteira acontece dentro dessa moldura para reforçar "mobile first"
   mesmo sendo um artifact web.
-- **Área de administração:** layout desktop convencional (sidebar + conteúdo), já que o próprio
-  documento a trata como "uso interno, computador".
+- **Perfil da empresa em desktop:** sidebar fixa + conteúdo, já que a coordenação costuma
+  trabalhar no computador. A mesma tela vira barra inferior no celular.
 
 ```
-Frame do app (mobile)              Área de administração (desktop)
+Frame do app (mobile)              Perfil da empresa (desktop)
 ┌─────────────────┐                ┌──┬──────────────────────────┐
-│  ●               │  ← notch      │  │  Fila de aprovação        │
-│ ┌───────────────┐ │                │N │  ┌──────────────────┐   │
-│ │  conteúdo da   │ │                │a │  │ linha da tabela   │   │
-│ │  tela atual    │ │                │v │  └──────────────────┘   │
-│ │                │ │                │  │  ┌──────────────────┐   │
-│ └───────────────┘ │                │  │  │ linha da tabela   │   │
-│ [ tab bar inferior]│                │  │  └──────────────────┘   │
+│  ●               │  ← notch      │  │  Cuidadores               │
+│ ┌───────────────┐ │                │N │  [quadro][análise][inat.]│
+│ │  conteúdo da   │ │                │a │  ┌──────────────────┐   │
+│ │  tela atual    │ │                │v │  │ cartão do cuidador│   │
+│ │                │ │                │  │  └──────────────────┘   │
+│ └───────────────┘ │                │  │  ┌──────────────────┐   │
+│ [ tab bar inferior]│                │  │  │ cartão do cuidador│   │
 │      ▂▂▂▂          │  ← home ind.  └──┴──────────────────────────┘
 └─────────────────┘
 ```
+
+A fila de aprovação de cuidadores vive dentro de **Cuidadores**, no perfil da empresa — não há
+área de administração de plataforma.
 
 ---
 

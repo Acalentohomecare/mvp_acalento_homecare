@@ -1,7 +1,8 @@
 import type { AppState, Session } from "../types";
 import { seedAppState } from "../mocks/seed";
 
-const STORAGE_KEY = "acalento:app-state:v1";
+// v2: o quadro de cuidadores passou a ser da empresa (`caregiverLinks`); dados v1 não migram.
+const STORAGE_KEY = "acalento:app-state:v2";
 const SESSION_KEY = "acalento:session:v1";
 
 /**

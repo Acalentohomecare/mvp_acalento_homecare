@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Bell,
   CalendarCheck,
@@ -7,6 +7,7 @@ import {
   HeartHandshake,
   Home,
   LogOut,
+  Settings,
   Users,
 } from "lucide-react";
 import { Button } from "../components/ui";
@@ -25,6 +26,8 @@ const NAV_ITEMS = [
   // Relatório fica fora da barra do celular (não cabem 6 itens); há um link no painel.
   { to: "/empresa/relatorios", label: "Relatórios", icon: FileText, end: false, mobile: false },
   { to: "/empresa/notificacoes", label: "Avisos", icon: Bell, end: false, mobile: true },
+  // Configurações também não cabe na barra; no celular o acesso é pelo ícone no cabeçalho.
+  { to: "/empresa/configuracoes", label: "Configurações", icon: Settings, end: false, mobile: false },
 ];
 
 export function CompanyLayout() {
@@ -86,9 +89,18 @@ export function CompanyLayout() {
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut size={14} /> Sair
-          </Button>
+          <div className="flex shrink-0 items-center gap-1">
+            <Link
+              to="/empresa/configuracoes"
+              aria-label="Configurações"
+              className="rounded-[10px] p-2 text-ink/55 transition-colors duration-200 ease-out hover:bg-linha/50 hover:text-ink"
+            >
+              <Settings size={16} />
+            </Link>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut size={14} /> Sair
+            </Button>
+          </div>
         </header>
 
         <Outlet />

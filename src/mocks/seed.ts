@@ -2,6 +2,7 @@ import type { AppState } from "../types";
 import { USERS } from "./users";
 import { COMPANIES } from "./companies";
 import { CAREGIVERS } from "./caregivers";
+import { CAREGIVER_LINKS } from "./caregiver-links";
 import { PATIENTS } from "./patients";
 import { ATTENDANCES } from "./attendances";
 import { INVITATIONS } from "./invitations";
@@ -20,6 +21,7 @@ export function seedAppState(): AppState {
     users: USERS,
     companies: COMPANIES,
     caregivers: CAREGIVERS,
+    caregiverLinks: CAREGIVER_LINKS,
     patients: PATIENTS,
     attendances: ATTENDANCES,
     invitations: INVITATIONS,

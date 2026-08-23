@@ -2,6 +2,7 @@ export type * from "./enums";
 export type * from "./user";
 export type * from "./company";
 export type * from "./caregiver";
+export type * from "./roster";
 export type * from "./patient";
 export type * from "./activity";
 export type * from "./attendance";
