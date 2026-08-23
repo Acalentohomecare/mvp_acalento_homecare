@@ -54,6 +54,10 @@ export function LoginPage() {
         className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-accent-soft to-transparent"
       />
       <div className="relative w-full max-w-sm">
+        {/* O lockup é o título visual da tela; o `h1` existe para quem navega por estrutura,
+            que sem ele entra numa página sem nenhum cabeçalho. */}
+        <h1 className="sr-only">Entrar na Acalento Gestão</h1>
+
         <div className="mb-8 flex justify-center">
           <Logo variant="stacked" align="center" size={76} />
         </div>

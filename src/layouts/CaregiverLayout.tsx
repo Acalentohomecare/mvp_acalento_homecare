@@ -5,6 +5,7 @@ import { Button, Logo, Modal, PRODUTO_NOME } from "../components/ui";
 import {
   HEADER_ICON_CLASS,
   SHEET_ITEM_CLASS,
+  SKIP_LINK_CLASS,
   TAB_INDICATOR_CLASS,
   sideNavClass,
   tabNavClass,
@@ -49,6 +50,10 @@ export function CaregiverLayout() {
 
   return (
     <div className="min-h-screen md:flex">
+      <a href="#conteudo" className={SKIP_LINK_CLASS}>
+        Ir para o conteúdo
+      </a>
+
       <div className="hidden md:block md:w-60 md:shrink-0 md:border-r md:border-linha md:bg-surface-nav">
         <aside className="sticky top-0 flex h-screen flex-col px-3.5 py-5">
           <div className="px-2">
@@ -118,7 +123,9 @@ export function CaregiverLayout() {
           </div>
         </header>
 
-        <Outlet />
+        <main id="conteudo">
+          <Outlet />
+        </main>
       </div>
 
       <nav

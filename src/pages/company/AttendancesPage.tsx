@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { ButtonLink, Chip, FilterRow, TelaCarregando } from "../../components/ui";
+import { ACTION_LINK_CLASS, ButtonLink, Chip, FilterRow, TelaCarregando } from "../../components/ui";
 import { AttendanceCard } from "../../components/shared/AttendanceCard";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
@@ -12,10 +12,6 @@ import {
 import { companyPatients } from "../../services/patients";
 import type { Attendance } from "../../types";
 import { LIST_GRID, PAGE_LIST } from "../../components/layout/page";
-
-/* Ação secundária do card. 44px no dedo, densidade de volta onde o ponteiro é preciso. */
-const ACTION_CLASS =
-  "inline-flex min-h-11 items-center rounded-control border border-linha px-3 text-label font-semibold transition-colors duration-150 ease-out hover:border-accent pointer-fine:min-h-8 pointer-fine:px-2.5";
 
 type Filter = "all" | "awaiting" | "scheduled" | "done" | "draft";
 
@@ -117,11 +113,11 @@ export function CompanyAttendancesPage() {
                   a.status === "draft" || a.status === "cancelled" ? null : (
                     <>
                       {isAwaitingCaregiver(a) && (
-                        <Link to={`/empresa/atendimentos/${a.id}/cuidadores`} className={ACTION_CLASS}>
+                        <Link to={`/empresa/atendimentos/${a.id}/cuidadores`} className={ACTION_LINK_CLASS}>
                           Buscar cuidadores
                         </Link>
                       )}
-                      <Link to={`/empresa/atendimentos/${a.id}/candidaturas`} className={ACTION_CLASS}>
+                      <Link to={`/empresa/atendimentos/${a.id}/candidaturas`} className={ACTION_LINK_CLASS}>
                         Candidaturas{applications > 0 && ` (${applications})`}
                       </Link>
                     </>

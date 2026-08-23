@@ -300,6 +300,41 @@ body {
   font-weight: 500;
 }
 
+/*
+  Atalho para o conteúdo — primeiro elemento focalizável de cada layout.
+
+  Sem ele, quem navega por teclado atravessa a barra lateral inteira, sete destinos, a cada troca
+  de tela antes de chegar no que veio ler.
+
+  É escrito aqui e não com `sr-only focus:not-sr-only` porque no Tailwind v4 `not-sr-only` não é
+  gerado sob a variante `focus:` — a regra simplesmente não sai no CSS, e o atalho fica preso em
+  1×1px mesmo focado. Verificado no arquivo compilado, não suposto.
+
+  Fica fora da tela por posição, nunca por `display:none` nem `visibility:hidden`: os dois o
+  tirariam da ordem de tabulação, que é justamente o que ele existe para usar.
+*/
+@utility pular-para-conteudo {
+  position: fixed;
+  top: -4rem;
+  left: 0.75rem;
+  z-index: 60;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  border-radius: var(--radius-control);
+  background-color: var(--color-accent);
+  padding-inline: 1rem;
+  font-size: var(--text-note);
+  font-weight: 600;
+  color: var(--color-accent-ink);
+  box-shadow: var(--shadow-raised);
+  transition: top 150ms ease-out;
+
+  &:focus {
+    top: 0.75rem;
+  }
+}
+
 /* Medida de leitura para texto corrido (bio, observações, estados vazios). */
 .prosa {
   max-width: 62ch;

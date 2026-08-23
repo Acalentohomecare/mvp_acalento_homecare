@@ -43,6 +43,8 @@ export function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 py-14">
       <div className="w-full max-w-sm">
+        <h1 className="sr-only">Criar cadastro</h1>
+
         <div className="mb-6 flex justify-center">
           <Logo variant="stacked" align="center" size={58} />
         </div>
@@ -61,6 +63,7 @@ export function RegisterPage() {
                 <div className="flex gap-2">
                   <Button
                     type="button"
+                    aria-pressed={accountType === "caregiver"}
                     variant={accountType === "caregiver" ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setAccountType("caregiver")}
@@ -69,6 +72,7 @@ export function RegisterPage() {
                   </Button>
                   <Button
                     type="button"
+                    aria-pressed={accountType === "company"}
                     variant={accountType === "company" ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setAccountType("company")}
@@ -85,6 +89,7 @@ export function RegisterPage() {
                       <Button
                         key={cat}
                         type="button"
+                        aria-pressed={category === cat}
                         variant={category === cat ? "secondary" : "ghost"}
                         size="sm"
                         onClick={() => setCategory(cat)}

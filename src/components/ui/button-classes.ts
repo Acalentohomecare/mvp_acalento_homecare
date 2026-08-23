@@ -38,6 +38,16 @@ export const SIZE_CLASSES: Record<ButtonSize, string> = {
 export const BUTTON_BASE_CLASS =
   "inline-flex items-center justify-center gap-1.5 rounded-control font-semibold transition-[background-color,border-color,color,transform,filter] duration-150 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none";
 
+/**
+ * Ação secundária dentro de um card — "Ver perfil", "Buscar cuidadores", "Candidaturas".
+ *
+ * Não é `<Button>` porque navega, e não é `<ButtonLink>` porque tem peso menor que uma ação de
+ * tela. Estava escrita à mão em três telas com a mesma string; duas delas ficaram para trás na
+ * revisão de alvo de toque e continuavam com 32px no dedo.
+ */
+export const ACTION_LINK_CLASS =
+  "inline-flex min-h-11 items-center rounded-control border border-linha px-3 text-label font-semibold transition-colors duration-150 ease-out hover:border-accent pointer-fine:min-h-8 pointer-fine:px-2.5";
+
 export function buttonClass(
   variant: ButtonVariant = "primary",
   size: ButtonSize = "md",

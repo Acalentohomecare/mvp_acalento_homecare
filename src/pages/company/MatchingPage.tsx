@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { BadgeCheck, Check, Heart, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Input, Select, TelaCarregando, VoltarLink } from "../../components/ui";
+import { ACTION_LINK_CLASS, Avatar, Button, Card, Cracha, Input, Select, TelaCarregando, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { CATEGORY_CLASS, CATEGORY_LABEL, SHIFT_LABEL, SHIFT_ORDER } from "../../constants/caregiver";
@@ -159,24 +159,27 @@ export function MatchingPage() {
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">
                     <Link
                       to={`/empresa/cuidadores/${c.id}`}
-                      className="rounded-control border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent"
+                      className={ACTION_LINK_CLASS}
                     >
                       Ver perfil
                     </Link>
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      disabled={invited}
-                      onClick={() => setState((s) => sendInvitation(s, attendance.id, c.id))}
-                    >
-                      {invited ? (
-                        <>
-                          <Check size={13} /> Convidado
-                        </>
-                      ) : (
-                        "Convidar"
-                      )}
-                    </Button>
+                    {/* Convite enviado não é "botão indisponível": é uma coisa que já aconteceu.
+                        Como botão desabilitado, aparecia a 45% de opacidade e lia como falha.
+                        Vira crachá de confirmação — o mesmo vocabulário de estado do resto do
+                        produto (DESIGN_SYSTEM.md, seção 3). */}
+                    {invited ? (
+                      <span className="inline-flex min-h-11 items-center gap-1.5 rounded-control bg-status-confirmado-soft px-3 text-label font-semibold text-status-confirmado pointer-fine:min-h-8 pointer-fine:px-2.5">
+                        <Check size={13} aria-hidden="true" /> Convidado
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => setState((s) => sendInvitation(s, attendance.id, c.id))}
+                      >
+                        Convidar
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Card>

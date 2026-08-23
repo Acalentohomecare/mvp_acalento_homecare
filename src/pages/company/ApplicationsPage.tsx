@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
+import { ACTION_LINK_CLASS, Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { CATEGORY_CLASS, CATEGORY_LABEL } from "../../constants/caregiver";
@@ -128,7 +128,7 @@ export function ApplicationsPage() {
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">
                     <Link
                       to={`/empresa/cuidadores/${caregiver.id}`}
-                      className="rounded-control border border-linha px-2.5 py-1.5 text-label font-semibold transition-colors hover:border-accent"
+                      className={ACTION_LINK_CLASS}
                     >
                       Ver perfil
                     </Link>

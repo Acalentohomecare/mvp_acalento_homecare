@@ -24,6 +24,9 @@ export const tabNavClass = (isActive: boolean) =>
 /** Traço da aba ativa: o estado não fica só na cor (DESIGN_SYSTEM.md, seção 3). */
 export const TAB_INDICATOR_CLASS = "absolute inset-x-5 top-0 h-0.5 rounded-full bg-accent";
 
+/** Atalho para o conteúdo. A regra mora em `index.css`; ver o comentário lá. */
+export const SKIP_LINK_CLASS = "pular-para-conteudo";
+
 /**
  * Botão de ícone do cabeçalho do celular (sino, menu). 44px de alvo com ícone pequeno: a área
  * cresce, o desenho não.

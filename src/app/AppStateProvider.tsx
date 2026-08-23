@@ -1,17 +1,8 @@
-import { createContext, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { AppState } from "../types";
 import { loadAppState, resetAppState, saveAppState } from "../services/storage";
 import { syncAutomaticNotifications } from "../services/notifications";
-
-type StateUpdater = AppState | ((prev: AppState) => AppState);
-
-interface AppStateContextValue {
-  state: AppState | null;
-  setState: (updater: StateUpdater) => void;
-  reset: () => Promise<void>;
-}
-
-export const AppStateContext = createContext<AppStateContextValue | null>(null);
+import { AppStateContext, type StateUpdater } from "./app-state-context";
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [state, setStateRaw] = useState<AppState | null>(null);

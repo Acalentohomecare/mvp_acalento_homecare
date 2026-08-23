@@ -256,48 +256,81 @@ Cada entrada é o trio `bg-<x>-soft text-<x> border-<x>/25`, consumido pelo `<Cr
 
 ## 4. Tipografia
 
-Duas famílias, com papéis que não se misturam.
+**Uma família só: DM Sans**, servida do próprio projeto (`public/fonts/`, `@font-face` com
+`unicode-range`). Não é preferência — é a marca. O símbolo do logo é feito de círculos e cápsulas, e
+"ACALENTO" é uma capitular geométrica de bojos redondos; a DM Sans é uma geométrica de baixo
+contraste com bojo praticamente circular, o mesmo esqueleto do símbolo na mesma temperatura calma.
+Foi comparada lado a lado com Plus Jakarta Sans e Manrope sobre o mesmo conteúdo real do produto
+(card de atendimento, tabela de horas, texto curto): a Jakarta comprimia "R$ 180" e os carimbos de
+hora, a Manrope alargava demais o texto denso. A DM Sans ficou melhor nos dois pontos que este
+produto mais usa.
 
-- **Inter** (`font-sans`) — toda a interface. É uma fonte desenhada para tela de interface na faixa
-  de 12–16px, que é onde este produto vive: x-height alta, contadores fechados, dígitos tabulares.
-  Está ligada com `font-variant-numeric: tabular-nums` no `body`, porque quase todo número daqui
-  (horas, valores, contagens) aparece em coluna e precisa alinhar.
-- **IBM Plex Mono** (`font-mono`) — **só o que é registro ou prova**: horário de check-in/check-out,
-  data, horas fechadas, valores, CPF/CNPJ. Fechamento de horas é a dor nº 1 do cliente; número que
-  serve de prova não usa a fonte do texto.
+A Inter saiu. Excelente legibilidade, mas neo-grotesca de bojo oval e desenho de sistema
+operacional — nenhuma relação com um logo circular, e a face que a maioria das interfaces geradas
+por IA usa, o que trabalha contra um produto que precisa parecer específico numa reunião comercial.
 
-Escala por **papel**, não por pixel — cada uma já traz o próprio `line-height` e `tracking`:
+A IBM Plex Mono saiu junto. O papel dela nunca foi tipográfico de verdade — era **alinhar coluna**,
+e isso é `font-variant-numeric: tabular-nums`, não uma família inteira. O que sobrava era timbre:
+uma slab-grotesca da IBM em horário, valor, data e contador, ou seja, em quase toda a interface
+deste produto. Esse papel virou o utilitário `.numero` (tabular, tracking -0.006em, peso 500) —
+prova sem sotaque de terminal, dentro da mesma família do texto.
 
-| Utilidade | Tamanho | Papel |
-|---|---|---|
-| `text-meta` | 12px | Carimbo de data/hora, contagem, apoio terciário. **Piso — nada menor.** |
-| `text-label` | 13px | Rótulo de campo, título de seção, botão pequeno. |
-| `text-note` | 14px | Texto denso dentro de card e lista, botão. |
-| `text-body` | 16px | Leitura corrente e **todo campo de formulário**. |
-| `text-title` | 18px | Nome de paciente/cuidador, título de card e de modal. |
-| `text-display` | 26→32px fluido | Título da página. Uma única voz grande por tela. |
+Três pesos, nenhum acima de 600: **400** corpo, **500** rótulo e ênfase, **600** título.
+`font-bold` não existe neste produto.
+
+Escala por **papel**, não por pixel — e responsiva nos dois sentidos. `text-display` cresce com a
+tela, como se espera. Já `text-note` e `text-meta` fazem o oposto: são **maiores no celular** e
+apertam a partir de `md` (768px), porque a leitura em deslocamento pede corpo maior e a tela densa
+do desktop comporta mais por linha. É o inverso de "encolher tudo proporcionalmente".
+
+| Utilidade | Celular | `md` e acima | Papel |
+|---|---|---|---|
+| `text-dado` | 12px | 12px | Rótulo de dado: bloco de número, cabeçalho de tabela. Caixa alta, tracking aberto, peso 600. |
+| `text-meta` | 13px | 12px | Carimbo de data/hora, contagem, apoio terciário. |
+| `text-label` | 13px | 13px | Rótulo de campo e botão pequeno. Peso 500. |
+| `text-note` | 15px | 14px | Texto denso dentro de card e lista, botão. |
+| `text-body` | 16px | 16px | Leitura corrente e **todo campo de formulário**. |
+| `text-heading` | 15px | 15px | Título de seção, em caixa normal. Peso 600. |
+| `text-title` | 19px | 19px | Nome de paciente/cuidador, título de card e de modal. Peso 600. |
+| `text-display` | 28px | 34px fluido | Título da página. Uma única voz grande por tela. Peso 600. |
+
+Cada papel já carrega o próprio peso — `text-heading`, `text-title` e `text-display` não precisam
+de `font-semibold` no `className`; escrever os dois é redundância que pode divergir.
+
+### `.numero` — o papel que a mono ocupava
+
+Entra em horário de check-in/check-out, horas fechadas, valor, data, documento, contador — número
+que o produto precisa **provar** (princípio 3 do `PRODUCT.md`). `tabular-nums` alinha coluna,
+o tracking negativo (-0.006em) compensa a largura do algarismo tabular, o peso 500 separa o dado do
+texto ao redor sem precisar de outra cor. A regra completa mora em `src/index.css`.
+
+Não é global no `body`: em prosa, algarismo tabular abre buracos ("8 anos de experiência"), e texto
+corrido quer figura proporcional. Alinhamento é característica de tabela, não de parágrafo.
 
 ### Hierarquia de textos — quem pode aparecer, e quantas vezes
 
 | Nível | Utilidade | Regra de frequência |
 |---|---|---|
-| Título da página (`h1`) | `text-display font-semibold` | **Um por tela.** Nunca dois. |
-| Divisor de lista (`h2`) | `text-label font-semibold tracking-wide uppercase text-ink/50` | Quantos a lista pedir. É estrutura, não conteúdo. |
-| Título de bloco (`h3`) | `text-body font-semibold text-ink` | Nomeia um bloco em tela de detalhe ou formulário. |
-| Nome / título de card | `text-title font-semibold` | Um por card. |
+| Título da página (`h1`) | `text-display` | **Um por tela.** Nunca dois. |
+| Título de seção (`h2`) | `text-heading text-ink` | Quantos a tela pedir. Caixa normal — não é mais caixa alta tracked. |
+| Rótulo de dado | `text-dado text-ink-subtle uppercase` | Cabeçalho de bloco numérico e de tabela. Caixa alta, é o único papel que ainda carrega esse traço. |
+| Título de bloco (`h3`) | `text-heading text-ink` | Nomeia um bloco em tela de detalhe ou formulário. |
+| Nome / título de card | `text-title` | Um por card. |
 | Corpo | `text-body` ou `text-note` | `note` dentro de card e lista; `body` em leitura corrida. |
-| Apoio / carimbo | `text-meta text-ink/45` | Data, autoria, contagem. |
+| Apoio / carimbo | `text-meta text-ink-subtle` | Data, autoria, contagem. |
 
-Pesos: `font-medium` para rótulo, `font-semibold` para nome, botão e título. **Não use
-`font-bold`** — a Inter em semibold já separa o suficiente num ambiente com tanta informação, e o
-bold a 14px fecha os contadores na tela do celular.
-
-`text-display` é o único tamanho fluido (`clamp()`: 26px no celular, 32px a partir de ~740px).
-Todos os outros são fixos de propósito: encolher texto denso em tela pequena é exatamente o
-contrário do que este produto precisa.
+`text-display` é o único tamanho fluido (`clamp()`: 28px no celular, 34px a partir de ~1180px) —
+teto deliberadamente baixo: título de produto não é título de landing page.
 
 Texto corrido (bio, observação, estado vazio) recebe a classe `.prosa`, que trava a medida em 62
 caracteres.
+
+### Por que "caixa alta tracked" quase sumiu
+
+Os títulos de seção (`h2`) eram `text-label uppercase tracking-wide` — a fórmula-padrão de SaaS
+genérico. Ficou só onde o conteúdo é de fato um rótulo de dado (cabeçalho de tabela, legenda de
+métrica): ali a caixa alta separa rótulo de valor. Em título de seção ela competia com o próprio
+peso 600 do `text-heading` para dizer a mesma coisa duas vezes.
 
 ---
 
@@ -1061,7 +1094,7 @@ cancelamento) e "Observações" no registro do atendimento.
   {log.map((entry) => (
     <li key={entry.id} className="border-b border-linha py-2.5 text-note last:border-0">
       <span className="font-semibold">{entry.action}</span> — {entry.detail}
-      <div className="mt-0.5 font-mono text-meta text-ink/45">
+      <div className="mt-0.5 numero text-meta text-ink-subtle">
         {entry.actor} · {new Date(entry.createdAt).toLocaleString("pt-BR")}
       </div>
     </li>
@@ -1075,7 +1108,7 @@ cancelamento) e "Observações" no registro do atendimento.
 |---|---|---|
 | Ação | `font-semibold` | Verbo no passado, curto: "Aprovou", "Bloqueou", "Cancelou". |
 | Detalhe | `text-note` normal, após `—` | Sobre quem ou o quê. |
-| Carimbo | `font-mono text-meta text-ink/45`, linha própria | **Sempre `font-mono`**: é registro, e registro não usa a fonte do texto (seção 4). Autor · data e hora, separados por `·`. |
+| Carimbo | `numero text-meta text-ink-subtle`, linha própria | **Sempre `.numero`**: é registro, e registro não usa o corpo do texto (seção 4). Autor · data e hora, separados por `·`. |
 
 **Ordem.** Mais recente primeiro, sempre (`[...log].reverse()`). Histórico que começa no evento
 mais antigo obriga a rolar até o fim para ver o que acabou de acontecer.
@@ -1104,16 +1137,19 @@ página.
 
 ### 9.2 Faixa de números ✅
 
+Este padrão virou componente: **`<StatStrip>`** (`src/components/shared/StatStrip.tsx`). Não
+escreva a faixa de números à mão.
+
 **Objetivo.** Os indicadores do painel, lidos de relance.
 
-**Estrutura.** Grade com `gap-px` sobre `bg-linha` — os divisores são o próprio fundo aparecendo
-entre as células. Rótulo `text-meta uppercase text-ink/50`; valor `font-mono text-title
-font-medium text-accent`.
+**Estrutura — duas formas, um conteúdo.** A partir de `sm`, faixa emendada: grade com `gap-px`
+sobre `bg-linha`, os divisores são o próprio fundo aparecendo entre as células. Rótulo
+`text-dado text-ink-subtle uppercase`; valor `numero text-title text-accent`.
 
-**Mobile.** Em celular a faixa cabe em **duas ou três colunas**, nunca mais. Com quatro
-indicadores a 390px, o rótulo quebra em três linhas e a faixa fica mais alta que os cards que ela
-resume. Se houver mais de três indicadores, os menos importantes saem da faixa e viram linha de
-texto abaixo dela.
+**Mobile.** Abaixo de `sm` a faixa vira uma **fila que rola na horizontal**, com `snap-x`. Não é
+"duas ou três colunas": cinco indicadores em grade quebravam em três linhas e empurravam o
+conteúdo que pede ação para baixo da dobra. Em fila, a mesma informação cabe numa única linha
+curta e nada é escondido — é a mesma lógica do `<FilterRow>` (seção 9.3).
 
 ### 9.3 Filtros e seleção ✅
 
@@ -1191,8 +1227,8 @@ onde se lê de uma vez.
 ### Cabeçalho de página
 
 ```tsx
-<h1 className="text-display font-semibold">Início</h1>
-<p className="prosa mt-1 text-body text-ink/50">{subtítulo}</p>
+<h1 className="text-display">Início</h1>
+<p className="prosa mt-1 text-body text-ink-subtle">{subtítulo}</p>
 ```
 
 Quando a tela tem ação primária, ela fica **à direita do título em desktop** e **abaixo do
@@ -1202,7 +1238,7 @@ subtítulo, `block`, em celular** — nunca no cabeçalho fixo, que é territór
 
 | Papel | Estilo | Onde |
 |---|---|---|
-| **Divisor de lista** (`h2`) | `text-label font-semibold tracking-wide text-ink/50 uppercase`, com contador em pastilha `bg-surface-sunken` | Painéis e listas: separa grupos de cards. É estrutura, não conteúdo. |
+| **Divisor de lista** (`h2`) | `text-heading text-ink`, com contador em pastilha `bg-surface-sunken` | Painéis e listas: separa grupos de cards. É estrutura, não conteúdo — caixa normal, não mais caixa alta tracked (seção 4). |
 | **Título de bloco** (`h3`) | `text-body font-semibold text-ink` | Telas de detalhe e formulário: nomeia um bloco de conteúdo. |
 
 ---
@@ -1422,7 +1458,7 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 **Hierarquia**
 
 - [ ] Um `h1` (`text-display`) por tela; uma única ação `primary`.
-- [ ] Todo `font-mono` é registro, data, hora, valor ou documento — nada de texto corrido.
+- [ ] Todo `.numero` é registro, data, hora, valor ou documento — nada de texto corrido.
 - [ ] A marca aparece via `<Logo>`/`<LogoMark>`, sem fundo próprio e com o nome em caixa normal.
 
 **Estados**
@@ -1460,6 +1496,80 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 11 — passagem final: os buracos que sobraram (agosto/2026)
+
+Revisão de acabamento sobre o caminho inteiro, não sobre uma tela. Nada de conceito novo — o que
+foi encontrado eram furos, e eles foram fechados.
+
+- **`<main>` e atalho de teclado nasceram.** Nenhuma tela tinha marco de conteúdo, e quem navega
+  por teclado atravessava a barra lateral inteira — sete destinos — a cada troca de tela. O
+  atalho é o primeiro focalizável do documento e leva direto ao `<main id="conteudo">`.
+  Escrito como utilitário próprio (`pular-para-conteudo` em `index.css`) porque no Tailwind v4
+  `not-sr-only` **não é gerado sob a variante `focus:`** — verificado no CSS compilado, não
+  suposto; com `sr-only focus:not-sr-only` o atalho ficava preso em 1×1px mesmo focado.
+- **O estado de "selecionado" do cadastro era só cor.** Os três alternadores (Cuidador/Empresa e
+  as categorias) mudavam de variante sem `aria-pressed` — para leitor de tela, nenhum deles
+  estava marcado. Regra 3 desta página, quebrada no lugar mais fácil de não olhar.
+- **Entrada e cadastro não tinham `<h1>`.** O lockup é o título visual; agora existe um cabeçalho
+  real, invisível, para quem navega por estrutura.
+- **"Convidado" era um botão desabilitado.** Convite enviado é uma coisa que **aconteceu**, não
+  uma ação indisponível — a 45% de opacidade lia como falha. Virou crachá de confirmação, o mesmo
+  vocabulário de estado do resto do produto (seção 3).
+- **`ACTION_LINK_CLASS` nasceu.** A mesma string de ação secundária estava escrita à mão em três
+  telas; duas ficaram para trás na revisão de alvo de toque e continuavam com 32px no dedo. A
+  varredura anterior não as pegou porque as rotas de matching e candidaturas **não estavam no
+  conjunto medido** — o furo era da verificação, não só do código.
+- **`AppHeader.tsx` foi removido:** componente completo, nunca importado por ninguém.
+- **O portão de lint ficou verde.** Ver "Avisos de lint conhecidos" acima.
+- **Verificação:** 40 telas percorridas em celular e desktop com console capturado — **0 erros e
+  0 avisos**; contraste computado sobre o DOM — 0 falhas; 16 rotas × 5 larguras — 0 estouros
+  horizontais; alvos de toque em 18 rotas — 1 exceção, o link dentro de frase que a WCAG 2.5.8
+  isenta; `<main>`, ordem de tabulação e o atalho conferidos por medição em cinco rotas.
+
+### Revisão 10 — a tipografia virou sistema, e a família trocou pela marca (agosto/2026)
+
+- **Inter saiu, DM Sans entrou.** Não foi troca por gosto: o símbolo do logo é feito de círculos e
+  cápsulas, "ACALENTO" é uma capitular geométrica de bojos redondos, e a Inter é uma neo-grotesca
+  de bojo oval — sem relação com a marca, e a face que a maioria das interfaces geradas por IA usa.
+  A DM Sans é geométrica de bojo circular, foi comparada lado a lado com Plus Jakarta Sans e
+  Manrope sobre conteúdo real do produto (card de atendimento, tabela de horas), e ganhou nos dois
+  pontos onde este produto mais aparece: número curto e texto denso de card.
+- **A fonte passou a ser servida do projeto** (`public/fonts/`, `@font-face` com
+  `unicode-range`), não do Google Fonts. O `PRODUCT.md` diz que a demo roda "sem rede"; com a
+  fonte em CDN, wi-fi ruim numa reunião comercial derrubava a tipografia inteira para o fallback
+  do sistema — no momento em que o produto mais precisa parecer acabado. Só os dois pesos da
+  primeira tela são pré-carregados (`rel="preload"` no `index.html`).
+- **A IBM Plex Mono saiu.** O papel real dela nunca foi tipográfico — era alinhar coluna, e isso é
+  `tabular-nums`, não uma família inteira. O que sobrava era timbre: uma slab-grotesca da IBM em
+  horário, valor, data e contador, ou seja, em quase toda a interface. Virou o utilitário
+  `.numero` (tabular, tracking -0.006em, peso 500), dentro da mesma família do texto — prova sem
+  sotaque de terminal.
+- **Dois papéis novos nasceram**, porque a escala anterior não distinguia rótulo de dado (cabeçalho
+  de tabela, legenda de métrica) de título de seção: `--text-dado` (12px, caixa alta, peso 600) e
+  `--text-heading` (15px, caixa normal, peso 600).
+- **"Caixa alta tracked" deixou de ser o padrão de título de seção.** Era `text-label uppercase
+  tracking-wide` em todo `<h2>` do produto — a fórmula-padrão de SaaS genérico. Ficou só onde o
+  conteúdo é de fato rótulo de dado; título de seção agora é `text-heading`, caixa normal, peso 600
+  fazendo o trabalho de hierarquia sozinho.
+- **`--text-note` e `--text-meta` viraram responsivos ao contrário do resto:** maiores no celular
+  (15px / 13px), apertam a partir de `md` (14px / 12px). É o inverso de "encolher tudo
+  proporcionalmente" — leitura em deslocamento pede corpo maior, tela densa de desktop comporta
+  mais por linha.
+- **`text-display` ganhou teto mais alto e tracking mais fechado** (28px→34px, antes 26px→32px) e
+  os papéis com peso próprio (`heading`, `title`, `display`) deixaram de precisar de
+  `font-semibold` redundante no `className` — 20 arquivos tinham as duas coisas escritas juntas.
+- **Pesos redundantes removidos em 20 arquivos**, e um separador de dois níveis
+  (`{empresa}` / `{empresa}` no cabeçalho e no subtítulo da página) passou a se esconder quando o
+  nome da conta é igual ao nome do produto — a DM Sans deixou a repetição mais visível do que a
+  Inter deixava.
+- **`<StatStrip>` e o registro de atividade tiveram a documentação sincronizada** com o código: a
+  seção 9.2 ainda descrevia grade de duas ou três colunas, de antes da extração do componente
+  (revisão 9), e o carimbo do registro de atividade ainda citava `font-mono`.
+- **Verificação:** contraste computado sobre o DOM em 15 rotas — 0 falhas; 16 rotas × 5 larguras —
+  0 estouros horizontais; alvos de toque — inalterados desde a revisão 9 (1 exceção documentada,
+  link dentro de frase); as três famílias candidatas renderizadas lado a lado sobre conteúdo real
+  antes da escolha, não por preferência a olho.
 
 ### Revisão 9 — e o celular deixou de ser o desktop encolhido (agosto/2026)
 
@@ -1748,7 +1858,11 @@ a ser necessário.
 
 ### Avisos de lint conhecidos
 
-`AppStateProvider.tsx` e `SessionProvider.tsx` exportam o contexto junto com o componente, o que o
-oxlint sinaliza como quebra do fast refresh. São anteriores a este trabalho e não afetam o produto
-— a correção é mover cada contexto para um módulo próprio, como foi feito em
-`ui/toast-context.ts`.
+**Nenhum.** `npm run lint` sai limpo, sem erro e sem aviso.
+
+Os dois avisos de fast refresh que moravam aqui foram corrigidos na revisão 11, do jeito que esta
+página já prescrevia: cada contexto ganhou módulo próprio (`app/app-state-context.ts` e
+`app/session-context.ts`), como `ui/toast-context.ts` já fazia. O protótipo antigo da raiz
+(`app_acalento_homecare.jsx`) saiu do alcance do lint por `ignorePatterns` — ele mantinha o portão
+permanentemente vermelho por três erros num arquivo que está fora do build, o que treinava a
+equipe a ignorar o resultado.

@@ -2,6 +2,7 @@ export { Avatar } from "./Avatar";
 export { Aviso } from "./Aviso";
 export { Button } from "./Button";
 export {
+  ACTION_LINK_CLASS,
   BUTTON_BASE_CLASS,
   SIZE_CLASSES,
   VARIANT_CLASSES,
