@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { ButtonLink, PRODUTO_NOME, TelaCarregando } from "../../components/ui";
 import { AttendanceCard } from "../../components/shared/AttendanceCard";
-import { StatStrip } from "../../components/shared/StatStrip";
+import { AttendanceOpenActions } from "../../components/shared/AttendanceOpenActions";
 import { rosterQueue } from "../../services/roster";
+import { compatibleCaregivers } from "../../services/matching";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
@@ -34,7 +36,7 @@ function Section({
   className?: string;
 }) {
   return (
-    <section className={`mt-7 ${className}`}>
+    <section className={`mt-8 ${className}`}>
       <h2 className="mb-2.5 flex items-center gap-2 text-heading text-ink">
         {title}
         {count !== undefined && count > 0 && (
@@ -77,21 +79,14 @@ export function CompanyDashboardPage() {
   const alerts = state.dashboardAlerts.filter((a) => a.companyId === session?.companyId);
   const activity = recentActivity(all, patients);
   const awaitingApproval = rosterQueue(state, session?.companyId);
+  const activeCount = activeCaregiverIds(all).length;
 
   const patientName = (id: string) => patients.find((p) => p.id === id)?.name ?? "Paciente";
   const caregiverName = (id?: string) =>
     id ? state.caregivers.find((c) => c.id === id)?.name : undefined;
 
-  const numbers = [
-    { label: "Hoje", value: String(today.length) },
-    { label: "Em aberto", value: String(awaiting.length) },
-    { label: "Pacientes", value: String(patients.length) },
-    { label: "Cuidadores ativos", value: String(activeCaregiverIds(all).length) },
-    { label: "Horas realizadas", value: `${Math.round(completedHours(all))}h` },
-  ];
-
+  // O quadro é responsabilidade da empresa: cadastro parado na fila trava os plantões.
   const pendencies = [
-    // O quadro é responsabilidade da empresa: cadastro parado na fila trava os plantões.
     ...(awaitingApproval.length > 0
       ? [
           {
@@ -115,21 +110,65 @@ export function CompanyDashboardPage() {
     ...alerts.map((a) => ({ id: a.id, text: a.text })),
   ];
 
+  const dateLabel = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
   return (
     <div className={PAGE_WORK}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-display">Início</h1>
-          {company?.name !== PRODUTO_NOME && (
-          <p className="prosa mt-1 text-body text-ink-subtle">{company?.name}</p>
-        )}
+          <p className="mt-1 text-note text-ink-subtle">
+            {company?.name !== PRODUTO_NOME && `${company?.name} · `}
+            {dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)}
+          </p>
         </div>
-        <ButtonLink to="/empresa/atendimentos/novo">
+        <ButtonLink to="/empresa/atendimentos/novo" className="shrink-0">
           <Plus size={15} /> Novo atendimento
         </ButtonLink>
       </div>
 
-      <StatStrip items={numbers} />
+      {/*
+        A primeira coisa que a coordenadora precisa saber não é uma parede de números — é uma
+        frase: quantos atendimentos hoje, quantos plantões ainda sem cuidador. "Em aberto" é
+        também o link mais curto até "ver quem está disponível", por isso mora na frase, não numa
+        caixa. Pacientes, cuidadores ativos e horas descem para uma linha quieta abaixo: são
+        contexto, não a manchete do dia.
+      */}
+      <p className="mt-5 max-w-2xl text-body text-ink-muted">
+        {today.length > 0 ? (
+          <>
+            <span className="text-heading font-semibold text-accent">{today.length}</span>{" "}
+            {today.length === 1 ? "atendimento hoje" : "atendimentos hoje"}
+          </>
+        ) : (
+          "Nenhum atendimento hoje"
+        )}
+        {awaiting.length > 0 ? (
+          <>
+            {" "}
+            ·{" "}
+            <Link
+              to="/empresa/atendimentos?filtro=awaiting"
+              className="font-semibold text-status-aberto underline decoration-status-aberto/30 underline-offset-2 transition-colors duration-150 ease-out hover:decoration-status-aberto"
+            >
+              {awaiting.length} {awaiting.length === 1 ? "plantão em aberto" : "plantões em aberto"}
+            </Link>{" "}
+            aguardando cuidador
+          </>
+        ) : (
+          " — nenhum plantão em aberto no momento"
+        )}
+        .
+      </p>
+      <p className="mt-1.5 text-meta text-ink-subtle">
+        {patients.length} {patients.length === 1 ? "paciente" : "pacientes"} · {activeCount}{" "}
+        {activeCount === 1 ? "cuidador ativo" : "cuidadores ativos"} ·{" "}
+        {Math.round(completedHours(all))}h realizadas
+      </p>
 
       {/*
         A grade de trabalho do desktop, e ela tem só duas peças: a **fila** na coluna larga e as
@@ -147,11 +186,11 @@ export function CompanyDashboardPage() {
         coluna de apoio ela abriria um vão que nenhuma regra de conteúdo determina — só a
         aritmética de linhas da grade.
       */}
-      <div className="mt-7 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-x-8">
+      <div className="mt-3 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-x-8">
         <Section
           title="Pendências"
           count={pendencies.length}
-          className="lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1 lg:mt-0"
+          className="lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1"
         >
           {pendencies.length === 0 ? (
             <Empty text="Nada pendente no momento." />
@@ -182,6 +221,7 @@ export function CompanyDashboardPage() {
                     attendance={a}
                     patientName={patientName(a.patientId)}
                     caregiverName={caregiverName(a.confirmedCaregiverId)}
+                    caregiverId={a.confirmedCaregiverId}
                   />
                 ))}
               </div>
@@ -193,14 +233,37 @@ export function CompanyDashboardPage() {
               <Empty text="Nenhum atendimento aguardando cuidador." />
             ) : (
               <div className="flex flex-col gap-2.5">
-                {awaiting.map((a) => (
-                  <AttendanceCard
-                    key={a.id}
-                    attendance={a}
-                    patientName={patientName(a.patientId)}
-                    caregiverName={caregiverName(a.confirmedCaregiverId)}
-                  />
-                ))}
+                {awaiting.map((a) => {
+                  const compatible = compatibleCaregivers(state, a).length;
+                  const applications = state.applications.filter(
+                    (ap) => ap.attendanceId === a.id,
+                  ).length;
+                  return (
+                    <AttendanceCard
+                      key={a.id}
+                      attendance={a}
+                      patientName={patientName(a.patientId)}
+                      caregiverName={caregiverName(a.confirmedCaregiverId)}
+                      caregiverId={a.confirmedCaregiverId}
+                      note={
+                        compatible === 0 ? (
+                          <span className="text-status-cancelado">
+                            Nenhum cuidador compatível no quadro ainda.
+                          </span>
+                        ) : (
+                          <span className="text-ink-subtle">
+                            {compatible}{" "}
+                            {compatible === 1 ? "cuidador compatível" : "cuidadores compatíveis"} no
+                            quadro.
+                          </span>
+                        )
+                      }
+                      actions={
+                        <AttendanceOpenActions attendance={a} applicationsCount={applications} />
+                      }
+                    />
+                  );
+                })}
               </div>
             )}
           </Section>
@@ -216,13 +279,14 @@ export function CompanyDashboardPage() {
                     attendance={a}
                     patientName={patientName(a.patientId)}
                     caregiverName={caregiverName(a.confirmedCaregiverId)}
+                    caregiverId={a.confirmedCaregiverId}
                   />
                 ))}
               </div>
             )}
           </Section>
 
-          <Section title="Atividade recente">
+          <Section title="Atividade recente" className="mb-2">
             {activity.length === 0 ? (
               <Empty text="Sem movimentação registrada." />
             ) : (

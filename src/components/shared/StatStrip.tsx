@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 export interface Stat {
   label: string;
   value: ReactNode;
+  /** Quando presente, o número vira link — ex.: "Em aberto" leva à lista já filtrada. */
+  to?: string;
 }
 
 /**
@@ -23,19 +26,31 @@ export interface Stat {
 export function StatStrip({ items }: { items: Stat[] }) {
   return (
     <div className="-mx-6 mt-5 flex snap-x snap-mandatory gap-2 overflow-x-auto px-6 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-flow-col sm:auto-cols-fr sm:gap-px sm:overflow-hidden sm:rounded-card sm:border sm:border-linha sm:bg-linha sm:px-0 sm:pb-0 sm:shadow-card [&::-webkit-scrollbar]:hidden">
-      {items.map((item) => (
-        <div
-          key={item.label}
-          className="flex min-w-32 shrink-0 snap-start flex-col justify-between gap-2 rounded-card border border-linha bg-surface-raised px-3.5 py-3 shadow-card sm:min-w-0 sm:rounded-none sm:border-0 sm:shadow-none"
-        >
-          <div className="text-dado text-ink-subtle uppercase">
-            {item.label}
+      {items.map((item) => {
+        const inner = (
+          <>
+            <div className="text-dado text-ink-subtle uppercase">
+              {item.label}
+            </div>
+            <div className="mt-1 flex items-center gap-1 numero text-title leading-none font-medium text-accent">
+              {item.value}
+            </div>
+          </>
+        );
+        const className =
+          "flex min-w-32 shrink-0 snap-start flex-col justify-between gap-2 rounded-card border border-linha bg-surface-raised px-3.5 py-3 shadow-card transition-colors duration-150 ease-out sm:min-w-0 sm:rounded-none sm:border-0 sm:shadow-none" +
+          (item.to ? " hover:border-accent sm:hover:bg-surface-sunken" : "");
+
+        return item.to ? (
+          <Link key={item.label} to={item.to} className={className}>
+            {inner}
+          </Link>
+        ) : (
+          <div key={item.label} className={className}>
+            {inner}
           </div>
-          <div className="mt-1 flex items-center gap-1 numero text-title leading-none font-medium text-accent">
-            {item.value}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
