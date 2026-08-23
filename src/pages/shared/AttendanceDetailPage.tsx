@@ -5,7 +5,7 @@ import { Button, Card, Check, Cracha, Input, TelaCarregando, Textarea, VoltarLin
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL, ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
-import { ACTIVITIES } from "../../constants/activities";
+import { allActivities } from "../../services/activities";
 import { activityNames } from "../../services/caregivers";
 import { canSeeFullAddress } from "../../services/invitations";
 import { attendanceMessages, sendMessage } from "../../services/messages";
@@ -124,6 +124,7 @@ export function AttendanceDetailPage() {
   const messages = attendanceMessages(state, attendance.id);
   const myEvaluation = evaluationFor(state, attendance.id, role);
   const time = (iso?: string) => (iso ? new Date(iso).toLocaleString("pt-BR") : "—");
+  const catalog = allActivities(state);
 
   return (
     <div className={PAGE_WORK}>
@@ -252,7 +253,7 @@ export function AttendanceDetailPage() {
           <p className="mb-2 text-note font-semibold text-ink-muted">Tarefas</p>
           <div className="flex flex-col gap-1.5">
             {attendance.activityIds.map((id) => {
-              const activity = ACTIVITIES.find((a) => a.id === id);
+              const activity = catalog.find((a) => a.id === id);
               if (!activity) return null;
               const done = record.completedActivityIds.includes(id);
               return (
@@ -469,7 +470,7 @@ export function AttendanceDetailPage() {
       </div>
 
       <p className="mt-6 text-meta text-ink-subtle">
-        Atividades exigidas: {activityNames(attendance.activityIds).join(", ")}
+        Atividades exigidas: {activityNames(attendance.activityIds, catalog).join(", ")}
       </p>
 
       {role === "caregiver" && attendance.status !== "cancelled" && (

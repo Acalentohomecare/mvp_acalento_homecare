@@ -26,11 +26,19 @@ export const CATEGORY_RANK: Record<Activity["minCategory"], number> = {
   superior: 2,
 };
 
-/** Categoria mínima exigida por um conjunto de atividades (regra central do produto, CLAUDE.md §24). */
-export function requiredCategory(activityIds: string[]): Activity["minCategory"] {
+/**
+ * Categoria mínima exigida por um conjunto de atividades (regra central do produto, CLAUDE.md §24).
+ *
+ * Recebe o catálogo por parâmetro — não só o `ACTIVITIES` fixo — porque uma empresa pode cadastrar
+ * atividades próprias (`services/activities.ts`), e a regra precisa valer para elas também.
+ */
+export function requiredCategory(
+  activityIds: string[],
+  catalog: Activity[] = ACTIVITIES,
+): Activity["minCategory"] {
   let maxRank = 0;
   for (const id of activityIds) {
-    const activity = ACTIVITIES.find((a) => a.id === id);
+    const activity = catalog.find((a) => a.id === id);
     if (activity) maxRank = Math.max(maxRank, CATEGORY_RANK[activity.minCategory]);
   }
   return (Object.keys(CATEGORY_RANK) as Activity["minCategory"][])[maxRank];

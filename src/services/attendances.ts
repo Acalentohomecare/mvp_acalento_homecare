@@ -7,6 +7,7 @@ import type {
   Patient,
 } from "../types";
 import { requiredCategory } from "../constants/activities";
+import { allActivities } from "./activities";
 
 /** Tolerância antes de considerar o check-in atrasado (mesma regra da Etapa 12). */
 export const CHECKIN_TOLERANCE_MINUTES = 15;
@@ -147,8 +148,8 @@ export function recentActivity(
 }
 
 /** A categoria exigida vem só das atividades marcadas — é a regra central do produto (R2). */
-export function attendanceRequiredCategory(activityIds: string[]): CaregiverCategory {
-  return requiredCategory(activityIds);
+export function attendanceRequiredCategory(state: AppState, activityIds: string[]): CaregiverCategory {
+  return requiredCategory(activityIds, allActivities(state));
 }
 
 export interface NewAttendanceInput {

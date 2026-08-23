@@ -45,9 +45,9 @@ export function allowedActivities(category: CaregiverCategory): Activity[] {
   return ACTIVITIES.filter((a) => CATEGORY_RANK[a.minCategory] <= CATEGORY_RANK[category]);
 }
 
-export function activityNames(activityIds: string[]): string[] {
+export function activityNames(activityIds: string[], catalog: Activity[] = ACTIVITIES): string[] {
   return activityIds
-    .map((id) => ACTIVITIES.find((a) => a.id === id)?.name)
+    .map((id) => catalog.find((a) => a.id === id)?.name)
     .filter((name): name is string => Boolean(name));
 }
 

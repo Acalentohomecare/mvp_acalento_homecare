@@ -44,7 +44,7 @@ export function MatchingPage() {
   }
 
   const patient = state.patients.find((p) => p.id === attendance.patientId);
-  const required = attendanceRequiredCategory(attendance.activityIds);
+  const required = attendanceRequiredCategory(state, attendance.activityIds);
   const invitations = attendanceInvitations(state, attendance.id);
   const invitedIds = invitations.filter((i) => i.status !== "rejected").map((i) => i.caregiverId);
   const matches = filterMatches(compatibleCaregivers(state, attendance), { query, shift, maxRate });

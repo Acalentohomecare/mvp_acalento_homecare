@@ -187,7 +187,7 @@ export function CaregiverInvitationsPage() {
               <Card key={a.id}>
                 {summary(a)}
                 <p className="mt-2 text-meta text-ink-subtle">
-                  Perfil exigido: {CATEGORY_LABEL[attendanceRequiredCategory(a.activityIds)]}
+                  Perfil exigido: {CATEGORY_LABEL[attendanceRequiredCategory(state, a.activityIds)]}
                 </p>
               </Card>
             ))}

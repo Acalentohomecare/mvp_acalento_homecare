@@ -1,3 +1,4 @@
+import type { Activity } from "./activity";
 import type { Application } from "./application";
 import type { Attendance } from "./attendance";
 import type { AuditLogEntry } from "./audit-log";
@@ -32,4 +33,6 @@ export interface AppState {
   auditLog: AuditLogEntry[];
   dashboardAlerts: DashboardAlert[];
   records: AttendanceRecord[];
+  /** Atividades que a empresa cadastrou além do catálogo padrão (`constants/activities.ts`). */
+  customActivities: Activity[];
 }

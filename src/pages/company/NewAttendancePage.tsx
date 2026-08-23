@@ -1,27 +1,27 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, Info } from "lucide-react";
+import { Copy, Info, Plus } from "lucide-react";
 import { Aviso, Button, Card, Check, Chip, Cracha, Input, Select, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { useToast } from "../../hooks/useToast";
-import { ACTIVITIES } from "../../constants/activities";
+import { CATEGORY_CLASS, CATEGORY_LABEL, CATEGORY_ORDER } from "../../constants/caregiver";
 import {
   ATTENDANCE_TYPE_DURATION,
   ATTENDANCE_TYPE_FIXED_DURATION,
   ATTENDANCE_TYPE_LABEL,
   ATTENDANCE_TYPE_ORDER,
 } from "../../constants/attendance";
-import { CATEGORY_CLASS, CATEGORY_LABEL } from "../../constants/caregiver";
 import {
   attendanceRequiredCategory,
   companyAttendances,
   createAttendance,
   todayISO,
 } from "../../services/attendances";
+import { allActivities, createCustomActivity } from "../../services/activities";
 import { companyPatients, createPatient, splitAddress } from "../../services/patients";
 import { formatCurrency } from "../../utils/format";
-import type { AttendanceType } from "../../types";
+import type { AttendanceType, CaregiverCategory } from "../../types";
 import { MOBILE_ACTION_BAR, MOBILE_ACTION_SPACER, PAGE_WORK } from "../../components/layout/page";
 
 const NEW_PATIENT = "__new__";
@@ -66,6 +66,11 @@ export function NewAttendancePage() {
   const [value, setValue] = useState("180");
   const [error, setError] = useState("");
 
+  // Atividade nova, além do catálogo (CLAUDE.md §23 pede "atividades", não um catálogo fechado).
+  const [addingActivity, setAddingActivity] = useState(false);
+  const [newActivityName, setNewActivityName] = useState("");
+  const [newActivityCategory, setNewActivityCategory] = useState<CaregiverCategory>("informal");
+
   // Campos do paciente novo (cadastro inline — CLAUDE.md §19 "Selecionar/Cadastrar Paciente").
   const [pName, setPName] = useState("");
   const [pAge, setPAge] = useState("");
@@ -90,8 +95,23 @@ export function NewAttendancePage() {
 
   const isNewPatient = patientId === NEW_PATIENT;
   const selectedPatient = patients.find((p) => p.id === patientId);
-  const category = attendanceRequiredCategory(activityIds);
+  const activities = allActivities(state);
+  const category = attendanceRequiredCategory(state, activityIds);
   const fixedDuration = ATTENDANCE_TYPE_FIXED_DURATION[type];
+
+  const addCustomActivity = () => {
+    const name = newActivityName.trim();
+    if (!name) return;
+    const { activity, nextState } = createCustomActivity(state, {
+      name,
+      minCategory: newActivityCategory,
+    });
+    setState(nextState);
+    setActivityIds((prev) => [...prev, activity.id]);
+    setNewActivityName("");
+    setNewActivityCategory("informal");
+    setAddingActivity(false);
+  };
 
   const chooseType = (next: AttendanceType) => {
     setError("");
@@ -361,7 +381,7 @@ export function NewAttendancePage() {
         <Field label="Atividades exigidas">
           {/* Onze itens em coluna única viram rolagem à toa quando há largura de sobra. */}
           <div className="flex flex-col gap-1.5 lg:grid lg:grid-cols-2 lg:gap-x-6">
-            {ACTIVITIES.map((activity) => (
+            {activities.map((activity) => (
               <Check
                 key={activity.id}
                 label={activity.name}
@@ -376,6 +396,67 @@ export function NewAttendancePage() {
               />
             ))}
           </div>
+
+          {/*
+            O catálogo fixo não cobre tudo que uma empresa pode precisar pedir. A atividade nova
+            entra com a categoria mínima que ela exige — sem isso, a regra central do produto (R2)
+            não teria como saber que ela pede formação, e um cuidador informal poderia aparecer
+            como compatível para algo que não devia.
+          */}
+          {addingActivity ? (
+            <Card className="mt-3 flex flex-col gap-3">
+              <Input
+                label="Nome da atividade"
+                value={newActivityName}
+                onChange={(e) => setNewActivityName(e.target.value)}
+                placeholder="Ex.: Aplicação de insulina"
+              />
+              <Select
+                label="Formação mínima exigida"
+                value={newActivityCategory}
+                onChange={(e) => setNewActivityCategory(e.target.value as CaregiverCategory)}
+              >
+                {CATEGORY_ORDER.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {CATEGORY_LABEL[cat]}
+                  </option>
+                ))}
+              </Select>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  disabled={!newActivityName.trim()}
+                  onClick={addCustomActivity}
+                >
+                  Adicionar
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setAddingActivity(false);
+                    setNewActivityName("");
+                    setNewActivityCategory("informal");
+                  }}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="mt-3"
+              onClick={() => setAddingActivity(true)}
+            >
+              <Plus size={13} /> Adicionar atividade
+            </Button>
+          )}
         </Field>
 
         <Card className="flex flex-wrap items-center gap-2.5 lg:hidden">

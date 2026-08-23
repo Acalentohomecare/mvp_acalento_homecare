@@ -12,7 +12,7 @@ import { rosterCaregivers } from "./roster";
  * Ordenação: favoritos, proximidade (bairro), histórico com a empresa, avaliação.
  */
 export function compatibleCaregivers(state: AppState, attendance: Attendance): Caregiver[] {
-  const required = attendanceRequiredCategory(attendance.activityIds);
+  const required = attendanceRequiredCategory(state, attendance.activityIds);
 
   const pool = rosterCaregivers(state, attendance.companyId).filter((c) => {
     if (CATEGORY_RANK[c.category] < CATEGORY_RANK[required]) return false;

@@ -33,5 +33,6 @@ export function seedAppState(): AppState {
     auditLog: AUDIT_LOG,
     dashboardAlerts: DASHBOARD_ALERTS,
     records: RECORDS,
+    customActivities: [],
   });
 }
