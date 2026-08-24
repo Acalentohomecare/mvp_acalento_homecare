@@ -281,7 +281,7 @@ primária. Nove status, cinco formas:
 
 | Forma | Desenho | Estados | Leitura |
 |---|---|---|---|
-| `aguarda` | anel vazado | Rascunho, Em busca, Convite enviado, Candidaturas | Falta alguém decidir. O vazio é literal: o plantão não tem dono. |
+| `aguarda` | anel vazado | Rascunho, Em busca, Convidado, Em confirmação | Falta alguém decidir. O vazio é literal: o plantão não tem dono. |
 | `firmado` | ponto cheio | Confirmado | Combinado de pé. |
 | `agora` | ponto cheio com halo | Em andamento | Está acontecendo neste momento. |
 | `fechado` | quadrado cheio | Concluído, Avaliado | Encerrou, virou histórico. Quadrado porque parou. |
@@ -298,10 +298,41 @@ varrida sem ler rótulo nenhum, e continua legível para quem não distingue âm
 | `bloco` | crachá quadrado (`rounded-marker`), fundo `-soft` + borda | Cabeçalho da ficha, onde o estado é a manchete. |
 | `ponto` | só o marcador, com o rótulo em `sr-only` | Onde a palavra já está escrita ao lado. |
 
-Na variante `linha` o rótulo sai na forma curta (`ATTENDANCE_STATUS_SHORT`) — "Candidaturas", não
-"Candidaturas recebidas" — e a forma longa vai junto em `sr-only`. Não é economia por gosto: a
-coluna de estado é a última da linha, e o rótulo longo comia metade da largura que sobra para o
-nome do paciente num telefone de 320px.
+#### O rótulo é um só, e é sempre um estado
+
+`ATTENDANCE_STATUS_LABEL` é a **única** fonte da palavra, nas três variantes. Havia um segundo mapa
+(`ATTENDANCE_STATUS_SHORT`) com uma forma curta para a coluna e uma longa para a ficha e o leitor
+de tela, e ele divergia em dois estados — "Convite enviado"/"Convidado",
+"Candidaturas recebidas"/"Candidaturas". Duas palavras para o mesmo estado é o que faz alguém
+perguntar se são estados diferentes; o mapa curto saiu na revisão 17 e o `sr-only` da variante
+`linha` saiu com ele.
+
+| Status | Rótulo |
+|---|---|
+| `draft` | Rascunho |
+| `open` | Em busca |
+| `invited` | Convidado |
+| `applications_received` | **Em confirmação** |
+| `confirmed` | Confirmado |
+| `in_progress` | Em andamento |
+| `completed` | Concluído |
+| `evaluated` | Avaliado |
+| `cancelled` | Cancelado |
+
+Duas réguas decidem a palavra, e as duas valem ao mesmo tempo:
+
+**1. É um estado — nunca uma contagem, nunca um objeto.** "Candidaturas" era um substantivo de
+coisa ocupando o lugar reservado à situação do registro, na mesma coluna onde as vizinhas diziam
+"Em busca" e "Confirmado". Ler uma coluna em que a maioria das linhas responde *em que pé está* e
+uma responde *o que chegou* obriga a parar e reinterpretar a posição. Quantas candidaturas
+chegaram é informação complementar, e mora na camada 4 do registro (seção 9.0).
+
+**2. Cabe na coluna, em 320px.** A coluna de estado é a última da linha densa, e cada pixel que ela
+toma sai do nome do paciente. "Aguardando confirmação" mede ~152px a 13px e comeria metade da
+largura útil de um telefone; "Em confirmação" mede ~97px e entra na família dos "Em ___" que o
+ciclo já usa — **Em busca → Em confirmação → Em andamento**. O que a espera tem de específico
+(*de quem* se espera) é trabalho da **situação operacional**, uma camada abaixo, onde a linha é
+inteira e a frase pode ser completa.
 
 ```tsx
 <StatusAtendimento status={attendance.status} />                  // na lista
@@ -342,7 +373,7 @@ o ambiente é teal, e um azul genérico ao lado dele leria como erro de token, n
 |---|---|---|
 | Estado do atendimento | *em que situação está este registro?* | `<StatusAtendimento>` ([3.1](#31-o-marcador-de-estado--forma-antes-de-cor-)) — forma antes de cor |
 | **Nível de sinalização** | *quanta urgência esta linha carrega para quem lê?* | `<PontoNivel>`, `<Aviso>` |
-| Tom da linha do tempo | *onde no tempo isto aconteceu?* | `<LinhaDoTempo>` ([9.1](#91-histórico-de-atividades---linhadotempo)) |
+| Tom da linha do tempo | *onde no tempo isto aconteceu?* | `<LinhaDoTempo>` ([9.1](#91-linha-do-tempo-de-atividade-operacional---linhadotempo)) |
 
 Um "Confirmado" na coluna de estado e um ponto verde de nível dizem coisas diferentes, e é por
 isso que os dois nunca aparecem na mesma linha.
@@ -829,7 +860,8 @@ substituiu a maior parte dos `<Card>` do módulo de Atendimentos.
 |---|---|---|
 | `<Card>` | uma **superfície solta no fluxo** — caixa de entrada, resumo lateral | borda 1px, `rounded-card`, `p-3.5` |
 | `<Painel>` | um **bloco do documento** com cabeçalho e conteúdo estruturado | borda 1px, cabeçalho em faixa rebaixada, sem sombra |
-| nenhum dos dois | listas de registro | usam a moldura do próprio `<AttendanceList>` |
+| `<Secao>` | uma **região nomeada** cujo conteúdo já se delimita sozinho | nenhuma moldura: rótulo + conteúdo |
+| nenhum dos três | listas de registro | usam a moldura do próprio `<AttendanceList>` |
 
 **Estrutura.** Cabeçalho opcional (`title` + `count` + `actions`) numa faixa `bg-surface-sunken/60`
 com `border-b`; conteúdo com `p-3.5`, ou colado à borda com `flush` quando o filho é uma lista.
@@ -858,6 +890,72 @@ linhas parecerem dez caixas empilhadas.
 tabelas e linhas de dado — nunca outro contêiner com moldura. Para separar blocos **dentro** de um
 painel, use um fio (`border-t border-linha pt-3.5`) e um rótulo `text-dado uppercase`, nunca uma
 segunda caixa.
+
+---
+
+### `<Secao>` ✅ — a região sem moldura
+
+**Objetivo.** Nomear uma região da página **sem desenhar uma caixa em volta dela**.
+
+É o terceiro degrau da escada de contêineres, e ele faltava:
+
+| | O que é | Forma |
+|---|---|---|
+| `<Card>` | superfície **elevada** — flutua sobre a página | borda, raio, às vezes sombra |
+| `<Painel>` | bloco **delimitado** | borda de 1px, cabeçalho em faixa |
+| `<Secao>` | região **nomeada** | nenhuma moldura: rótulo + conteúdo |
+
+**Por que ele nasceu.** O Início da empresa tinha cinco painéis empilhados numa tela só. Cada um
+anunciava "aqui começa uma caixa" antes de deixar ler o que interessa, e somados eram cinco
+bordas, cinco faixas de cabeçalho e cinco fundos brancos sobre o fundo cinza — mais peso visual do
+que o conteúdo que separavam. É esse acúmulo que faz uma tela de trabalho parecer painel genérico
+de dashboard.
+
+A seção inverte a pergunta: uma **lista de plantões já parece uma lista**. Os fios entre as linhas
+e o alinhamento das colunas fazem esse trabalho sozinhos. O que ela precisa é de um nome, não de
+uma parede.
+
+**Estrutura.**
+
+```
+ATENDIMENTOS DE HOJE · 3                                    Ver todos
+[conteúdo, colado logo abaixo]
+```
+
+| Peça | Valor |
+|---|---|
+| Rótulo | `text-dado` (12px / 600 / `0.045em`) `uppercase`, tinta `--ink-muted` |
+| Contagem | `numero`, `--ink-subtle`, precedida de `· ` — **número puro, nunca `<Contador>`** |
+| Ações | à direita, `SECAO_LINK_CLASS` — `text-meta font-semibold text-accent`, sublinhado no hover |
+| Folga | `pb-1.5` entre o cabeçalho e o conteúdo. Nada mais. |
+
+A pastilha do `<Contador>` serve dentro de uma faixa de cabeçalho, onde precisa se destacar de um
+fundo. Solta sobre a página ela vira mais uma caixinha — exatamente o que a seção existe para não
+ter. O ponto médio é `aria-hidden`: quem ouve a tela recebe "Atendimentos de hoje 3".
+
+```tsx
+<Secao title="Atendimentos de hoje" count={3}>
+  <AttendanceList variant="fluxo">{/* linhas */}</AttendanceList>
+</Secao>
+```
+
+**A ação do cabeçalho é um alvo de 44px.** "Ver todos" e "Ver escala" eram texto de 13px solto num
+cabeçalho: ~18px de altura clicável, abaixo do piso da seção 11, num link que a coordenadora usa de
+pé com o telefone numa mão. `SECAO_LINK_CLASS` traz `min-h-11`, e o contêiner de ações devolve a
+altura extra ao layout com `-my-2.5` — **aumenta a área, não o desenho**. No ponteiro o alvo
+encolhe sozinho (`pointer-fine:min-h-0`) e a margem negativa se desliga junto, então o cabeçalho de
+desktop não muda um pixel.
+
+Por isso o `<header>` alinha por `items-center` e não por `items-baseline`: uma caixa de 44px
+alinhada pela linha de base empurraria o texto do link ~12px abaixo do rótulo da seção.
+
+**Quando usar cada um.** Se o conteúdo é uma lista ou tabela que **já se delimita sozinha**, use
+`<Secao>`. Se é conteúdo solto que precisa ser recortado do resto da página — um resumo, um
+formulário curto, um bloco de dados —, use `<Painel>`.
+
+**Estado vazio.** Dentro de uma seção o vazio usa `<Vazio porte="solto">`: mesma altura do
+`porte="linha"`, **sem** o recuo horizontal. Não existe borda de painel da qual afastar o texto, e
+o recuo só desalinharia a frase em relação às linhas da lista.
 
 ---
 
@@ -1260,8 +1358,10 @@ diferentes, e é o clichê de estado vazio: desenha um buraco no lugar do conte�
 justamente para o que não existe. O vazio deste produto é **quieto** — uma anotação onde o
 registro estaria.
 
-**Dois portes:** `bloco` (`py-6`) para uma lista inteira vazia; `linha` (`py-3`) para uma seção
-pequena dentro de um painel.
+**Três portes:** `bloco` (`px-3.5 py-6`) para uma lista inteira vazia; `linha` (`px-3.5 py-3`)
+para uma seção pequena dentro de um painel; `solto` (`py-3`, **sem recuo horizontal**) para dentro
+de um `<Secao>`, onde não existe borda de painel da qual afastar o texto — ali o recuo só
+desalinharia a frase em relação às linhas da lista.
 
 **Duas naturezas, e elas não são a mesma coisa** — a frase precisa dizer qual é:
 
@@ -1390,40 +1490,173 @@ do cuidador.
 plantão numa caixa com borda, raio de 14px e sombra: quinze plantões viravam quinze objetos
 flutuando, ~150px cada, e nenhum dado ficava na mesma posição de uma caixa para a outra.
 
-#### A anatomia
+#### As cinco camadas de um registro
 
-```
-celular (3 col × 3 linhas)            desktop lg (5 col × 2 linhas)
-┌──────┬─────────────────┬───────┐   ┌──────┬───────────┬─────────┬───────┬────────┐
-│14/03 │ Marli Gonçalves │ R$180 │   │14/03 │ Marli G.  │ Sandra  │ R$180 │ ● Em   │
-│07:00 │ Plantão 12h ·…  │ ● Em  │   │07:00 │ Plantão…  │ Oliveira│       │ andam. │
-│      │ Sandra Oliveira │ andam.│   └──────┴───────────┴─────────┴───────┴────────┘
-└──────┴─────────────────┴───────┘
-```
+Um plantão confirmado é só um dado: quando, quem, quanto. Um plantão **em aberto** é um dado mais
+um pedaço de operação — o que se está esperando, o que já se sabe sobre a busca, o que dá para
+fazer a respeito. É por isso que a linha tem camadas, e não campos.
 
-**Uma grade só, o mesmo DOM.** O que muda entre celular e desktop é **onde cada célula cai**
-(`col-start` / `row-start`), não o conteúdo. O nome do cuidador é o mesmo nó nos dois casos —
-nunca uma segunda cópia escondida com `lg:hidden`, que duplica conteúdo para leitor de tela e sai
-de sincronia na primeira alteração.
+A revisão 17 separou as três últimas, que chegavam embaralhadas. O recado ("1 compatível no
+quadro") e as ações ("Buscar cuidadores", "Candidaturas") dividiam **uma linha só**, separados por
+12px de `gap`: a informação parecia um link que não clicava, e os links pareciam continuação da
+frase. Na coluna de estado, no mesmo registro, "Candidaturas" aparecia mais uma vez — agora como
+rótulo de status.
 
-**As nove informações do briefing, e onde cada uma cai:**
+| # | Camada | Responde | Conteúdo | Recurso tipográfico |
+|---|---|---|---|---|
+| 1 | **Principal** | *o que é, em que pé está* | hora (+ data), paciente, estado | `text-note` 600 `--ink`; `.numero`; marcador de forma |
+| 2 | **Contexto** | *que trabalho é, quanto vale* | tipo · duração · bairro, valor | `text-meta` `--ink-subtle`; `.numero` à direita |
+| 3 | **Situação operacional** | *de quem se está esperando* | "Aguardando cuidador"; ou o cuidador que assumiu | `text-note` **500**, tinta do estado |
+| 4 | **Complementar** | *o que já se sabe* | "1 cuidador compatível no quadro" | `text-meta` `--ink-subtle` — **neutra** |
+| 5 | **Ação** | *o que dá para fazer daqui* | Buscar cuidadores · Candidaturas (1) | `ROW_ACTION_CLASS` — `text-accent` 600 |
 
-| # | Informação | Onde | Peso |
+**Cada camada tem a sua linha.** Empilhadas, elas param de disputar a mesma faixa horizontal e o
+olho desce em degraus em vez de varrer uma sopa de textos curtos. As camadas 3, 4 e 5 só existem
+quando há o que dizer: um plantão confirmado tem 1, 2 e 3; um rascunho tem 1 e 2.
+
+**A separação que mais importava é a 3 → 5.** Situação é **estado do mundo**; ação é **coisa que se
+clica**. As duas moravam na mesma faixa, com pesos parecidos, e a diferença entre elas é a
+diferença entre ler e decidir.
+
+**A camada 4 é neutra de propósito.** Ela informa a decisão que a camada 5 executa; se ganhasse
+tinta de marca ou sublinhado, competiria com as ações logo abaixo e a linha voltaria a ter dois
+níveis de "clicável". A única exceção é quando o próprio dado **é** o problema — "Nenhum cuidador
+compatível no quadro" sai em `--status-cancelado`, porque ali buscar cuidadores não resolve:
+aprovar alguém para o quadro resolve.
+
+#### Estado, situação e contagem — três coisas, três lugares
+
+O erro que a revisão 17 corrigiu foi de vocabulário antes de ser de layout: **três conceitos
+diferentes se revezavam na mesma posição**, e por isso a coluna de estado ora dizia em que pé o
+plantão estava, ora dizia o que tinha chegado nele.
+
+| Conceito | Pergunta | Onde mora | Exemplo |
 |---|---|---|---|
-| 1 | Paciente | col. 2, linha 1 | `text-note` 600, `--ink` — **principal** |
-| 2 | Quando (data + hora) | col. 1, coluna própria | `.numero` 500 — **operacional** |
-| 3 | Tipo e duração | col. 2, linha 2 | `text-meta`, `--ink-subtle` — **contextual** |
-| 4 | Onde (bairro) | col. 2, linha 2 | idem |
-| 5 | Cuidador | col. 3 (desktop) / col. 2 linha 3 | `text-note`, `--ink-muted` |
-| 6 | Valor | col. 4, à direita | `.numero` — **complementar** |
-| 7 | Status | col. 5, à direita | `<StatusAtendimento>` |
-| 8 | Recado | linha 3, quando existe | `text-meta` |
-| 9 | Próxima ação | linha 3, quando existe | `ROW_ACTION_CLASS` |
+| **Estado** | Em que ponto do ciclo o registro está? | camada 1, coluna fixa à direita | ● Em busca |
+| **Situação operacional** | De quem a operação está esperando? | camada 3, linha própria | Aguardando cuidador |
+| **Contagem** | Quantos? | camada 4, ou entre parênteses no rótulo da ação | 1 cuidador compatível · Candidaturas (2) |
 
-**Quatro pesos, e nenhum é só cor** — tamanho, peso, posição e agrupamento fazem a hierarquia.
+A regra da situação é sempre a mesma — **nomear a parte que precisa agir**:
 
-**O horário fica numa coluna própria, à esquerda de tudo**, porque numa escala **quando** é a
-primeira pergunta — antes até de quem. É o que uma escala impressa sempre fez.
+| Estado | Situação operacional | De quem se espera |
+|---|---|---|
+| ● Em busca | Aguardando cuidador | ninguém se apresentou ainda |
+| ● Convidado | Aguardando resposta do cuidador | de quem foi convidado |
+| ● Em confirmação | Aguardando sua confirmação | da coordenadora |
+| ● Confirmado em diante | *(o nome do cuidador)* | de ninguém — a espera acabou |
+| ● Rascunho, Cancelado | `—` | não há espera |
+
+Situação e nome do cuidador dividem a **mesma linha** porque são a mesma pergunta em dois tempos:
+enquanto o plantão espera, ela diz *o que* se espera; depois de confirmado, diz *quem* assumiu.
+
+O âmbar de `--status-aberto` só acende **enquanto alguém é esperado** (`ATTENDANCE_SITUATION` cobre
+exatamente os três estados abertos). Num rascunho ou num cancelado ele prometia trabalho que não
+existe, e a coluna inteira acendia sem motivo.
+
+#### Duas disposições, uma hierarquia
+
+O mesmo componente, o mesmo DOM e a mesma hierarquia servem dois trabalhos, e o que os separa é
+**quantos registros a pessoa vai varrer de uma vez**:
+
+| `layout` | Onde | O problema que resolve |
+|---|---|---|
+| `denso` (padrão) | Atendimentos, Escala, agenda do cuidador | trinta plantões numa tela — o que importa é caber |
+| `empilhado` | Início da empresa (Hoje, Em aberto, Próximos) | três ou quatro registros — o que importa é ler de relance |
+
+**Não são dois componentes porque não são duas hierarquias.** Paciente continua sendo o dado
+principal, hora continua sendo a âncora, valor e estado continuam encostados à direita. O que muda
+é só **em que célula da grade cada um cai** — `col-start` / `row-start` por breakpoint, nunca uma
+segunda cópia escondida com `lg:hidden`.
+
+#### A anatomia — `denso`
+
+```
+celular (3 col x 3 linhas)            desktop lg (5 col x 2 linhas)
++------+-----------------+-------+   +------+-----------+---------+-------+--------+
+|14/03 | Marli Gonçalves | R$180 |   |14/03 | Marli G.  | Sandra  | R$180 | o Em   |
+|07:00 | Plantão 12h ... | o Em  |   |07:00 | Plantão.. | Oliveira|       | andam. |
+|      | Sandra Oliveira | andam.|   +------+-----------+---------+-------+--------+
++------+-----------------+-------+
+```
+
+Grade: `[3.25rem_1fr_auto]` no celular, `[3.5rem_1.7fr_1fr_5.5rem_8.5rem]` em `lg`. Preenchimento
+`px-3.5 py-2.5`.
+
+As duas colunas de texto são **fracionárias** (1,7fr e 1fr), não uma elástica e outra fixa: com
+`10rem` fixos, toda a folga de um monitor de 1440px se acumulava num vão entre o nome do paciente
+e o nome do cuidador, e os dois pareciam de linhas diferentes.
+
+#### A anatomia — `empilhado` (mobile-first)
+
+O celular é o ponto de partida, e a leitura **desce** em vez de atravessar. Cada linha responde
+uma pergunta:
+
+```
+celular (2 col x 6 linhas)               desktop sm (3 col x 5 linhas)
++---------------------+-----------+     +------+----------------------+-----------+
+| 26/08 15:00         | o Em busca|     |26/08 | Marli Souza          | o Em busca|
+| Marli Souza         |     R$ 120|     |15:00 | Avulsa · 1h · Centro |           |
+| Avulsa · 1h · Centro            |     |      | Aguardando cuidador  |     R$ 120|
+| Aguardando cuidador             |     |      | 1 cuidador compatível no quadro  |
+| 1 cuidador compatível no quadro |     |      | Buscar cuidadores · Candidaturas |
+| Buscar cuidadores · Candidat... |     +------+----------------------+-----------+
++---------------------------------+
+```
+
+| Linha (celular) | Camada | Responde | Conteúdo |
+|---|---|---|---|
+| 1 | 1 | *quando · como está* | hora (+ data) à esquerda, estado à direita |
+| 2 | 1 · 2 | *quem · quanto* | paciente à esquerda, valor à direita |
+| 3 | 2 | *que trabalho é* | tipo · duração · bairro |
+| 4 | 3 | *de quem se espera* | situação operacional, ou o cuidador |
+| 5 | 4 | *o que já se sabe* | recado neutro — só quando existe |
+| 6 | 5 | *o que dá para fazer* | ações — só quando existem |
+
+As linhas 5 e 6 são o que o Início ganhou na revisão 17. Um plantão de hoje, já confirmado, para na
+linha 4 e continua com quatro linhas — **não se força os dois tipos de registro à mesma altura**.
+Numa lista, a exceção deve se destacar da regra, não ser nivelada com ela.
+
+**A data, quando existe, fica ao lado da hora no celular** (`27/08  07:00`) e volta a empilhar
+sobre ela no desktop. A primeira linha do registro é larga e sobra espaço: empilhar ali gastaria
+uma linha inteira para dois dados curtos, e o estado passaria a flutuar ao lado de um bloco de
+duas alturas. Na calha de 3.5rem do desktop o empilhamento volta a ser o único arranjo que cabe.
+
+**Por que a hora sobe para a primeira linha no celular.** No `denso` ela tem uma calha própria à
+esquerda, porque numa escala **quando** é a primeira pergunta. Em 390px não há largura para calha
+e coluna de texto ao mesmo tempo: a hora sobe, e leva o estado a reboque. A primeira linha do
+registro passa a responder *quando* e *como está*, que é exatamente a leitura de um turno.
+
+**No desktop a calha volta.** A hora ocupa a coluna 1 inteira (`row-span-3`) e a leitura recupera
+a varredura vertical de horários. A estrutura continua sendo uma **lista flexível**, não uma
+tabela rígida: a coluna do meio é `minmax(0,1fr)` e a da direita é `auto`.
+
+A régua é `sm` (640px), não `lg`: a partir daí já existe largura para as três colunas, inclusive
+dentro da coluna de conteúdo de 588px que o Início tem em `lg`.
+
+#### As nove informações do briefing, e onde cada uma cai
+
+| # | Informação | Camada | `denso` | `empilhado` | Peso |
+|---|---|---|---|---|---|
+| 1 | Paciente | 1 | col. 2, linha 1 | linha 2 esq. / col. 2 linha 1 | `text-note` 600, `--ink` — **principal** |
+| 2 | Quando (data + hora) | 1 | col. 1, calha | linha 1 esq. / col. 1 calha | `.numero` 600 — **operacional** |
+| 3 | Status | 1 | col. 5, à direita | linha 1 dir. / col. 3 linha 1 | `<StatusAtendimento>` |
+| 4 | Tipo e duração | 2 | col. 2, linha 2 | linha 3 / col. 2 linha 2 | `text-meta`, `--ink-subtle` — **contextual** |
+| 5 | Onde (bairro) | 2 | col. 2, linha 2 | idem | idem |
+| 6 | Valor | 2 | col. 4, à direita | linha 2 dir. / col. 3 linha 3 | `.numero`, `--ink-muted` |
+| 7 | Situação / Cuidador | 3 | col. 3 (desktop), linha 3 (celular) | linha 4 / col. 2 linha 3 | `text-note`, 500 na situação · `--ink-muted` no nome |
+| 8 | Recado | 4 | linha própria, quando existe | idem | `text-meta`, `--ink-subtle` |
+| 9 | Próxima ação | 5 | linha própria, quando existe | idem | `ROW_ACTION_CLASS` |
+
+**Cinco pesos, e nenhum é só cor** — tamanho, peso, posição e agrupamento fazem a hierarquia.
+
+**A camada 3 é coluna no `denso`, linha no `empilhado`.** Não é inconsistência: com trinta
+registros, uma linha a mais em cada plantão aberto custaria uma tela inteira de rolagem, e no
+desktop denso há uma coluna sobrando para ela — a do cuidador, que é a mesma pergunta. Abaixo de
+`lg`, onde não há largura, ela desce para a terceira linha do bloco de texto.
+
+**O valor não compete com o nome.** No `empilhado` ele fica na mesma linha do paciente, então cai
+para `--ink-muted` e peso 500 contra o `--ink` peso 600 do nome. Continua tabular e alinhado à
+direita: destaque moderado, não segunda manchete.
 
 #### Nenhum ícone
 
@@ -1435,21 +1668,74 @@ ser data, e quatro ícones cinzas na mesma linha viram textura. O que separa os 
 Ícone só entra onde carrega significado que o texto não dá — o cadeado do endereço trancado
 ("isto abre quando você aceitar") — ou onde representa uma ação.
 
-#### A moldura
+#### A moldura — `<AttendanceList variant>`
 
-`<AttendanceList>` é **uma** borda para o conjunto e um fio de 1px entre as linhas, em vez de
-borda e sombra em cada item. É a diferença entre uma planilha e uma pilha de post-its.
+| Variante | Forma | Quando |
+|---|---|---|
+| `moldura` (padrão) | `border border-linha rounded-card bg-surface-raised` + `divide-y` | a lista **é** o conteúdo da tela |
+| `fluxo` | só `divide-y`, mais `-mx-2` | a lista mora sob um `<Secao>`, sem caixa em volta |
 
-Usa `overflow-clip`, **não** `overflow-hidden`: `hidden` cria um contêiner de rolagem e o
-cabeçalho de grupo `sticky` pararia de grudar no topo da janela.
+`moldura` é **uma** borda para o conjunto e um fio de 1px entre as linhas, em vez de borda e
+sombra em cada item. É a diferença entre uma planilha e uma pilha de post-its.
 
-#### Densidade e altura
+`fluxo` tira até essa borda. No Início, onde vários recortes curtos se seguem, cada moldura extra
+é uma parede a mais entre a coordenadora e a operação do dia. O `-mx-2` compensa exatamente o
+`px-2` da linha empilhada: o texto volta a nascer na margem da página, e o fundo de hover/toque
+sobra 8px para cada lado em vez de encostar nas letras. Os fios ficam 8px mais largos que o texto,
+que é o que uma lista impressa sempre fez.
+
+`moldura` usa `overflow-clip`, **não** `overflow-hidden`: `hidden` cria um contêiner de rolagem e
+o cabeçalho de grupo `sticky` pararia de grudar no topo da janela.
+
+#### Separadores
+
+Um fio `divide-linha` de 1px entre registros, e nada mais. Ele existe para três coisas: organizar
+a varredura, marcar onde termina uma área clicável e começa a próxima, e substituir a borda que
+cada card tinha. Nunca uma caixa por item, nunca borda em todos os lados, nunca sombra.
+
+#### Ritmo vertical
+
+O espaço entre as camadas **é** a hierarquia: sem degraus, as seis linhas de um plantão em aberto
+leem como seis frases da mesma altura. A escada tem um degrau grande e o resto pequeno.
+
+```
+Linha principal            hora · paciente · estado
+  ↓ 4px                    (mt-1)
+Informações do atendimento tipo · duração · bairro · valor
+  ↓ 8px                    (mt-2)  ← o único respiro grande
+Situação operacional       Aguardando cuidador
+  ↓ 6px                    (mt-1.5)
+Informação complementar    1 cuidador compatível no quadro
+  ↓ 4px                    (mt-1)
+Ações                      Buscar cuidadores · Candidaturas (1)
+  ↓ 12px                   (py-3 da linha)
+Separador                  ────────────────────────────
+```
+
+**O `mt-2` é a articulação do registro.** Ele separa o **bloco de dados** (camadas 1 e 2) do
+**bloco de operação** (3, 4 e 5). Sem esse degrau, "Aguardando cuidador" lia como uma quarta linha
+de contexto do plantão em vez de como a situação dele.
+
+O ritmo vem de `mt-*` em cada célula, **não** do `gap-y` da grade (que é `0` no `empilhado` e
+`0.5` no `denso`). É deliberado: as camadas 3, 4 e 5 aparecem e somem conforme o plantão, e um vão
+uniforme deixaria buraco onde a camada não existe. Com `mt-*`, a linha que não tem recado
+simplesmente não abre espaço para ele — **nenhuma lacuna artificial**.
+
+#### Densidade, altura e alvo de toque
 
 | | Altura | Antes (card) |
 |---|---|---|
-| desktop, linha simples | ~56px | ~150px |
-| celular, linha simples | ~74px | ~150px |
-| linha com ação | +30px | — |
+| `denso`, desktop, linha simples | ~56px | ~150px |
+| `denso`, celular, linha simples | ~74px | ~150px |
+| `empilhado`, desktop, sem operação | ~66px | — |
+| `empilhado`, celular, sem operação | ~117px (4 linhas) | — |
+| `empilhado`, celular, em aberto | ~190px (6 linhas) | — |
+| `denso`, linha com ação | +30px | — |
+
+O `empilhado` tem `min-h-20` (80px) como **piso** de alvo de toque, para o registro mais curto
+(sem data, sem cuidador) não encolher abaixo do confortável, e `pointer-fine:min-h-0` para devolvê-lo
+à altura do conteúdo onde existe mouse. A régua é o **método de entrada**, não a largura da tela:
+um tablet em paisagem tem largura de desktop e dedo de celular.
 
 **Só a linha que pede trabalho fica mais alta.** A ação rápida aparece apenas onde existe ação —
 o plantão que ainda espera cuidador. Numa lista, a exceção deve se destacar da regra, não ser
@@ -1462,61 +1748,298 @@ nivelada com ela.
 linha que se está lendo não pode depender de rolar de volta. Os grupos entram como `<Fragment>`
 dentro da mesma `<ul>` — um nível a mais de lista tiraria as linhas de baixo do `divide-y`.
 
+#### A área clicável
+
+**A linha inteira é o botão.** Hora, estado, paciente, valor, contexto e cuidador — todos abrem a
+ficha do atendimento. Nunca um botão "Ver atendimento" separado: se o registro inteiro já faz
+aquilo, o botão é uma segunda porta para a mesma sala, ocupando espaço e uma parada a mais de
+tabulação.
+
+A técnica é o **link esticado**: o nome do paciente é o `<a>` real e ganha
+`after:absolute after:inset-0` sobre a `<li>` `relative`. Isso dá três coisas de uma vez — a área
+de clique cobre a linha, existe **um** nó focalizável por registro (não seis), e o leitor de tela
+anuncia o nome do paciente como destino, que é o rótulo certo.
+
+Links de dentro (o nome do cuidador, as ações rápidas) sobem com `relative z-10` para ficar por
+cima do pseudo-elemento e continuar clicáveis.
+
+**As ações da camada 5 são links de texto separados por ponto médio**, nunca botões nem pílulas:
+
+```
+Buscar cuidadores · Candidaturas (1)
+```
+
+O ponto médio é o que faz duas ações lerem como **uma barra de ações**, e não como duas frases
+soltas que por acaso caíram perto. Ele é `aria-hidden` e `select-none`, e o componente que monta a
+lista (`<AttendanceOpenActions>`) só o emite **entre** itens — com um `&&` no meio do JSX, o
+plantão já convidado abria a linha com um ponto médio órfão.
+
+Botão de verdade só entra quando **uma** ação é prioritária a ponto de merecer peso de decisão de
+tela — e numa lista isso quase nunca é verdade: quinze plantões × dois botões são trinta molduras
+dentro de uma lista que a moldura externa já delimita.
+
+**Espaçamento entre alvos:** `gap-x-3` no toque (12px de cada lado do ponto médio, ~28px entre os
+dois alvos de 44px), `pointer-fine:gap-x-2.5` no ponteiro. Dois links colados, mesmo com 44px cada,
+produzem toque errado na borda (seção 11).
+
 #### Estados
 
 | Estado | Comportamento |
 |---|---|
-| `hover` | `bg-surface-sunken/60` na linha inteira. Sem sombra, sem mudança de borda. |
-| foco de teclado | anel no nome do paciente, que é o link esticado. |
-| clique | qualquer ponto da linha abre a ficha (`after:absolute after:inset-0` no nome). |
-| links internos | `relative z-10` para ficarem por cima do link esticado. |
-| sem cuidador | `text-status-aberto` **só** enquanto o plantão espera alguém; fora disso, `—`. |
+| normal | nenhum. Sem borda, sem sombra, sem elevação, sem fundo próprio. |
+| `hover` | `bg-surface-sunken/60` na linha inteira, `transition-colors duration-150 ease-out`, `cursor-pointer` do link. |
+| `active` (toque) | `bg-surface-sunken` — um degrau mais forte que o hover. No toque o dedo cobre o ponto tocado; sem mudança imediata de fundo a pessoa não sabe se pegou. |
+| foco de teclado | anel `:focus-visible` global no nome do paciente **mais** `has-[a:focus-visible]:bg-surface-sunken/60` na `<li>`. Sem o segundo, o anel aparece só em volta do nome e não fica claro que a **linha** é o destino. |
+| sem cuidador | situação da camada 3 em `text-status-aberto`, peso 500, **só** enquanto o plantão espera alguém; em rascunho ou cancelado, `—`. |
 | carregando | `<SkeletonLista>` — a mesma grade, as mesmas colunas. |
+
+**Os estados da ação (camada 5)**, que são os de `ROW_ACTION_CLASS`:
+
+| Estado | Comportamento |
+|---|---|
+| normal | `text-accent`, peso 600, `decoration-transparent` — a cor e o peso já dizem "clicável" sem hover nenhum, que é o que uma pessoa no celular tem. |
+| `hover` | o sublinhado aparece (`decoration-accent/50`). |
+| `active` (pressed) | `text-accent-strong` + `decoration-accent-strong/60`. |
+| foco de teclado | anel `:focus-visible` global. |
+
+O `active:` **não é opcional aqui**. A linha inteira já escurece no toque, e `:active` sobe para os
+ancestrais: sem uma resposta do próprio link, tocar "Buscar cuidadores" acendia a linha toda e
+parecia que o dedo tinha aberto a ficha do plantão em vez da busca. A tinta mais escura do accent é
+o que diz qual dos dois alvos pegou.
+
+**O que nunca entra no hover:** sombra, elevação, `translateY`, borda aparecendo, mudança de raio.
+Qualquer um deles devolve ao registro a aparência de card flutuante que o padrão existe para
+eliminar. Só a tinta do fundo muda.
+
+#### Acessibilidade
+
+- `<ul>` / `<li>` de verdade: o leitor de tela anuncia "lista, 3 itens" e permite pular de item em
+  item. Uma pilha de `<div>` clicáveis não dá nenhuma das duas coisas.
+- **Um** nó focalizável por registro, na ordem visual. Os links internos vêm depois dele.
+- O estado nunca é só cor: `<StatusAtendimento>` carrega **forma + cor + palavra**, e a forma é a
+  primária. A palavra é uma só, visível e anunciada — o `sr-only` com uma segunda redação saiu na
+  revisão 17 junto com o mapa curto: dois textos para o mesmo estado é uma divergência esperando
+  acontecer, e o `sr-only` é onde ela demoraria mais a ser notada.
+- "Aguardando cuidador" é **texto**, não um âmbar sozinho. A cor reforça; a palavra informa. O que
+  a distingue da camada acima é peso (500 contra 400) além da tinta — regra 3.
+- A hierarquia entre as camadas 4 e 5 não depende de cor: a complementar é `<p>` de texto corrido, a
+  ação é `<a>`. Quem navega por teclado ou leitor de tela pula direto para os links; quem lê a tela
+  vê texto neutro seguido de texto de marca.
+- **A ordem do DOM é a ordem das camadas** (1 → 5), e não a da grade: `quando · paciente · estado ·
+  contexto · valor · situação · recado · ações`. Quem ouve a tela recebe *quando, quem, em que pé
+  está* antes de qualquer detalhe — que é a leitura de um turno. A grade reposiciona as células com
+  `col-start`/`row-start` sem tocar nessa sequência, então o estado pode aparecer à direita da
+  primeira linha sem ser anunciado por último.
+- O contexto (`Plantão · 12h · Centro`) é um `<p>` único com separadores textuais, não três spans
+  com bullets decorativos.
+- Alvo de toque de 80px no `empilhado`, bem acima dos 44px mínimos, porque um registro errado
+  aberto no celular custa uma navegação de volta.
+
+#### Comportamento responsivo — resumo
+
+| | `denso` | `empilhado` |
+|---|---|---|
+| < 640px | 3 col × 3 linhas (+2 quando há recado/ação), calha de data/hora | 2 col × 4 linhas (+2 quando há recado/ação), hora no topo |
+| 640–1023px | idem | 3 col × 3 linhas (+2), calha de hora |
+| ≥ 1024px | 5 col × 2 linhas (+2): a camada 3 vira coluna | idem `sm` |
+| toque | `py-2.5`, ações com `min-h-11` e `gap-x-3` | `min-h-20`, `py-3`, idem ações |
+| mouse | idem, ações `pointer-fine:min-h-7` | `pointer-fine:min-h-0`, `py-2.5` |
+
+Uma quantidade só de registros não muda nada: com um atendimento ou com nove, a seção é a mesma
+lista. Não existe tratamento especial para "só um" — criar um card para preencher espaço é
+justamente o que o padrão substituiu.
 
 ---
 
-### 9.1 Histórico de atividades ✅ — `<LinhaDoTempo>`
+### 9.1 Linha do tempo de atividade operacional ✅ — `<LinhaDoTempo>`
 
-**Objetivo.** Mostrar o que aconteceu, quando e por quem — em ordem, sem que o histórico dispute
-atenção com o conteúdo vivo da tela. É requisito de rastreabilidade (R12).
+**Objetivo.** Mostrar o que aconteceu na operação, em ordem, de forma que a coordenadora **varra**
+a coluna de cima para baixo em vez de ler evento por evento. É requisito de rastreabilidade (R12)
+e é a última leitura do Início: hoje → em aberto → à frente → o que acabou de acontecer.
 
-**Onde.** "Atividade recente" no Início, "Histórico" na ficha do atendimento, "Registro de
-atividade" em Configurações.
+**Onde.** "Atividade recente" no Início da empresa e "Histórico" na ficha do atendimento. (O
+"Registro de atividade" de Configurações ainda usa a forma antiga descrita no fim desta seção — é
+o último lugar que sobrou com ela.)
 
-**A revisão 13 deu estrutura ao evento.** Era uma `<ul>` de parágrafos — frase, carimbo, borda
-embaixo, repete — que lia como notas soltas e não como o registro de uma operação. Hoje toda
-entrada tem os mesmos quatro campos:
+**A revisão 16 tirou a moldura e empilhou o carimbo.** Eram duas coisas erradas ao mesmo tempo:
+
+- a seção inteira morava num `<Painel>` com borda e faixa de cabeçalho, e um card de seis eventos
+  no fim de uma coluna de listas soltas lê como *widget de notificações de dashboard*, não como o
+  histórico da operação;
+- o carimbo ficava encostado à direita, na mesma linha do evento. Ele comprimia a frase no que
+  sobrasse de largura, abria um vão no meio de toda entrada curta e — pior — trocava de altura de
+  item para item: quando o evento tinha contexto a data ficava acima dele, quando não tinha ficava
+  sozinha.
+
+Hoje a linha do tempo é **conteúdo do documento**: vive sob um `<Secao>` (seção 7), sem moldura, e
+toda entrada tem exatamente a mesma silhueta — evento, contexto, carimbo, um embaixo do outro.
 
 ```
-●─┐  Check-in registrado                          07:04
-  │  Sandra Oliveira · Vila Mariana, portaria
-  │
-●─┘  Cuidador confirmado                          ontem, 18:22
-     Coordenação
+●  Atendimento de Marli Souza cancelado
+│  Paciente foi internada
+│  23/08 às 22:44
+│
+●  Check-in registrado em Antônio Ferreira
+│  Jardim das Flores (simulado)
+│  23/08 às 06:58
+│
+●  Atendimento de Iracema Bezerra criado
+   22/08 às 16:05
 ```
+
+#### A entrada — três degraus, sempre nesta ordem
 
 | Campo | Papel | Forma |
 |---|---|---|
-| `evento` | o que aconteceu | `text-note` peso 500, `--ink`. Verbo no particípio. |
-| `quando` | o carimbo | `.numero`, `text-meta`, encostado à direita |
-| `contexto` | quem e onde | `text-meta`, `--ink-subtle`, linha própria |
-| `tom` | a natureza do evento | marcador: `feito` · `agora` · `previsto` · `caiu` |
+| `evento` | o que aconteceu | `text-note` peso 500, `--ink`. Verbo no particípio, **sem ponto final**. |
+| `contexto` | a informação complementar | `text-meta`, `--ink-muted`, linha própria, `.prosa`. Motivo, local, responsável. |
+| `quando` | o carimbo | `.numero text-meta`, `--ink-subtle`, sempre a última linha. |
+| `tom` | a natureza do evento | pinta **só o marcador** — ver a tabela abaixo. |
 
-**O conector é um fio de 1px atrás dos marcadores**, não uma borda em cada item: fio contínuo é o
-que faz uma sequência parecer uma sequência. Ele some no último evento, senão a lista parece
-continuar para fora de si.
+**Evento e motivo nunca se juntam numa frase.** `Atendimento de Marli Souza cancelado: Paciente
+foi internada.` obriga a ler a sentença inteira para saber o que aconteceu; separados, o evento é
+escaneável e o motivo fica um degrau abaixo, para quem quiser.
 
-**A ordenação usa o ISO de origem**, nunca o carimbo já formatado — "02/01" vem depois de "28/12"
-no calendário e antes dele em ordem alfabética.
+**O carimbo tem uma forma só no produto inteiro:** `23/08 às 22:44`, de `utils/date.ts` →
+`carimbo()`. Nunca à direita em uns eventos e embaixo em outros; nunca "ontem, 18:22" ao lado de
+"14/03 07:04". O "às" existe porque, como última linha de um evento, `14/03 07:04` vira uma
+sequência de quatro números que o olho lê como um bloco só.
 
-**Restrição.** Evento de histórico **nunca ganha caixa própria**. A regra do módulo é linha,
-conector e separador — nada de card por evento.
+#### Marcadores
+
+Ponto de 8px, `rounded-full`. Pequeno e discreto: é o índice da linha, não o elemento principal
+dela — e **nenhum evento vira crachá, pílula ou ícone**.
+
+| `tom` | Marcador | Quando |
+|---|---|---|
+| `neutro` | `bg-linha-strong` | Rotina sem nada a sinalizar — "atendimento criado", o evento mais comum da lista. |
+| `feito` (padrão) | `bg-accent` | A operação andou: check-in, check-out, confirmação, conclusão. |
+| `agora` | `bg-status-andamento` + `ring-[3px] ring-status-andamento/20` | O estado corrente. No máximo um por lista. |
+| `previsto` | `border-[1.5px] border-linha-strong bg-surface-raised` | Ainda não aconteceu (a régua do ciclo). |
+| `caiu` | `bg-status-cancelado` | Cancelamento e recusa. |
+
+**A cor semântica fica no marcador e só nele.** O texto do evento continua em `--ink` mesmo num
+cancelamento: título inteiro pintado é o começo de uma linha do tempo colorida, e a palavra
+"cancelado" já carrega o significado sem tinta nenhuma (regra 3). Nada de fundo colorido por
+evento, nada de faixa de alerta dentro do histórico — a aparência é sóbria e operacional.
+
+**Três tons por lista, no máximo.** Em "Atividade recente" são `neutro` (criado), `feito`
+(check-in, concluído) e `caiu` (cancelado). Se cada tipo de evento ganhasse a sua cor, a coluna
+viraria uma escala cromática que ninguém lê de cor — e a única coisa que precisa saltar ali é o
+que deu errado.
+
+#### O fio
+
+Um traço de 1px em `--linha` **atrás** dos marcadores — nunca uma borda embaixo de cada item. Fio
+contínuo é o que faz uma sequência parecer uma sequência; borda por item faz seis eventos
+parecerem seis registros sem relação entre si. Ele nasce no centro do primeiro marcador e morre no
+centro do último: nada de fio saindo pelo topo ou pingando abaixo do último evento.
+
+A geometria é fixa e está declarada no componente, porque é o que mantém o fio centrado quando o
+espaçamento mudar:
+
+| Medida | Valor | De onde vem |
+|---|---|---|
+| Centro do marcador | 15px do topo da entrada | `py-1` (4px) + `mt-[7px]` + metade do ponto (4px) |
+| Eixo do fio | `left-[11.5px]` | `px-2` (8px) + metade do ponto (4px) − meio pixel de fio |
+| Travessia do respiro | `-bottom-3` | atravessa os 12px de `pb-3` que separam dois eventos |
+
+Os 15px servem aos dois tamanhos de `text-note` (15px no celular, 14px no desktop): o centro da
+primeira linha de texto cai em 15,25px e em 14,5px, e meio pixel não se vê.
+
+#### Espaçamento
+
+| Entre | Valor |
+|---|---|
+| Evento → contexto | `mt-0.5` (2px) |
+| Contexto → carimbo | `mt-0.5` (2px) |
+| Evento → próximo evento | `pb-3` (12px) no `<li>`; o último não tem |
+| Marcador → texto | `gap-3` (12px) |
+
+Compacto e confortável: sem card por evento, sem separador horizontal entre eventos, sem respiro
+grande sobrando. **O fio já é a estrutura de separação** — qualquer divisor além dele é ruído.
+
+#### Estados clicáveis
+
+Quando o evento tem uma entidade atrás (o atendimento que foi criado, o plantão em que o check-in
+caiu), a prop `para` transforma **a entrada inteira** em link: marcador, evento, contexto e
+carimbo. Só o nome do paciente clicável seria um alvo de ~90px dentro de uma entrada de 300px — no
+celular, um convite a errar o toque. Evento sem destino continua sendo só registro: nenhum cursor,
+nenhum hover, nenhuma borda.
+
+| Estado | Visual |
+|---|---|
+| Repouso | Nada. Sem fundo, sem borda, sem sombra. |
+| Hover | `hover:bg-surface-sunken/60` em `rounded-control`, com `transition-colors duration-150 ease-out`. |
+| Pressionado / toque | `active:bg-surface-sunken` — o dedo cobre o ponto tocado, e sem mudança imediata de fundo a pessoa não sabe se o toque pegou. |
+| Foco de teclado | O anel global de `:focus-visible` (2px `--accent`, offset 2px), que acompanha o `rounded-control` da entrada. |
+| Não clicável | Idêntico ao repouso, num `<div>`. Mesmo recuo, para as duas naturezas alinharem na mesma lista. |
+
+**Nunca:** sombra, elevação, `translate`, borda no hover, ou qualquer coisa que transforme a
+entrada num card ao passar o mouse. O retorno é uma mudança de fundo e nada mais.
+
+**Alvo de toque.** A entrada mais curta possível — evento de uma linha mais o carimbo — mede ~49px
+no celular (4 + 22,5 + 2 + 18,2 + 4), acima do piso de 44px da seção 11 sem precisar de `min-h`.
+Se algum dia existir entrada sem carimbo, ela passa a precisar de `min-h-11 pointer-fine:min-h-0`.
+
+**A sangria.** A entrada usa `-mx-2 px-2`: o marcador nasce na margem do texto da página e o fundo
+de hover sobra 8px de cada lado em vez de encostar nas letras. É o mesmo recuo do
+`<AttendanceList variant="fluxo">`, e é o que faz as seções do Início alinharem entre si. Dentro
+de um `<Painel>`, quem dá o recuo é a moldura — ali a linha do tempo devolve a sangria com
+`className="mx-2"`.
+
+#### Estados da seção
+
+| Estado | Visual |
+|---|---|
+| Com eventos | A linha do tempo acima, sob um `<Secao title="Atividade recente">`. |
+| Vazia | `<Vazio porte="solto">Sem movimentação registrada.</Vazio>` — sem moldura tracejada. |
+| Entrada com ressalva | Sufixo em texto no contexto: `· acrescentada após o check-out`. Nunca só uma cor. |
+
+#### Mobile e desktop
+
+**A disposição é uma só, e é a do celular.** Largura total, marcador à esquerda, três linhas
+empilhadas à direita dele. No desktop **nada muda de estrutura**: a coluna fica mais larga, o
+contexto quebra menos e o `.prosa` segura a linha em 62ch para o texto não atravessar um monitor
+inteiro. A linha do tempo **não vira tabela, card, grade de colunas nem painel de eventos** — em
+nenhuma largura.
+
+Data à direita é proibida em qualquer tamanho de tela: foi exatamente o que a revisão 16 desfez.
+
+#### Acessibilidade
+
+- `<ol>` de `<li>`: é uma sequência ordenada, e o leitor de tela anuncia "lista, 6 itens".
+- Marcador e fio são `aria-hidden` — cor e traço não carregam informação que o texto já não diga.
+- Na entrada clicável, o nome acessível do link é o texto inteiro da entrada ("Atendimento de
+  Marli Souza cancelado, Paciente foi internada, 23/08 às 22:44"), nunca "ver mais".
+- Contraste: `--ink` no evento, `--ink-muted` no contexto e `--ink-subtle` no carimbo passam de
+  4,5:1 em todas as superfícies claras (seção 2). O marcador não responde por contraste de texto
+  porque não carrega informação sozinho.
+- Ordem: mais recente primeiro em "Atividade recente" — histórico que começa no evento mais antigo
+  obriga a rolar até o fim para ver o que acabou de acontecer; cronológica crescente na ficha do
+  atendimento, onde o que se lê é o ciclo do plantão.
+- **A ordenação usa o ISO de origem**, nunca o carimbo já formatado — "02/01" vem depois de
+  "28/12" no calendário e antes dele em ordem alfabética.
 
 ```tsx
-<LinhaDoTempo eventos={[{ id, evento: "Check-out registrado", contexto: "3 de 3 tarefas", quando: "24/08 19:02" }]} />
+<Secao title="Atividade recente">
+  <LinhaDoTempo
+    eventos={[
+      {
+        id: "at3-cancel",
+        evento: "Atendimento de Marli Souza cancelado",
+        contexto: "Paciente foi internada",
+        quando: carimbo(cancellation.at), // "23/08 às 22:44"
+        tom: "caiu",
+        para: "/empresa/atendimentos/at3",
+      },
+    ]}
+  />
+</Secao>
 ```
 
-**A forma antiga**, ainda válida para listas simples de observação:
+**A forma antiga**, ainda em uso no "Registro de atividade" de Configurações, onde as entradas são
+de auditoria (ação · autor · detalhe) e não eventos de uma operação:
 
 ```tsx
 <ul>
@@ -1531,38 +2054,23 @@ conector e separador — nada de card por evento.
 </ul>
 ```
 
-**Anatomia de uma entrada — três partes, sempre nesta ordem:**
-
 | Parte | Estilo | Regra |
 |---|---|---|
 | Ação | `font-semibold` | Verbo no passado, curto: "Aprovou", "Bloqueou", "Cancelou". |
 | Detalhe | `text-note` normal, após `—` | Sobre quem ou o quê. |
-| Carimbo | `numero text-meta text-ink-subtle`, linha própria | **Sempre `.numero`**: é registro, e registro não usa o corpo do texto (seção 4). Autor · data e hora, separados por `·`. |
+| Carimbo | `numero text-meta text-ink-subtle`, linha própria | **Sempre `.numero`**: é registro, e registro não usa o corpo do texto (seção 4). |
 
-**Ordem.** Mais recente primeiro, sempre (`[...log].reverse()`). Histórico que começa no evento
-mais antigo obriga a rolar até o fim para ver o que acabou de acontecer.
+**Restrições.**
 
-**Estados.**
-
-| Estado | Visual |
-|---|---|
-| Com entradas | A lista acima. |
-| Vazio | Bloco tracejado da seção 8.2: "Nenhum registro ainda." |
-| Entrada com ressalva | Sufixo no carimbo, em texto: `· acrescentada após o check-out`. Nunca só uma cor. |
-
-**Espaçamento.** `py-2.5` por entrada, divisor de 1px `border-linha`, `last:border-0`. Sem `gap` —
-o padding e o divisor já dão o ritmo.
-
-**Mobile.** Largura total, sem card, sem recuo. **É de propósito que histórico não seja card:**
-numa lista de vinte eventos, vinte cards com borda e sombra viram um paredão a 390px, e o
-histórico é conteúdo de consulta, não de ação. A ação e o detalhe fluem na mesma linha e quebram
-naturalmente; o carimbo vai sempre em linha própria, para não competir por largura.
-
-**Restrições.** Sem ícone por tipo de evento — vinte ícones diferentes numa coluna estreita viram
-ruído, e o verbo já diz. Sem cor por tipo de ação: o histórico é passado, e passado não usa o
-semáforo (seção 3). Se o histórico passar de ~20 entradas visíveis, ele ganha "Ver mais" em
-`Button variant="ghost"` — nunca rolagem interna própria, que em celular briga com a rolagem da
-página.
+- **Evento de histórico nunca ganha caixa própria**, e a linha do tempo inteira também não: nada
+  de `<Painel>` em volta de "Atividade recente" no Início.
+- **Sem ícone por tipo de evento** — vinte ícones diferentes numa coluna estreita viram textura, e
+  o verbo já diz o que aconteceu.
+- **Sem badge, pílula ou crachá dentro da entrada.** O único elemento gráfico é o ponto de 8px.
+- **Sem separador horizontal** entre eventos. O fio faz esse trabalho.
+- Se a linha do tempo passar de ~20 entradas visíveis, ela ganha "Ver mais" em
+  `Button variant="ghost"` — nunca rolagem interna própria, que em celular briga com a rolagem da
+  página.
 
 ### 9.2 Faixa de números ✅
 
@@ -1763,7 +2271,9 @@ era otimismo.
 | `<Check>` (linha inteira) | 44px | 25px | ✅ `min-h-11 pointer-fine:min-h-0` |
 | Estrela de avaliação | 44px | 28px | ✅ `size-11 pointer-fine:size-7` |
 | `<VoltarLink>` | 44px | justo | ✅ `min-h-11 px-2 -ml-2 pointer-fine:*` |
-| Ação do card de atendimento | 44px | 32px | ✅ `min-h-11 pointer-fine:min-h-8` |
+| Ação da linha de registro (`ROW_ACTION_CLASS`) | 44px | 28px | ✅ `min-h-11 pointer-fine:min-h-7` |
+| Link de cabeçalho de `<Secao>` (`SECAO_LINK_CLASS`) | 44px | justo | ✅ `min-h-11` + `-my-2.5` no contêiner, `pointer-fine:min-h-0` |
+| Ação secundária de card (`ACTION_LINK_CLASS`) | 44px | 32px | ✅ `min-h-11 pointer-fine:min-h-8` |
 | Campo (`field.ts`) | 44px | 44px | ✅ `min-h-11` — media 43px por arredondamento |
 | Sino / "Mais" do cabeçalho | 44px | — | ✅ `size-11` |
 | Linha da folha "Mais" | 48px | — | ✅ `min-h-12` |
@@ -1787,6 +2297,11 @@ plantões. Medido: 1440px com mouse → linha de 25px, chip de 35px; 390px e **1
 **37 alvos abaixo de 44px para 1**. O que sobra é o link "Criar cadastro" dentro da frase "Ainda
 não tem conta?" — a WCAG 2.5.8 isenta explicitamente link embutido em bloco de texto, e aumentá-lo
 quebraria a linha.
+
+O "Ver todos" do cabeçalho de `<Secao>` nasceu **depois** dessa varredura (revisão 15) e entrou com
+~18px; foi corrigido na revisão 17. É o padrão do buraco: componente novo não herda a régua de
+alvo, herda o CSS de quem foi copiado. Componente que introduz um elemento clicável precisa entrar
+nesta tabela no mesmo PR.
 
 **A saída quando o visual não pode crescer:** aumente a área, não o desenho. Margem negativa
 (`size-11 -m-2.5`) expande o alvo sem engordar o ícone — é o que o ✕ do modal e do toast fazem.
@@ -1889,6 +2404,11 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 - [ ] Um `h1` (`text-display`) por tela; uma única ação `primary`.
 - [ ] Todo `.numero` é registro, data, hora, valor ou documento — nada de texto corrido.
 - [ ] A marca aparece via `<Logo>`/`<LogoMark>`, sem fundo próprio e com o nome em caixa normal.
+- [ ] Numa linha de registro, cada camada está no seu lugar (seção 9.0): **estado** na coluna fixa
+      (sempre um estado, nunca contagem nem substantivo de coisa), **situação** em linha própria,
+      **informação complementar** neutra, **ação** em `text-accent`. Informação e ação nunca
+      dividem a mesma faixa.
+- [ ] Texto de dado é frase inteira: "1 cuidador compatível no quadro", não "1 compatível".
 
 **Estados**
 
@@ -1925,6 +2445,134 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 17 — o plantão em aberto ganhou camadas (agosto/2026)
+
+**O problema.** A seção "Em aberto" do Início já era lista e não card — isso a revisão 15 tinha
+resolvido. O que sobrou foi de **hierarquia dentro do registro**: um plantão sem cuidador carrega
+quatro informações a mais que um confirmado, e as quatro chegavam achatadas no mesmo plano.
+
+Três defeitos concretos, e nenhum deles era de cor ou de espaçamento:
+
+1. **A coluna de estado misturava conceitos.** Ela dizia "Em busca" numa linha, "Convidado" na
+   seguinte e "Candidaturas" na terceira. As duas primeiras são estados; a terceira é um
+   substantivo de coisa. Ler uma coluna em que a posição ora responde *em que pé está* e ora
+   responde *o que chegou* obriga a parar e reinterpretar a posição a cada linha.
+2. **Informação e ação dividiam a mesma faixa.** "1 compatível no quadro" ficava a 12px de "Buscar
+   cuidadores" e "Candidaturas (1)", com pesos parecidos. A informação parecia um link que não
+   clicava; os links pareciam continuação da frase.
+3. **A situação operacional não tinha degrau.** "Aguardando cuidador" era mais uma linha de texto
+   secundário, do mesmo tamanho e no mesmo cinza do bairro e da duração — quando é exatamente a
+   frase que diz por que aquele registro está naquela seção.
+
+Havia ainda uma redundância de vocabulário atrás do defeito 1: dois mapas de rótulo
+(`ATTENDANCE_STATUS_LABEL` e `ATTENDANCE_STATUS_SHORT`) que divergiam em dois estados, e a palavra
+"Candidaturas" aparecendo três vezes no mesmo registro — como estado, como situação e como ação.
+
+**O que mudou.**
+
+| | Antes | Depois |
+|---|---|---|
+| Vocabulário de estado | dois mapas, divergentes em 2 estados | **um** mapa; `sr-only` da variante `linha` removido |
+| `applications_received` | "Candidaturas" / "Candidaturas recebidas" | **"Em confirmação"** — estado, não contagem |
+| `invited` | "Convidado" / "Convite enviado" | **"Convidado"**, nos dois lugares |
+| Situação operacional | "Aguardando cuidador" para os três estados abertos, `text-meta` 400 | frase por estado (`ATTENDANCE_SITUATION`), `text-note` **500**, degrau `mt-2` |
+| Recado + ações | uma linha, `gap-x-3` entre eles | **duas camadas**, uma linha cada |
+| Ações | dois links com `gap` | links separados por **ponto médio**, com `active:` próprio |
+| Recado | "1 compatível no quadro" | "1 cuidador compatível no quadro" |
+| "Ver todos" do `<Secao>` | ~18px de alvo | 44px no toque, sem engordar o cabeçalho |
+
+O registro passou a ter **cinco camadas nomeadas** (seção 9.0), e a regra da camada 3 é a que
+organiza o resto: a situação **nomeia a parte que precisa agir** — o cuidador que não apareceu, o
+cuidador que não respondeu, a coordenadora que não confirmou. Estado responde *em que ponto do
+ciclo*; situação responde *de quem se está esperando*; contagem responde *quantos* e mora na
+camada 4 ou entre parênteses no rótulo da ação. Três perguntas, três lugares fixos.
+
+**O que não mudou, e é o ponto.** Nenhum card voltou. Nenhuma borda em volta de registro, nenhuma
+sombra, nenhuma pílula, nenhum badge grande. Os separadores continuam sendo um fio de 1px, a linha
+inteira continua sendo a área clicável, e o `denso` continua cabendo em ~56px porque lá a camada 3
+é coluna, não linha. A seção "Em aberto" continua falando a mesma língua de "Atendimentos de hoje"
+— só que com duas camadas a mais, porque tem duas perguntas a mais a responder.
+
+**Onde bateu.** `constants/attendance.ts` (vocabulário), `StatusAtendimento` (um rótulo só),
+`AttendanceRow` (as cinco camadas e o ritmo), `AttendanceOpenActions` (ponto médio),
+`button-classes.ts` (`SECAO_LINK_CLASS`, `active:` nas ações), `Secao` (alvo de toque do
+cabeçalho), Início da empresa (texto do recado).
+
+---
+
+### Revisão 16 — "Atividade recente" virou histórico (agosto/2026)
+
+A revisão 15 tirou três seções do Início da moldura e deixou uma de fora: "Atividade recente"
+continuou num `<Painel>` com borda e faixa de cabeçalho, no fim da coluna. O argumento da época
+era que ela não é uma lista de registros, é outro padrão. Só que o efeito na tela era o contrário
+do pretendido — no fim de três listas soltas, a única caixa restante não lia como "esta é
+diferente", lia como **um card genérico de dashboard com uma lista de notificações dentro**, que é
+exatamente a aparência que o produto evita.
+
+O que mudou:
+
+- **A moldura caiu.** A seção passou a `<Secao title="Atividade recente">`, como as três de cima:
+  rótulo em versalete, cronologia embaixo, nada em volta. O fio da linha do tempo delimita a
+  região melhor do que uma borda faria.
+- **O carimbo desceu para baixo do evento.** Encostado à direita, ele comprimia a frase, abria um
+  vão no meio de toda entrada curta e trocava de altura de item para item. Empilhado, todo evento
+  tem a mesma silhueta e a coluna vira uma varredura de cima para baixo.
+- **Evento e motivo se separaram.** `recentActivity()` passou a devolver `text` e `detail`: era
+  uma frase só — "Atendimento de Marli Souza cancelado: Paciente foi internada." — e virou título
+  em peso 500 mais uma linha secundária.
+- **O marcador ganhou o tom `neutro`** (`--linha-strong`), para a rotina não gastar a tinta da
+  marca: hoje a coluna tem três tons — neutro para "criado", accent para "check-in" e "concluído",
+  vermelho queimado para "cancelado".
+- **A cor semântica saiu do texto.** O evento cancelado deixou de sair em vermelho: a tinta fica
+  no ponto de 8px, e a palavra "cancelado" faz o resto (regra 3).
+- **A entrada inteira virou o alvo de clique** (prop `para`) — marcador, evento, contexto e
+  carimbo levam à ficha do atendimento que gerou o evento, com `hover:bg-surface-sunken/60` e
+  `active:bg-surface-sunken`. Antes a atividade era texto morto: lia-se "Check-in registrado em
+  Antônio Ferreira" e era preciso procurar o plantão na mão, na tela ao lado.
+- **`carimbo()` passou a escrever `23/08 às 22:44`.** Como última linha de um evento, `23/08 22:44`
+  vira uma sequência de quatro números que o olho lê como um bloco só. Vale para o produto inteiro
+  — carimbo de observação e de mensagem incluídos.
+
+**Nada de dado ou de regra mudou**: são os mesmos seis eventos, derivados dos mesmos atendimentos
+da empresa (nunca do `auditLog` global, que quebraria o isolamento de dados). O que mudou é que
+agora eles se leem como o histórico de uma operação.
+
+### Revisão 15 — o Início saiu da moldura (agosto/2026)
+
+"Atendimentos de hoje" era um `<Painel>` com borda, faixa de cabeçalho e pastilha de contagem,
+contendo três linhas. O resultado lia como *um card grande com um atendimento dentro*, e não como
+*a lista operacional do dia* — que é o que a coordenadora abre a tela para ver. Empilhado com "Em
+aberto", "Próximos" e "Atividade recente", o Início somava quatro molduras entre ela e cinco
+plantões: exatamente o acúmulo que faz uma tela de trabalho parecer dashboard genérico.
+
+O que mudou:
+
+- Nasceu o **`<Secao>`** ([seção 7](#secao--a-região-sem-moldura)), o terceiro degrau da escada de
+  contêineres: uma região **nomeada**, sem moldura nenhuma. Rótulo `text-dado` versalete e
+  contagem como número puro depois de um ponto médio — `ATENDIMENTOS DE HOJE · 3`.
+- O **`<AttendanceRow>` ganhou a disposição `empilhado`** ([9.0](#90-o-registro-de-atendimentos----attendancerow--attendancelist)),
+  mobile-first: hora e estado na primeira linha, paciente e valor na segunda, contexto na terceira,
+  cuidador na quarta. No desktop a calha de hora volta e o registro cai para três linhas. Mesmo
+  componente, mesmo DOM, mesma hierarquia — só muda em que célula cada dado cai.
+- O **`<AttendanceList>` ganhou a variante `fluxo`**: os fios entre as linhas, sem borda, fundo
+  nem raio, com `-mx-2` para o fundo de hover sobrar 8px de cada lado do texto.
+- **O feedback de toque passou a existir.** Havia `hover:` e nada para o dedo. Entraram
+  `active:bg-surface-sunken` e `has-[a:focus-visible]` na linha inteira — sem o segundo, o anel de
+  foco cercava só o nome do paciente e não dizia que a **linha** era o destino.
+- O piso de toque do `empilhado` é `min-h-20` com `pointer-fine:min-h-0`. A régua é o método de
+  entrada, não a largura da tela.
+- O **`<Vazio>` ganhou o porte `solto`** (sem recuo horizontal), para o vazio dentro de uma seção
+  alinhar com as linhas da lista em vez de recuar 14px de uma borda que não existe.
+- **"Sem cuidador" virou "Aguardando cuidador"**, na linha e na ficha. Dois rótulos para o mesmo
+  estado é o começo de um vocabulário que ninguém consegue manter.
+
+**As três leituras da escala mudaram juntas** — Hoje, Em aberto e Próximos: o que acontece agora,
+o que falta resolver, o que vem à frente. Sem moldura, o que separa uma seção da outra é o rótulo
+em versalete e o espaço; uma caixa sobrando no meio de listas soltas não lê como "esta é
+diferente", lê como sobra. "Atividade recente" ficou de fora desta revisão por ser
+uma linha do tempo e não uma lista de registros — exceção que a revisão 16 desfez: no fim de três
+listas soltas, a última moldura restante lia como um card de dashboard esquecido ali.
 
 ### Revisão 14 — a cor de sinalização ganhou uma escala (agosto/2026)
 
@@ -2407,6 +3055,14 @@ faz diferença.
 **Dois vermelhos vizinhos.** `status-cancelado` (`#A53F34`) e `status-bloqueado` (`#7A2B23`) são
 próximos de propósito — são estados vizinhos — mas se um dia aparecerem lado a lado na mesma
 lista, o bloqueado precisa ganhar um ícone de cadeado além do tom.
+
+**Link de ação no cabeçalho de `<Painel>`.** A revisão 17 levou o "Ver todos" do `<Secao>` a 44px
+de alvo com `SECAO_LINK_CLASS` + `-my-2.5` no contêiner. O "Ver tudo" do Início do cuidador vive
+num `<Painel actions>`, cujo cabeçalho tem preenchimento próprio e também recebe `<Button size="sm">`
+em outras telas — a mesma margem negativa ali puxaria os botões para fora da faixa. A correção
+certa é dar ao `<Painel>` o mesmo tratamento condicional que a `<Secao>` recebeu, medindo antes o
+efeito nos call sites que passam botão. Enquanto isso, aquele link continua com ~18px de altura
+clicável no celular.
 
 **Toast e ações fora do fluxo confirmado.** O `<Toast>` está ligado em quatro ações (publicar,
 salvar rascunho, aprovar, recusar). Convite enviado, check-in e check-out **não** usam aviso

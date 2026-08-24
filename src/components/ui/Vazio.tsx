@@ -22,8 +22,13 @@ interface VazioProps {
   children: ReactNode;
   /** A saída: um botão, um link. */
   acao?: ReactNode;
-  /** `bloco` ocupa a altura de uma lista curta; `linha` é a anotação de uma seção pequena. */
-  porte?: "linha" | "bloco";
+  /**
+   * `bloco` ocupa a altura de uma lista curta; `linha` é a anotação de uma seção pequena.
+   * `solto` é o mesmo `linha` **sem** recuo horizontal, para a seção sem moldura (`<Secao>`),
+   * onde não existe borda de painel da qual afastar o texto — ali o recuo só desalinharia a
+   * frase em relação às linhas da lista logo acima.
+   */
+  porte?: "linha" | "bloco" | "solto";
   className?: string;
 }
 
@@ -31,7 +36,7 @@ export function Vazio({ children, acao, porte = "bloco", className = "" }: Vazio
   return (
     <div
       className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 text-note text-ink-subtle ${
-        porte === "bloco" ? "px-3.5 py-6" : "px-3.5 py-3"
+        porte === "bloco" ? "px-3.5 py-6" : porte === "linha" ? "px-3.5 py-3" : "py-3"
       } ${className}`}
     >
       <p className="prosa min-w-0">{children}</p>

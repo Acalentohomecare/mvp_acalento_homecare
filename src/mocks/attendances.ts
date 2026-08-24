@@ -28,7 +28,7 @@ export const ATTENDANCES: Attendance[] = [
     status: "confirmed",
     openApplications: false,
     confirmedCaregiverId: "cg1",
-    createdAt: isoDate(-2),
+    createdAt: isoDateTime(-2, "10:24"),
   },
   {
     id: "at2",
@@ -48,7 +48,7 @@ export const ATTENDANCES: Attendance[] = [
     value: 120,
     status: "applications_received",
     openApplications: false,
-    createdAt: isoDate(-1),
+    createdAt: isoDateTime(-1, "16:05"),
   },
   {
     id: "at3",
@@ -67,7 +67,7 @@ export const ATTENDANCES: Attendance[] = [
     value: 150,
     status: "open",
     openApplications: false,
-    createdAt: isoDate(0),
+    createdAt: isoDateTime(0, "08:26"),
   },
   {
     id: "at4",
@@ -89,7 +89,7 @@ export const ATTENDANCES: Attendance[] = [
     confirmedCaregiverId: "cg2",
     checkinAt: isoDateTime(0, "06:58"),
     checkinLocation: "Jardim das Flores (simulado)",
-    createdAt: isoDate(-4),
+    createdAt: isoDateTime(-4, "09:38"),
   },
   {
     id: "at5",
@@ -112,7 +112,7 @@ export const ATTENDANCES: Attendance[] = [
     checkinAt: isoDateTime(-6, "06:55"),
     checkinLocation: "Jardim das Flores (simulado)",
     checkoutAt: isoDateTime(-5, "07:03"),
-    createdAt: isoDate(-8),
+    createdAt: isoDateTime(-8, "14:50"),
   },
   {
     id: "at6",
@@ -135,7 +135,7 @@ export const ATTENDANCES: Attendance[] = [
     checkinAt: isoDateTime(-10, "07:02"),
     checkinLocation: "Centro (simulado)",
     checkoutAt: isoDateTime(-10, "19:05"),
-    createdAt: isoDate(-12),
+    createdAt: isoDateTime(-12, "11:07"),
   },
   {
     id: "at7",
@@ -160,7 +160,7 @@ export const ATTENDANCES: Attendance[] = [
       reason: "Paciente foi internada.",
       noticeHours: 11,
     },
-    createdAt: isoDate(-16),
+    createdAt: isoDateTime(-16, "08:45"),
   },
   {
     id: "at8",
@@ -179,7 +179,7 @@ export const ATTENDANCES: Attendance[] = [
     value: 180,
     status: "open",
     openApplications: true,
-    createdAt: isoDate(0),
+    createdAt: isoDateTime(0, "07:15"),
   },
   {
     id: "at9",
@@ -198,7 +198,7 @@ export const ATTENDANCES: Attendance[] = [
     value: 90,
     status: "draft",
     openApplications: false,
-    createdAt: isoDate(0),
+    createdAt: isoDateTime(0, "09:05"),
   },
   {
     id: "at10",
@@ -217,7 +217,7 @@ export const ATTENDANCES: Attendance[] = [
     value: 185,
     status: "invited",
     openApplications: false,
-    createdAt: isoDate(-1),
+    createdAt: isoDateTime(-1, "17:41"),
   },
   {
     id: "at11",
@@ -237,7 +237,7 @@ export const ATTENDANCES: Attendance[] = [
     status: "confirmed",
     openApplications: false,
     confirmedCaregiverId: "cg4",
-    createdAt: isoDate(-3),
+    createdAt: isoDateTime(-3, "13:19"),
   },
   {
     id: "at12",
@@ -260,7 +260,7 @@ export const ATTENDANCES: Attendance[] = [
     checkinAt: isoDateTime(-3, "06:50"),
     checkinLocation: "Vila Nova (simulado)",
     checkoutAt: isoDateTime(-2, "07:10"),
-    createdAt: isoDate(-5),
+    createdAt: isoDateTime(-5, "10:56"),
   },
   {
     id: "at13",
@@ -280,7 +280,7 @@ export const ATTENDANCES: Attendance[] = [
     status: "confirmed",
     openApplications: false,
     confirmedCaregiverId: "cg2",
-    createdAt: isoDate(-1),
+    createdAt: isoDateTime(-1, "18:30"),
   },
   {
     id: "at14",
@@ -299,7 +299,7 @@ export const ATTENDANCES: Attendance[] = [
     value: 100,
     status: "applications_received",
     openApplications: false,
-    createdAt: isoDate(0),
+    createdAt: isoDateTime(0, "06:40"),
   },
   {
     id: "at15",
@@ -318,6 +318,6 @@ export const ATTENDANCES: Attendance[] = [
     value: 175,
     status: "open",
     openApplications: false,
-    createdAt: isoDate(0),
+    createdAt: isoDateTime(0, "07:48"),
   },
 ];

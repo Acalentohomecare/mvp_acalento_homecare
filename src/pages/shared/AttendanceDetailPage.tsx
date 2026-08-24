@@ -313,7 +313,7 @@ export function AttendanceDetailPage() {
               </Dado>
               <Dado termo="Perfil exigido">{CATEGORY_LABEL[attendance.requiredCategory]}</Dado>
               <Dado termo="Cuidador">
-                {caregiver ? caregiver.name : <span className="text-status-aberto">Sem cuidador</span>}
+                {caregiver ? caregiver.name : <span className="text-status-aberto">Aguardando cuidador</span>}
               </Dado>
               <Dado termo="Valor">
                 <span className="numero">{formatCurrency(attendance.value)}</span>
@@ -504,7 +504,11 @@ export function AttendanceDetailPage() {
         <div className="flex min-w-0 flex-col gap-5">
           {/* ---------- histórico ---------- */}
           <Painel title="Histórico">
-            <LinhaDoTempo eventos={eventos} />
+            {/* `mx-2` devolve a sangria de 8px que a linha do tempo abre para o fundo de hover
+                sobrar dos lados. No Início ela é necessária — lá os eventos são clicáveis e
+                nascem na margem da página; dentro de um painel quem dá o recuo é a moldura, e sem
+                a compensação os eventos ficariam 8px à esquerda do próprio cabeçalho. */}
+            <LinhaDoTempo eventos={eventos} className="mx-2" />
           </Painel>
 
           {/* ---------- Etapa 14: avaliação ---------- */}

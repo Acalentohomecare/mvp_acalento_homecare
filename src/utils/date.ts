@@ -59,16 +59,41 @@ export function rotuloDoDia(iso: string, hoje = new Date()): string {
   return `${diaDaSemana(iso)}, ${diaMes(iso)}`;
 }
 
-/** Carimbo de evento: `14/03 07:04`. Usado na linha do tempo e no registro de atividade. */
+/**
+ * Carimbo de evento: `14/03 às 07:04`. Usado na linha do tempo, na observação e na mensagem.
+ *
+ * O "às" entrou junto com a linha do tempo empilhada (revisão 16). Sem ele, `14/03 07:04` é uma
+ * sequência de quatro números que o olho lê como um bloco só — tolerável quando o carimbo estava
+ * numa coluna própria, à direita, mas não quando ele passou a ser a **última linha de um evento**,
+ * logo abaixo de uma frase. Ali a preposição é o que separa data de hora sem gastar um separador
+ * gráfico.
+ */
 export function carimbo(iso: string): string {
-  const d = new Date(iso);
+  const d = paraData(iso);
   const data = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
-  const hora = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-  return `${data} ${hora}`;
+  return `${data} às ${hora(d)}`;
 }
 
-/** Carimbo com ano, para quando o evento pode ser antigo. */
+/** Carimbo com ano, para quando o evento pode ser antigo: `14/03/2026 às 07:04`. */
 export function carimboCompleto(iso: string): string {
-  const d = new Date(iso);
-  return `${dataCompleta(d.toISOString().slice(0, 10))} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const d = paraData(iso);
+  const data = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+  return `${data} às ${hora(d)}`;
+}
+
+/*
+ * Data **sem hora** é meia-noite local, nunca UTC.
+ *
+ * `new Date("2026-03-14")` cai em 00:00Z — que em Brasília é 21:00 **do dia anterior**. Enquanto o
+ * `createdAt` dos atendimentos era uma data seca, a linha do tempo mostrava todo "atendimento
+ * criado" um dia antes do que foi, sempre às 21:00. Os mocks passaram a gravar hora, mas a guarda
+ * fica: é a mesma armadilha que `rotuloDoDia` evita do outro lado, e a regra do arquivo é uma só —
+ * data deste produto é lida no fuso de quem lê.
+ */
+function paraData(iso: string): Date {
+  return new Date(iso.includes("T") ? iso : `${iso}T00:00`);
+}
+
+function hora(d: Date): string {
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }

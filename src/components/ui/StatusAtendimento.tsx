@@ -2,7 +2,6 @@ import {
   ATTENDANCE_STATUS_BLOCK,
   ATTENDANCE_STATUS_LABEL,
   ATTENDANCE_STATUS_SHAPE,
-  ATTENDANCE_STATUS_SHORT,
   ATTENDANCE_STATUS_TINT,
   type StatusShape,
 } from "../../constants/attendance";
@@ -99,15 +98,17 @@ export function StatusAtendimento({ status, variant = "linha", className = "" }:
     );
   }
 
-  /* Na coluna, a forma curta; para leitor de tela, a longa — "Candidaturas" sozinho não diz o
-     que aconteceu, e quem ouve a tela não tem a coluna para dar o contexto. */
+  /* Uma palavra só, visível e anunciada. Havia aqui uma forma curta para os olhos e uma longa
+     em `sr-only` para o leitor de tela, porque "Candidaturas" sozinho não dizia o que tinha
+     acontecido. Com o rótulo unificado (`ATTENDANCE_STATUS_LABEL`) o problema deixou de existir
+     na origem, e a duplicata some junto: dois textos para o mesmo estado é uma divergência
+     esperando acontecer, e o `sr-only` é onde ela demoraria mais a ser notada. */
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-meta font-semibold whitespace-nowrap ${tint} ${className}`}
     >
       <MarcadorEstado shape={shape} />
-      <span aria-hidden="true">{ATTENDANCE_STATUS_SHORT[status]}</span>
-      <span className="sr-only">{label}</span>
+      {label}
     </span>
   );
 }

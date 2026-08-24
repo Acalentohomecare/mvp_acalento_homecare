@@ -110,10 +110,25 @@ export function activeCaregiverIds(list: Attendance[]): string[] {
   return [...new Set(ids)];
 }
 
+/** A natureza do que aconteceu. Quem exibe decide a tinta do marcador a partir daqui. */
+export type RecentActivityKind = "criado" | "checkin" | "concluido" | "cancelado";
+
 export interface RecentActivityEntry {
   id: string;
   at: string;
+  /** O evento. Frase curta, verbo no particípio, **sem ponto final** — é rótulo, não parágrafo. */
   text: string;
+  /**
+   * A informação complementar do evento: o motivo do cancelamento, o local do check-in.
+   *
+   * Nasceu porque o cancelamento vinha como `"... cancelado: Paciente foi internada."` — evento e
+   * motivo grudados numa frase só, que na linha do tempo obriga a ler a sentença inteira para
+   * descobrir o que aconteceu. Separados, o evento é escaneável e o motivo fica um degrau abaixo.
+   */
+  detail?: string;
+  kind: RecentActivityKind;
+  /** O atendimento de origem — é ele que a entrada abre quando a linha do tempo é clicável. */
+  attendanceId: string;
 }
 
 /**
@@ -129,16 +144,17 @@ export function recentActivity(
   const entries: RecentActivityEntry[] = [];
 
   for (const a of list) {
+    const nome = patientName(a.patientId);
     if (a.checkoutAt) {
-      entries.push({ id: `${a.id}-out`, at: a.checkoutAt, text: `Atendimento de ${patientName(a.patientId)} concluído.` });
+      entries.push({ id: `${a.id}-out`, at: a.checkoutAt, text: `Atendimento de ${nome} concluído`, kind: "concluido", attendanceId: a.id });
     }
     if (a.checkinAt) {
-      entries.push({ id: `${a.id}-in`, at: a.checkinAt, text: `Check-in registrado em ${patientName(a.patientId)}.` });
+      entries.push({ id: `${a.id}-in`, at: a.checkinAt, text: `Check-in registrado em ${nome}`, detail: a.checkinLocation, kind: "checkin", attendanceId: a.id });
     }
     if (a.cancellation) {
-      entries.push({ id: `${a.id}-cancel`, at: a.cancellation.at, text: `Atendimento de ${patientName(a.patientId)} cancelado: ${a.cancellation.reason}` });
+      entries.push({ id: `${a.id}-cancel`, at: a.cancellation.at, text: `Atendimento de ${nome} cancelado`, detail: a.cancellation.reason, kind: "cancelado", attendanceId: a.id });
     }
-    entries.push({ id: `${a.id}-new`, at: a.createdAt, text: `Atendimento de ${patientName(a.patientId)} criado.` });
+    entries.push({ id: `${a.id}-new`, at: a.createdAt, text: `Atendimento de ${nome} criado`, kind: "criado", attendanceId: a.id });
   }
 
   return entries.sort((x, y) => y.at.localeCompare(x.at)).slice(0, limit);

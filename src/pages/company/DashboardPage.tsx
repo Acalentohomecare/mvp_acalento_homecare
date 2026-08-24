@@ -7,11 +7,13 @@ import {
   PRODUTO_NOME,
   Painel,
   PontoNivel,
+  SECAO_LINK_CLASS,
+  Secao,
   SkeletonLista,
   Vazio,
   type EventoLinhaDoTempo,
 } from "../../components/ui";
-import { AttendanceRow } from "../../components/shared/AttendanceRow";
+import { AttendanceList, AttendanceRow } from "../../components/shared/AttendanceRow";
 import { AttendanceOpenActions } from "../../components/shared/AttendanceOpenActions";
 import { rosterQueue } from "../../services/roster";
 import { compatibleCaregivers } from "../../services/matching";
@@ -28,6 +30,7 @@ import {
   recentActivity,
   todayAttendances,
   upcomingAttendances,
+  type RecentActivityKind,
 } from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
 import { carimbo } from "../../utils/date";
@@ -58,6 +61,21 @@ interface Pendencia {
  * operação de um dia normal; o excedente continua a um clique.
  */
 const PENDENCIAS_VISIVEIS = 5;
+
+/*
+ * A tinta do marcador de cada evento na linha do tempo — três tons, e nada além disso.
+ *
+ * `neutro` para a rotina (atendimento criado, que é o evento mais comum da lista), `feito` para a
+ * operação que andou (check-in, conclusão) e `caiu` para o cancelamento. Histórico não é semáforo:
+ * se cada tipo de evento ganhasse a sua cor, a coluna viraria uma escala cromática que ninguém
+ * lê de cor — e a única coisa que precisa saltar ali é o que deu errado.
+ */
+const TOM_ATIVIDADE: Record<RecentActivityKind, EventoLinhaDoTempo["tom"]> = {
+  criado: "neutro",
+  checkin: "feito",
+  concluido: "feito",
+  cancelado: "caiu",
+};
 
 export function CompanyDashboardPage() {
   const { session } = useSession();
@@ -138,10 +156,16 @@ export function CompanyDashboardPage() {
   const pendenciasVisiveis = verTodas ? pendencias : pendencias.slice(0, PENDENCIAS_VISIVEIS);
   const pendenciasOcultas = pendencias.length - pendenciasVisiveis.length;
 
+  /* Toda entrada daqui nasce de um atendimento, então toda entrada tem para onde levar: a linha
+     inteira abre a ficha do plantão que a gerou. Sem isso, "Check-in registrado em Antônio
+     Ferreira" é uma notícia que obriga a procurar o atendimento na mão, na tela ao lado. */
   const eventos: EventoLinhaDoTempo[] = activity.map((entry) => ({
     id: entry.id,
     evento: entry.text,
+    contexto: entry.detail,
     quando: carimbo(entry.at),
+    tom: TOM_ATIVIDADE[entry.kind],
+    para: `/empresa/atendimentos/${entry.attendanceId}`,
   }));
 
   const dateLabel = new Date().toLocaleDateString("pt-BR", {
@@ -273,16 +297,36 @@ export function CompanyDashboardPage() {
         </Painel>
 
         <div className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-1">
-          {/* Sem atendimento hoje, este painel não aparece — a frase acima já disse "Nenhum
-              atendimento hoje", e repetir a mesma informação num painel vazio custa ~110px do
-              topo da tela mais usada do produto. Painel vazio só se justifica quando o vazio é
-              notícia; aqui a notícia já foi dada. */}
+          {/*
+            Hoje, Em aberto e Próximos são as três leituras da escala — o que acontece agora, o
+            que falta resolver, o que vem à frente —, e as três saíram da moldura. Um painel
+            anuncia "aqui começa uma caixa" antes de deixar ler o que interessa; empilhados, quatro
+            painéis somavam quatro bordas, quatro faixas de cabeçalho e quatro fundos brancos entre
+            a coordenadora e uma dúzia de plantões — e "Atendimentos de hoje", com três linhas
+            dentro de uma caixa grande, lia como *um card contendo um atendimento* em vez de *a
+            lista do dia*. A lista de plantões já se delimita sozinha: os fios entre as linhas e o
+            alinhamento das colunas fazem esse trabalho. O que faltava era só o nome da região, que
+            é o `<Secao>`.
+
+            Sem moldura, o que separa uma seção da outra é o rótulo em versalete e o espaço — e é
+            por isso que as três precisavam mudar juntas: uma caixa sobrando no meio de listas
+            soltas não lê como "esta é diferente", lê como sobra.
+
+            A disposição muda junto: aqui são três ou quatro registros por seção, não trinta.
+            Densidade deixa de ser o problema e legibilidade de relance passa a ser — daí o
+            `empilhado`, com hora e estado na primeira linha e alvo de toque folgado.
+
+            Sem atendimento hoje a seção inteira some: a frase de abertura já disse "Nenhum
+            atendimento hoje", e repeti-la num vazio custa altura no topo da tela mais usada do
+            produto. Vazio só se justifica quando o vazio é notícia; aqui a notícia já foi dada.
+          */}
           {today.length > 0 && (
-            <Painel title="Atendimentos de hoje" count={today.length} flush>
-              <ul className="divide-y divide-linha">
+            <Secao title="Atendimentos de hoje" count={today.length}>
+              <AttendanceList variant="fluxo">
                 {today.map((a) => (
                   <AttendanceRow
                     key={a.id}
+                    layout="empilhado"
                     attendance={a}
                     to={`/empresa/atendimentos/${a.id}`}
                     patientName={patientName(a.patientId)}
@@ -291,19 +335,18 @@ export function CompanyDashboardPage() {
                     showDate={false}
                   />
                 ))}
-              </ul>
-            </Painel>
+              </AttendanceList>
+            </Secao>
           )}
 
-          <Painel
+          <Secao
             title="Em aberto"
             count={awaiting.length}
-            flush
             actions={
               awaiting.length > 0 && (
                 <Link
                   to="/empresa/atendimentos?filtro=awaiting"
-                  className="text-meta font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50"
+                  className={SECAO_LINK_CLASS}
                 >
                   Ver todos
                 </Link>
@@ -311,9 +354,9 @@ export function CompanyDashboardPage() {
             }
           >
             {awaiting.length === 0 ? (
-              <Vazio porte="linha">Nenhum plantão aguardando cuidador.</Vazio>
+              <Vazio porte="solto">Nenhum plantão aguardando cuidador.</Vazio>
             ) : (
-              <ul className="divide-y divide-linha">
+              <AttendanceList variant="fluxo">
                 {awaiting.map((a) => {
                   const compatible = compatibleCaregivers(state, a).length;
                   const applications = state.applications.filter(
@@ -322,21 +365,35 @@ export function CompanyDashboardPage() {
                   return (
                     <AttendanceRow
                       key={a.id}
+                      layout="empilhado"
                       attendance={a}
                       to={`/empresa/atendimentos/${a.id}`}
                       patientName={patientName(a.patientId)}
                       caregiverName={caregiverName(a.confirmedCaregiverId)}
                       caregiverId={a.confirmedCaregiverId}
+                      /*
+                        Camada 4 — o que já se sabe sobre a busca. A frase era "1 compatível no
+                        quadro": um adjetivo sem substantivo, encostado numa contagem, e quem lê
+                        precisa completar sozinho *compatível o quê*. Dizer "1 cuidador compatível
+                        no quadro" custa uma palavra e devolve a frase inteira.
+
+                        A tinta padrão da camada é neutra (a linha aplica `--ink-subtle`) porque
+                        informação complementar não deve competir com as ações logo abaixo. O zero
+                        é a exceção que se paga: quando **nenhum** cuidador do quadro pode assumir
+                        o plantão, o dado deixou de ser contexto e virou o problema — buscar
+                        cuidadores não vai resolver, aprovar alguém para o quadro vai.
+                      */
                       note={
                         compatible === 0 ? (
                           <span className="text-status-cancelado">
                             Nenhum cuidador compatível no quadro
                           </span>
                         ) : (
-                          <span className="text-ink-subtle">
+                          <>
                             <span className="numero">{compatible}</span>{" "}
-                            {compatible === 1 ? "compatível" : "compatíveis"} no quadro
-                          </span>
+                            {compatible === 1 ? "cuidador compatível" : "cuidadores compatíveis"} no
+                            quadro
+                          </>
                         )
                       }
                       actions={
@@ -345,19 +402,18 @@ export function CompanyDashboardPage() {
                     />
                   );
                 })}
-              </ul>
+              </AttendanceList>
             )}
-          </Painel>
+          </Secao>
 
-          <Painel
+          <Secao
             title="Próximos"
             count={upcoming.length}
-            flush
             actions={
               upcoming.length > 4 && (
                 <Link
                   to="/empresa/agenda"
-                  className="text-meta font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50"
+                  className={SECAO_LINK_CLASS}
                 >
                   Ver escala
                 </Link>
@@ -365,12 +421,13 @@ export function CompanyDashboardPage() {
             }
           >
             {upcoming.length === 0 ? (
-              <Vazio porte="linha">Nenhum atendimento confirmado à frente.</Vazio>
+              <Vazio porte="solto">Nenhum atendimento confirmado à frente.</Vazio>
             ) : (
-              <ul className="divide-y divide-linha">
+              <AttendanceList variant="fluxo">
                 {upcoming.slice(0, 4).map((a) => (
                   <AttendanceRow
                     key={a.id}
+                    layout="empilhado"
                     attendance={a}
                     to={`/empresa/atendimentos/${a.id}`}
                     patientName={patientName(a.patientId)}
@@ -378,18 +435,26 @@ export function CompanyDashboardPage() {
                     caregiverId={a.confirmedCaregiverId}
                   />
                 ))}
-              </ul>
+              </AttendanceList>
             )}
-          </Painel>
+          </Secao>
 
-          {/* Fim da leitura da operação: hoje → em aberto → à frente → o que acabou de acontecer. */}
-          <Painel title="Atividade recente">
+          {/*
+            Fim da leitura da operação: hoje → em aberto → à frente → o que acabou de acontecer.
+
+            A última moldura da coluna caiu junto com as outras três (revisão 16). Um `<Painel>`
+            com faixa de cabeçalho em volta de seis eventos lia como *um card de notificações do
+            dashboard*; o que a seção é, de fato, é o **histórico da operação** — e histórico se
+            apresenta como documento, com um rótulo em cima e a cronologia embaixo. O fio da linha
+            do tempo já delimita a região melhor do que uma borda faria.
+          */}
+          <Secao title="Atividade recente">
             {eventos.length === 0 ? (
-              <Vazio porte="linha">Sem movimentação registrada.</Vazio>
+              <Vazio porte="solto">Sem movimentação registrada.</Vazio>
             ) : (
               <LinhaDoTempo eventos={eventos} />
             )}
-          </Painel>
+          </Secao>
         </div>
       </div>
     </div>

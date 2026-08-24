@@ -5,6 +5,7 @@ export {
   ACTION_LINK_CLASS,
   BUTTON_BASE_CLASS,
   ROW_ACTION_CLASS,
+  SECAO_LINK_CLASS,
   SIZE_CLASSES,
   VARIANT_CLASSES,
   buttonClass,
@@ -29,6 +30,7 @@ export { Logo, LogoMark, PRODUTO_NOME } from "./Logo";
 export { Modal } from "./Modal";
 export { PontoNivel } from "./Nivel";
 export { Contador, Dado, ListaDeDados, Painel } from "./Painel";
+export { Secao } from "./Secao";
 export { Select } from "./Select";
 export { Skeleton, SkeletonCard, SkeletonLinha, SkeletonLista } from "./Skeleton";
 export { MarcadorEstado, StatusAtendimento } from "./StatusAtendimento";

@@ -37,11 +37,33 @@ export const ATTENDANCE_TYPE_FIXED_DURATION: Record<AttendanceType, boolean> = {
   single_session: false,
 };
 
+/**
+ * O estado do atendimento, **em uma palavra**, e essa palavra é a mesma em toda parte.
+ *
+ * Existiam dois mapas — um longo para a ficha e o leitor de tela, um curto para a coluna da linha
+ * — e eles divergiam em dois estados: `invited` saía "Convite enviado" na ficha e "Convidado" na
+ * lista, `applications_received` saía "Candidaturas recebidas" e "Candidaturas". Duas palavras
+ * para o mesmo estado é o que faz alguém perguntar se são estados diferentes.
+ *
+ * A régua da palavra escolhida é dupla, e as duas valem ao mesmo tempo:
+ *
+ * 1. **É um estado, nunca uma contagem nem um objeto.** "Candidaturas" era um substantivo de
+ *    coisa ocupando o lugar reservado à situação do registro — na mesma coluna onde as vizinhas
+ *    diziam "Em busca" e "Confirmado". Quantas candidaturas chegaram é informação complementar
+ *    (nível 4 da seção 9.0) e mora ao pé da linha, não na coluna de estado.
+ *
+ * 2. **Cabe na coluna, em 320px.** A coluna de estado é a última da linha densa, e cada pixel que
+ *    ela toma sai do nome do paciente. "Aguardando confirmação" mede ~152px a 13px e comeria
+ *    metade da largura útil de um telefone; "Em confirmação" mede ~97px e entra na família dos
+ *    "Em ___" que o ciclo já usa (Em busca → Em confirmação → Em andamento). O que a espera tem
+ *    de específico — *quem* está sendo esperado — é o trabalho da **situação operacional**, logo
+ *    abaixo, onde a linha é inteira e a frase pode ser completa.
+ */
 export const ATTENDANCE_STATUS_LABEL: Record<AttendanceStatus, string> = {
   draft: "Rascunho",
   open: "Em busca",
-  invited: "Convite enviado",
-  applications_received: "Candidaturas recebidas",
+  invited: "Convidado",
+  applications_received: "Em confirmação",
   confirmed: "Confirmado",
   in_progress: "Em andamento",
   completed: "Concluído",
@@ -50,25 +72,38 @@ export const ATTENDANCE_STATUS_LABEL: Record<AttendanceStatus, string> = {
 };
 
 /**
- * O mesmo estado, em uma palavra, para a **coluna** da linha de registro.
+ * A **situação operacional** — o terceiro nível da linha de registro (seção 9.0 do design system).
  *
- * Não é economia de espaço por gosto: a coluna de estado é a última da linha, e "Candidaturas
- * recebidas" (145px a 13px) comia metade da largura que sobra para o nome do paciente num
- * telefone de 320px. Nome do paciente é a informação principal da linha; estado é a
- * complementar, e a complementar não empurra a principal.
+ * O estado diz **em que ponto do ciclo** o registro está; a situação diz **de quem a operação
+ * está esperando**. São perguntas diferentes, e é essa a regra que mantém as duas camadas sem se
+ * repetir — a segunda sempre nomeia a parte que precisa agir:
  *
- * A forma longa continua onde há espaço e onde o estado é a manchete: o crachá quadrado da ficha.
+ *     ● Em busca          →  Aguardando cuidador            ninguém se apresentou ainda
+ *     ● Convidado         →  Aguardando resposta do cuidador a bola está com quem foi convidado
+ *     ● Em confirmação    →  Aguardando sua confirmação      a bola está com a coordenadora
+ *
+ * O "sua" da terceira é deliberado e não vaza: `applications_received` só chega a uma linha de
+ * registro nas telas da empresa — as do cuidador filtram por `confirmedCaregiverId`, e um plantão
+ * com candidaturas ainda não tem cuidador confirmado. É a mesma voz que o Início do cuidador já
+ * usa ("convites aguardando sua resposta").
+ *
+ * Só os três estados que **esperam alguém** têm situação. Confirmado em diante, quem ocupa essa
+ * linha é o nome do cuidador — a espera acabou e a pergunta passou a ser *com quem*. Em rascunho
+ * e em cancelado não há espera nenhuma, e a linha volta a ser um travessão: âmbar ali prometia
+ * trabalho que não existe.
+ *
+ * A contagem de candidaturas não entra aqui. Ela é informação complementar (camada 4) e já viaja
+ * no rótulo da ação — "Candidaturas (2)". Repeti-la na situação faria a mesma palavra aparecer
+ * três vezes no mesmo registro.
+ *
+ * O conjunto de chaves é exatamente o `OPEN_STATUSES` de `services/attendances`, e a coincidência
+ * não é acidental — é a mesma regra de negócio ("publicado e ainda sem cuidador") escrita uma vez
+ * em cada camada: lá para filtrar, aqui para nomear.
  */
-export const ATTENDANCE_STATUS_SHORT: Record<AttendanceStatus, string> = {
-  draft: "Rascunho",
-  open: "Em busca",
-  invited: "Convidado",
-  applications_received: "Candidaturas",
-  confirmed: "Confirmado",
-  in_progress: "Em andamento",
-  completed: "Concluído",
-  evaluated: "Avaliado",
-  cancelled: "Cancelado",
+export const ATTENDANCE_SITUATION: Partial<Record<AttendanceStatus, string>> = {
+  open: "Aguardando cuidador",
+  invited: "Aguardando resposta do cuidador",
+  applications_received: "Aguardando sua confirmação",
 };
 
 /**

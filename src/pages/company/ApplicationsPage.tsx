@@ -216,7 +216,7 @@ export function ApplicationsPage() {
               size="sm"
               onClick={() => {
                 setState((s) =>
-                  cancelAttendance(s, attendance.id, "company", reason.trim() || "Sem motivo informado."),
+                  cancelAttendance(s, attendance.id, "company", reason.trim() || "Sem motivo informado"),
                 );
                 setCancelling(false);
                 setReason("");
