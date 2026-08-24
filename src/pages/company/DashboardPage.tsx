@@ -16,7 +16,7 @@ import {
 import { AttendanceList, AttendanceRow } from "../../components/shared/AttendanceRow";
 import { AttendanceOpenActions } from "../../components/shared/AttendanceOpenActions";
 import { rosterQueue } from "../../services/roster";
-import { compatibleCaregivers } from "../../services/matching";
+import { awaitingByUrgency, compatibleCaregivers } from "../../services/matching";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
@@ -62,6 +62,22 @@ interface Pendencia {
  */
 const PENDENCIAS_VISIVEIS = 5;
 
+/**
+ * Quantos plantões em aberto o Início mostra antes de mandar para a tela de Atendimentos.
+ *
+ * "Em aberto" era a única seção sem teto, e é a que tem a linha mais alta do produto: cinco
+ * camadas (hora, paciente, situação, recado e duas ações) contra as três de "Próximos". Com seis
+ * plantões abertos ela sozinha passava de 800px no celular e empurrava Próximos e Atividade
+ * recente para fora de qualquer relance — o Início deixava de ser um resumo da operação e virava
+ * a lista de "Em aberto" com apêndices.
+ *
+ * Três, e não os quatro de "Próximos", pela mesma aritmética ao contrário: a linha é quase o
+ * dobro da altura, então o mesmo espaço de tela cabe menos registro. O que passa disso continua
+ * a um toque no "Ver todos" do cabeçalho, que leva à tela já filtrada — e lá existem busca,
+ * intervalo de datas e a linha densa, que é onde essa leitura deve acontecer.
+ */
+const EM_ABERTO_VISIVEIS = 3;
+
 /*
  * A tinta do marcador de cada evento na linha do tempo — três tons, e nada além disso.
  *
@@ -98,7 +114,10 @@ export function CompanyDashboardPage() {
   const patients = companyPatients(state, session?.companyId);
 
   const today = todayAttendances(all);
-  const awaiting = awaitingCaregiverAttendances(all);
+  /* Ordem por urgência real, não por data: o plantão que nenhum cuidador do quadro pode assumir
+     sobe para o topo, porque a saída dele é aprovar alguém para o quadro — outra tela e um prazo
+     bem maior que o de enviar convite. A regra mora em `services/matching`. */
+  const awaiting = awaitingByUrgency(state, awaitingCaregiverAttendances(all));
   const upcoming = upcomingAttendances(all);
   const drafts = draftAttendances(all);
   const toReview = applicationsToReview(all);
@@ -370,7 +389,7 @@ export function CompanyDashboardPage() {
               <Vazio porte="solto">Nenhum plantão aguardando cuidador.</Vazio>
             ) : (
               <AttendanceList variant="fluxo">
-                {awaiting.map((a) => {
+                {awaiting.slice(0, EM_ABERTO_VISIVEIS).map((a) => {
                   const compatible = compatibleCaregivers(state, a).length;
                   const applications = state.applications.filter(
                     (ap) => ap.attendanceId === a.id,

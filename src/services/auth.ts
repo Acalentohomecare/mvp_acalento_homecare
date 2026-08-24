@@ -17,6 +17,9 @@ export interface RegisterCaregiverInput {
   email: string;
   password: string;
   category: CaregiverCategory;
+  cpf: string;
+  /** Só chega preenchido para categoria "tecnico" ou "superior". */
+  councilRegistration?: string;
 }
 
 const DEFAULT_ACTIVITIES: Record<CaregiverCategory, string[]> = {
@@ -43,12 +46,12 @@ export function registerCaregiver(
   const caregiver: Caregiver = {
     id,
     name: input.name,
-    cpf: "000.000.000-00",
+    cpf: input.cpf,
     birthDate: "2000-01-01",
     city: "Cidade Média",
     neighborhoods: ["Centro"],
     category: input.category,
-    councilRegistration: requiresCouncil ? "Em conferência" : undefined,
+    councilRegistration: requiresCouncil ? input.councilRegistration : undefined,
     councilRegistrationStatus: requiresCouncil ? "pending" : undefined,
     activityIds: DEFAULT_ACTIVITIES[input.category],
     availability: { days: ["mon", "tue", "wed"], shifts: ["morning"] },

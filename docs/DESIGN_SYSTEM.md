@@ -978,6 +978,18 @@ alinhada pela linha de base empurraria o texto do link ~12px abaixo do rótulo d
 `<Secao>`. Se é conteúdo solto que precisa ser recortado do resto da página — um resumo, um
 formulário curto, um bloco de dados —, use `<Painel>`.
 
+**Toda seção de lista tem teto.** A seção não dobra nem esconde a si mesma — não existe `<Secao>`
+recolhível, porque esconder atrás de um clique o que a pessoa abriu a tela para ver é trabalho a
+mais, não densidade. O que ela tem é **limite de registros + saída**: N linhas no corpo e um link
+no cabeçalho para a tela onde a lista inteira mora, já filtrada. No Início são 4 em "Próximos" e
+**3 em "Em aberto"** — menos, porque a linha do plantão aberto tem cinco camadas contra três, e o
+teto é de altura de tela, não de contagem.
+
+Sem teto, a seção mais movimentada engole as outras e o resumo vira lista. A regra é: se existe
+uma tela dedicada àquele recorte, o excedente vai para lá (ali há busca, período e a linha densa);
+se **não** existe — o caso do painel de Pendências —, aí sim cabe um "mais N" que revela a sobra
+no lugar.
+
 **Estado vazio.** Dentro de uma seção o vazio usa `<Vazio porte="solto">`: mesma altura do
 `porte="linha"`, **sem** o recuo horizontal. Não existe borda de painel da qual afastar o texto, e
 o recuo só desalinharia a frase em relação às linhas da lista.
@@ -2509,9 +2521,42 @@ calmas.
 densidade — nessa ordem —, nunca reintroduzindo contêiner. Se uma região precisa mesmo de
 moldura, ela não era uma seção: era um `<Painel>`.
 
-**Onde bateu.** `Secao` (a variante de tinta e a nota da superfície reprovada), Início da empresa
-(as duas seções e a nota de arquitetura da coluna). Nenhum outro call site mudou — a variante
-nasce opt-in e o padrão continua sendo a região sem moldura em `--ink-muted`.
+#### O que estava por trás do sintoma
+
+Investigada a tela com a hierarquia resolvida, sobrou um defeito que não era de estilo: **"Em
+aberto" era a única seção sem teto.** `awaiting.map(...)` renderizava todos, enquanto "Próximos" já
+cortava em `slice(0, 4)` — e é justamente a seção cuja linha tem **cinco camadas** (hora, paciente,
+situação, recado e duas ações) contra as três de "Próximos". Com seis plantões abertos ela sozinha
+passava de 800px no celular: o Início deixava de ser resumo da operação e virava a lista de "Em
+aberto" com apêndices. Era isso que fazia a tela parecer que pedia um controle para domar a seção.
+
+Duas correções, nenhuma delas um controle novo:
+
+| | Antes | Depois |
+|---|---|---|
+| Teto de "Em aberto" | nenhum | **3**, com o "Ver todos" do cabeçalho como saída |
+| Ordem de "Em aberto" | data de início | **urgência**: plantão sem nenhum cuidador compatível no quadro primeiro; empatados, a data |
+
+A ordem por urgência mora em `services/matching.ts` (`awaitingByUrgency`), não na tela, porque é a
+mesma pergunta que o recado da linha já responde — "Nenhum cuidador compatível no quadro". Ordem e
+texto saindo do mesmo lugar é o que evita a lista dizer uma coisa na posição e outra na frase. O
+plantão travado não se resolve buscando cuidador (não há quem buscar): ele exige aprovar alguém
+para o quadro, que é outra tela e um prazo maior — por isso sobe.
+
+**Accordion foi considerado e descartado.** Retrair "Em aberto" ou "Próximos" esconde exatamente o
+que a coordenadora abriu a tela para ver, e o estado do accordion é uma armadilha: se não persiste,
+o clique se repete toda visita; se persiste, alguém fecha a seção numa terça e na quinta lê uma
+tela tranquila com quatro plantões sem cuidador atrás de um chevron. **Estado que esconde pendência
+silenciosamente não entra num produto operacional.** Filtro por seção caiu pelo mesmo raciocínio
+somado a um agravante: filtro que sobrevive à navegação faz a tela mentir ("EM ABERTO · 0" porque
+alguém filtrou ontem). As seções **já são** o filtro — Hoje / Em aberto / Próximos é um recorte de
+três vias com zero clique —, e quem precisa de mais recorte precisa da tela de Atendimentos, que
+tem abas, busca e intervalo de datas.
+
+**Onde bateu.** `Secao` (a variante de tinta e a nota da superfície reprovada), `matching`
+(`awaitingByUrgency`), Início da empresa (as duas seções, o teto e a nota de arquitetura da
+coluna). Nenhum outro call site mudou — a variante nasce opt-in e o padrão continua sendo a região
+sem moldura em `--ink-muted`.
 
 ---
 

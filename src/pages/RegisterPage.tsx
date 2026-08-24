@@ -6,6 +6,7 @@ import { useAppState } from "../hooks/useAppState";
 import { useSession } from "../hooks/useSession";
 import { registerCaregiver } from "../services/auth";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "../constants/caregiver";
+import { formatCpf, isCpfComplete } from "../utils/format";
 import type { CaregiverCategory } from "../types";
 
 type AccountType = "caregiver" | "company";
@@ -21,14 +22,29 @@ export function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [council, setCouncil] = useState("");
   const [notice, setNotice] = useState("");
+
+  // O conselho de classe só existe para técnico e superior (CLAUDE.md §9).
+  const requiresCouncil = category !== "informal";
+  const cpfInvalid = cpf.length > 0 && !isCpfComplete(cpf);
+  const step2Complete =
+    Boolean(name && email && password) && isCpfComplete(cpf) && (!requiresCouncil || council.trim().length > 0);
 
   if (!state) {
     return <TelaCarregando alturaTotal />;
   }
 
   const submitCaregiver = () => {
-    const { user, nextState } = registerCaregiver(state, { name, email, password, category });
+    const { user, nextState } = registerCaregiver(state, {
+      name,
+      email,
+      password,
+      category,
+      cpf,
+      councilRegistration: requiresCouncil ? council.trim() : undefined,
+    });
     setState(nextState);
     signIn({ userId: user.id, role: "caregiver", caregiverId: user.caregiverId });
     navigate("/cuidador/aguardando-aprovacao");
@@ -132,16 +148,24 @@ export function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <Input label="CPF" placeholder="000.000.000-00" disabled />
-              {category !== "informal" && (
-                <Input label="Registro no conselho de classe" placeholder="Ex.: COREN 12345" disabled />
+              <Input
+                label="CPF"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="000.000.000-00"
+                value={cpf}
+                onChange={(e) => setCpf(formatCpf(e.target.value))}
+                error={cpfInvalid ? "Informe os 11 dígitos do CPF." : undefined}
+              />
+              {requiresCouncil && (
+                <Input
+                  label="Registro no conselho de classe"
+                  placeholder="Ex.: COREN 12345"
+                  value={council}
+                  onChange={(e) => setCouncil(e.target.value)}
+                />
               )}
-              <Button
-                variant="primary"
-                block
-                disabled={!name || !email || !password}
-                onClick={() => setStep(3)}
-              >
+              <Button variant="primary" block disabled={!step2Complete} onClick={() => setStep(3)}>
                 Continuar
               </Button>
             </div>
