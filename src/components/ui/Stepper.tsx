@@ -6,11 +6,25 @@ interface StepperProps {
 }
 
 /**
- * Stepper horizontal de progresso do atendimento (docs/DESIGN_SYSTEM.md, seção 7). O estado do
- * atendimento nunca depende só de cor: a etapa atual é dita por posição, por peso do texto e
+ * Régua de progresso do atendimento (docs/DESIGN_SYSTEM.md, seção 7.4).
+ *
+ * Estava documentada e **não era usada por tela nenhuma** — a ficha do atendimento mostrava o
+ * estado como uma etiqueta solta, sem dizer o que já passou nem o que falta. Passou a ser o
+ * cabeçalho da ficha na revisão do módulo, que é o lugar para o qual ela sempre foi escrita.
+ *
+ * O estado nunca depende só de cor: a etapa atual é dita por **posição**, pelo peso do texto e
  * pelo tamanho do marcador, além do tom.
+ *
+ * ------------------------------------------------------------------- tela pequena
+ *
+ * Seis rótulos em colunas de largura igual dão ~48px cada num telefone de 320px, e "Confirmado"
+ * precisa de 65px: a fila quebrava no meio da palavra. Abaixo de `sm` os rótulos somem e sobra
+ * **uma frase** — "Etapa 3 de 6 · Confirmado" —, que diz a mesma coisa em menos espaço. Os
+ * marcadores continuam, porque é deles que vem a leitura de quanto já andou.
  */
 export function Stepper({ steps, currentIndex }: StepperProps) {
+  const atual = steps[currentIndex];
+
   return (
     <div>
       <div className="flex items-center">
@@ -34,7 +48,16 @@ export function Stepper({ steps, currentIndex }: StepperProps) {
           </Fragment>
         ))}
       </div>
-      <div className="mt-1.5 flex">
+
+      {/* Celular: a frase. */}
+      <p className="mt-2 text-meta text-ink-subtle sm:hidden">
+        Etapa <span className="numero">{currentIndex + 1}</span> de{" "}
+        <span className="numero">{steps.length}</span> ·{" "}
+        <span className="font-semibold text-accent">{atual}</span>
+      </p>
+
+      {/* `sm` para cima: a fila completa. */}
+      <div className="mt-1.5 hidden sm:flex">
         {steps.map((step, i) => (
           <div
             key={step}

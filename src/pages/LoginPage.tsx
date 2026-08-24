@@ -107,7 +107,7 @@ export function LoginPage() {
                 key={acc.email}
                 type="button"
                 onClick={() => attempt(acc.email, "123456")}
-                className="flex min-h-11 flex-col justify-center rounded-control border border-linha bg-surface-raised px-3 py-2 text-left shadow-card transition-colors duration-150 hover:border-accent/45 hover:bg-accent-soft/40"
+                className="flex min-h-11 flex-col justify-center rounded-control border border-linha bg-surface-raised px-3 py-2 text-left transition-colors duration-150 hover:border-accent/45 hover:bg-accent-soft/40"
               >
                 {/* Rótulo em cima, endereço embaixo: dois papéis tipográficos em vez de uma
                     linha só costurada por travessão. */}

@@ -70,7 +70,7 @@ export function ReportsPage() {
             type="button"
             onClick={() => setFiltrosAbertos((v) => !v)}
             aria-expanded={filtrosAbertos}
-            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-control border border-linha bg-surface-raised px-3.5 text-note font-semibold text-ink-muted shadow-card transition-colors duration-150 ease-out hover:border-accent/45 hover:text-ink md:hidden"
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-control border border-linha bg-surface-raised px-3.5 text-note font-semibold text-ink-muted transition-colors duration-150 ease-out hover:border-accent/45 hover:text-ink md:hidden"
           >
             <SlidersHorizontal size={15} />
             Filtros
@@ -229,7 +229,7 @@ export function ReportsPage() {
             {rows.map((r) => (
               <li
                 key={r.attendanceId}
-                className="rounded-card border border-linha bg-surface-raised p-3.5 shadow-card"
+                className="rounded-card border border-linha bg-surface-raised p-3.5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

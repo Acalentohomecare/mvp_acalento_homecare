@@ -1,58 +1,38 @@
 import { Link } from "react-router-dom";
-import { Star, Clock, Award } from "lucide-react";
-import { ButtonLink, Card, Cracha, TelaCarregando } from "../../components/ui";
+import { Star } from "lucide-react";
+import {
+  ButtonLink,
+  Dado,
+  ListaDeDados,
+  Painel,
+  SkeletonLista,
+  StatusAtendimento,
+  Vazio,
+} from "../../components/ui";
+import { AttendanceRow } from "../../components/shared/AttendanceRow";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
-import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL, ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
+import { ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
 import { completedHours, todayISO } from "../../services/attendances";
 import { caregiverRating } from "../../services/caregivers";
 import { caregiverInvitations } from "../../services/invitations";
 import { formatCurrency, formatRating } from "../../utils/format";
-import { PAGE_LIST } from "../../components/layout/page";
-
-/**
- * Cartão de métrica para dashboard do cuidador
- */
-function MetricCard({
-  label,
-  value,
-  icon: Icon,
-  variant = "default",
-}: {
-  label: string;
-  value: React.ReactNode;
-  icon?: React.ComponentType<{ size: number; className: string }>;
-  variant?: "default" | "highlight";
-}) {
-  return (
-    <div className={`rounded-card border border-linha px-4 py-3 shadow-card ${
-      variant === "highlight"
-        ? "bg-accent/5 border-accent/20"
-        : "bg-white"
-    }`}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-dado text-ink-subtle uppercase">
-            {label}
-          </div>
-          <div className="mt-1.5 text-title font-medium text-ink">
-            {value}
-          </div>
-        </div>
-        {Icon && (
-          <Icon size={18} className={variant === "highlight" ? "text-accent" : "text-ink-subtle"} />
-        )}
-      </div>
-    </div>
-  );
-}
+import { rotuloDoDia } from "../../utils/date";
+import { PAGE_WORK } from "../../components/layout/page";
 
 export function CaregiverDashboardPage() {
   const { session } = useSession();
   const { state } = useAppState();
 
   if (!state) {
-    return <TelaCarregando />;
+    return (
+      <div className={PAGE_WORK}>
+        <h1 className="text-display">Início</h1>
+        <div className="mt-6">
+          <SkeletonLista itens={3} />
+        </div>
+      </div>
+    );
   }
 
   const caregiver = state.caregivers.find((c) => c.id === session?.caregiverId);
@@ -64,131 +44,158 @@ export function CaregiverDashboardPage() {
     .filter((a) => a.startDate >= today && a.status !== "completed" && a.status !== "evaluated")
     .sort((a, b) => `${a.startDate}T${a.startTime}`.localeCompare(`${b.startDate}T${b.startTime}`));
   const next = upcoming[0];
+  const restante = upcoming.slice(1, 6);
   const invitations = caregiverInvitations(state, session?.caregiverId);
   const rating = caregiverRating(state.evaluations, session?.caregiverId ?? "");
+  const horas = Math.round(completedHours(mine));
 
   const patientName = (id: string) => state.patients.find((p) => p.id === id)?.name ?? "Paciente";
 
   return (
-    <div className={PAGE_LIST}>
-      {/* === HEADER === */}
+    <div className={PAGE_WORK}>
       <h1 className="text-display">Início</h1>
-      <p className="prosa mt-1.5 text-body text-ink-muted">{caregiver?.name}</p>
+      <p className="mt-1 text-note text-ink-subtle">{caregiver?.name}</p>
 
-      {/* === MÉTRICAS === */}
-      <div className="mt-8 space-y-2">
-        {/* Convites - métrica com destaque */}
-        <MetricCard
-          label="Convites pendentes"
-          value={invitations.length}
-          icon={Clock}
-          variant={invitations.length > 0 ? "highlight" : "default"}
-        />
-
-        {/* Horas e avaliação em grid */}
-        <div className="grid grid-cols-2 gap-2">
-          <MetricCard
-            label="Horas realizadas"
-            value={`${Math.round(completedHours(mine))}h`}
-          />
-          <MetricCard
-            label="Avaliação"
-            value={
-              rating.average === null ? (
-                `${rating.count}/3`
-              ) : (
-                <span className="inline-flex items-center gap-1">
-                  <Star size={13} className="fill-rating text-rating" />
-                  {formatRating(rating.average)}
-                </span>
-              )
-            }
-            icon={Award}
-          />
-        </div>
-      </div>
-
-      {/* === CONTEÚDO PRINCIPAL === */}
-      <div className="mt-10 space-y-10 lg:mt-12 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0">
-        {/* Próximo atendimento - item principal */}
-        <div className="min-w-0">
-          <h2 className="mb-3 text-heading font-medium text-ink">Próximo</h2>
-          {!next ? (
-            <p className="rounded-card border border-dashed border-linha bg-surface-raised px-4 py-6 text-center text-note text-ink-subtle">
-              Nenhum atendimento à frente.
-            </p>
-          ) : (
-            <Link to={`/cuidador/atendimentos/${next.id}`} className="block group">
-              <Card className="transition-all duration-150 ease-out group-hover:border-accent/45 group-hover:shadow-raised">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-title">{patientName(next.patientId)}</div>
-                    <div className="mt-0.5 text-note text-ink-subtle">
-                      {ATTENDANCE_TYPE_LABEL[next.type]} · {next.durationHours}h
-                    </div>
-                  </div>
-                  <Cracha
-                    label={ATTENDANCE_STATUS_LABEL[next.status]}
-                    className={ATTENDANCE_STATUS_CLASS[next.status]}
-                  />
-                </div>
-                <div className="mt-3 space-y-1">
-                  <div className="flex items-center justify-between text-note text-ink-muted">
-                    <span className="numero">
-                      {next.startDate.split("-").reverse().join("/")} · {next.startTime}
-                    </span>
-                    <span className="numero text-ink-muted">{formatCurrency(next.value)}</span>
-                  </div>
-                  <div className="text-note text-ink-subtle">{next.neighborhood}</div>
-                </div>
-              </Card>
-            </Link>
-          )}
-        </div>
-
-        {/* Próximos compromissos - lista compacta */}
-        <div className="min-w-0">
-          <h2 className="mb-3 text-heading font-medium text-ink">
-            Agenda{upcoming.length > 1 && ` (${upcoming.length - 1})`}
-          </h2>
-          {upcoming.length <= 1 ? (
-            <p className="rounded-card border border-dashed border-linha bg-surface-raised px-4 py-6 text-center text-note text-ink-subtle">
-              Nada além do próximo.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {upcoming.slice(1, 6).map((a) => (
-                <Link
-                  key={a.id}
-                  to={`/cuidador/atendimentos/${a.id}`}
-                  className="flex items-center gap-3 rounded-control border border-linha bg-white px-3 py-2.5 shadow-card transition-colors duration-150 ease-out hover:border-accent/45 hover:bg-accent/5"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="text-note font-medium text-ink truncate">{patientName(a.patientId)}</div>
-                    <div className="mt-0.5 text-dado text-ink-subtle">
-                      {a.startDate.split("-").reverse().join("/")} · {a.startTime}
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-note text-ink-muted">{a.durationHours}h</div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* === CTA SECUNDÁRIO === */}
+      {/*
+        Convite pendente é a única coisa nesta tela que **expira**: enquanto o cuidador não
+        responde, a empresa está esperando e o plantão pode ir para outro. Por isso ele não é um
+        cartão de métrica entre outros dois — é uma faixa de chamada acima de tudo, com a ação
+        junto. Sem convite, a faixa não existe e a tela começa pelo próximo atendimento.
+      */}
       {invitations.length > 0 && (
-        <div className="mt-10 lg:mt-12">
-          <ButtonLink to="/cuidador/convites" className="w-full lg:w-auto">
-            Ver {invitations.length} {invitations.length === 1 ? "convite" : "convites"} pendente
-            {invitations.length !== 1 ? "s" : ""}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 rounded-card border border-status-aberto/30 bg-status-aberto-soft px-3.5 py-3">
+          <p className="min-w-0 text-note text-status-aberto">
+            <span className="font-semibold">
+              {invitations.length} {invitations.length === 1 ? "convite" : "convites"}
+            </span>{" "}
+            {invitations.length === 1 ? "aguardando sua resposta" : "aguardando sua resposta"}.
+          </p>
+          <ButtonLink to="/cuidador/convites" size="sm" className="shrink-0">
+            Ver {invitations.length === 1 ? "convite" : "convites"}
           </ButtonLink>
         </div>
       )}
 
-      {/* Espaço negativo intencional */}
-      <div className="mt-16 lg:mt-20" />
+      <div className="mt-5 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8">
+        <div className="flex min-w-0 flex-col gap-5">
+          {/*
+            O próximo atendimento é a tela inteira para quem está a caminho dele. Não é um card
+            entre cards: é um painel com os dados operacionais em lista de definição — endereço,
+            horário, duração, valor —, que é como se lê uma ordem de serviço.
+          */}
+          <Painel
+            title="Próximo atendimento"
+            actions={
+              next && (
+                <Link
+                  to={`/cuidador/atendimentos/${next.id}`}
+                  className="text-meta font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50"
+                >
+                  Abrir ficha
+                </Link>
+              )
+            }
+          >
+            {!next ? (
+              <Vazio porte="linha">Nenhum atendimento à frente.</Vazio>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
+                  <div className="min-w-0">
+                    <Link
+                      to={`/cuidador/atendimentos/${next.id}`}
+                      className="text-title text-ink transition-colors duration-150 ease-out hover:text-accent"
+                    >
+                      {patientName(next.patientId)}
+                    </Link>
+                    <p className="mt-0.5 text-note text-ink-subtle">
+                      {ATTENDANCE_TYPE_LABEL[next.type]} ·{" "}
+                      <span className="numero">{next.durationHours}h</span>
+                    </p>
+                  </div>
+                  <StatusAtendimento status={next.status} variant="bloco" />
+                </div>
+
+                <ListaDeDados className="mt-3">
+                  <Dado termo="Quando">
+                    <span className="numero">
+                      {rotuloDoDia(next.startDate)} · {next.startTime}
+                    </span>
+                  </Dado>
+                  <Dado termo="Onde">{next.neighborhood}</Dado>
+                  <Dado termo="Valor">
+                    <span className="numero">{formatCurrency(next.value)}</span>
+                  </Dado>
+                </ListaDeDados>
+              </>
+            )}
+          </Painel>
+
+          <Painel
+            title="Agenda"
+            count={restante.length || undefined}
+            flush
+            actions={
+              <Link
+                to="/cuidador/agenda"
+                className="text-meta font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50"
+              >
+                Ver tudo
+              </Link>
+            }
+          >
+            {restante.length === 0 ? (
+              <Vazio porte="linha">Nada além do próximo atendimento.</Vazio>
+            ) : (
+              <ul className="divide-y divide-linha">
+                {restante.map((a) => (
+                  <AttendanceRow
+                    key={a.id}
+                    attendance={a}
+                    to={`/cuidador/atendimentos/${a.id}`}
+                    patientName={patientName(a.patientId)}
+                  />
+                ))}
+              </ul>
+            )}
+          </Painel>
+        </div>
+
+        {/*
+          Horas e avaliação são **contexto**, não manchete: dizem como o trabalho vem indo, não o
+          que fazer agora. Por isso descem para a coluna de apoio no desktop e para o pé no
+          celular, numa lista de dados — não em dois cartões com ícone, que é o que faziam dois
+          números virarem a coisa mais pesada da tela.
+        */}
+        <Painel title="Seu resumo" className="mt-5 lg:mt-0">
+          <ListaDeDados>
+            <Dado termo="Horas realizadas">
+              <span className="numero">{horas}h</span>
+            </Dado>
+            <Dado termo="Avaliação">
+              {rating.average === null ? (
+                <span className="text-ink-subtle">
+                  <span className="numero">{rating.count}</span> de 3 avaliações
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1">
+                  <Star size={13} aria-hidden="true" className="fill-rating text-rating" />
+                  <span className="numero">{formatRating(rating.average)}</span>
+                </span>
+              )}
+            </Dado>
+            <Dado termo="Atendimentos">
+              <span className="numero">{mine.length}</span>
+            </Dado>
+          </ListaDeDados>
+          {rating.average === null && (
+            /* R10 explicada onde ela age: sem isto, "1 de 3" parece nota baixa. */
+            <p className="mt-2.5 text-meta text-ink-subtle">
+              A média pública aparece a partir da terceira avaliação.
+            </p>
+          )}
+        </Painel>
+      </div>
     </div>
   );
 }

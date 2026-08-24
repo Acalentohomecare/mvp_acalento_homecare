@@ -1,18 +1,22 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Plus, SlidersHorizontal } from "lucide-react";
-import { ButtonLink, Chip, FilterRow, Input, TelaCarregando } from "../../components/ui";
-import { AttendanceCard } from "../../components/shared/AttendanceCard";
+import { Plus, SlidersHorizontal, X } from "lucide-react";
+import {
+  ButtonLink,
+  Input,
+  SkeletonLista,
+  Tabs,
+  Vazio,
+  type Aba,
+} from "../../components/ui";
+import { AttendanceList, AttendanceRow } from "../../components/shared/AttendanceRow";
 import { AttendanceOpenActions } from "../../components/shared/AttendanceOpenActions";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
-import {
-  companyAttendances,
-  isAwaitingCaregiver,
-} from "../../services/attendances";
+import { companyAttendances, isAwaitingCaregiver } from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
 import type { Attendance } from "../../types";
-import { LIST_GRID, PAGE_LIST } from "../../components/layout/page";
+import { PAGE_LIST } from "../../components/layout/page";
 
 type Filter = "all" | "awaiting" | "scheduled" | "done" | "draft";
 
@@ -69,7 +73,16 @@ export function CompanyAttendancesPage() {
   );
 
   if (!state) {
-    return <TelaCarregando />;
+    /* A moldura da lista e o cabeçalho já existem; só as linhas estão chegando. Antes a tela
+       inteira sumia atrás de "Carregando…" e voltava com outro layout. */
+    return (
+      <div className={PAGE_LIST}>
+        <h1 className="text-display">Atendimentos</h1>
+        <div className="mt-6">
+          <SkeletonLista />
+        </div>
+      </div>
+    );
   }
 
   const company = state.companies.find((c) => c.id === session?.companyId);
@@ -80,14 +93,28 @@ export function CompanyAttendancesPage() {
     id ? state.caregivers.find((c) => c.id === id)?.name : undefined;
 
   const term = query.trim().toLowerCase();
-  const visible = all.filter((a) => {
-    if (!matches(a, filter)) return false;
+  /* O recorte de data e busca vale para a contagem de todas as abas: a contagem precisa dizer
+     quanto existe **dentro do filtro corrente**, senão a aba promete dez e entrega dois. */
+  const noRecorte = all.filter((a) => {
     if (term && !patientName(a.patientId).toLowerCase().includes(term)) return false;
     if (dateFrom && a.startDate < dateFrom) return false;
     if (dateTo && a.startDate > dateTo) return false;
     return true;
   });
+  const visible = noRecorte.filter((a) => matches(a, filter));
   const filtrosAtivos = [query, dateFrom, dateTo].filter(Boolean).length;
+
+  const abas: Aba<Filter>[] = FILTERS.map((f) => ({
+    key: f.key,
+    label: f.label,
+    count: noRecorte.filter((a) => matches(a, f.key)).length,
+  }));
+
+  const limparFiltros = () => {
+    setQuery("");
+    setDateFrom("");
+    setDateTo("");
+  };
 
   return (
     <div className={PAGE_LIST}>
@@ -105,12 +132,12 @@ export function CompanyAttendancesPage() {
             type="button"
             onClick={() => setFiltrosAbertos((v) => !v)}
             aria-expanded={filtrosAbertos}
-            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-control border border-linha bg-surface-raised px-3.5 text-note font-semibold text-ink-muted shadow-card transition-colors duration-150 ease-out hover:border-accent/45 hover:text-ink md:hidden"
+            className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-control border border-linha bg-surface-raised px-3.5 text-note font-semibold text-ink-muted transition-colors duration-150 ease-out hover:border-accent/45 hover:text-ink md:hidden"
           >
             <SlidersHorizontal size={15} />
             Filtros
             {filtrosAtivos > 0 && (
-              <span className="rounded-full bg-accent px-1.5 py-0.5 numero text-meta leading-none text-accent-ink">
+              <span className="numero rounded-marker bg-accent px-1.5 py-px text-meta leading-[1.4] text-accent-ink">
                 {filtrosAtivos}
               </span>
             )}
@@ -124,7 +151,7 @@ export function CompanyAttendancesPage() {
       {/* Busca por paciente e período: recolhidos atrás do botão "Filtros" no celular pelo mesmo
           motivo do Relatório — quem abre a lista quer ver os atendimentos primeiro, não filtrá-los. */}
       <div
-        className={`${filtrosAbertos ? "mt-4 grid" : "hidden"} gap-2.5 md:mt-5 md:grid md:grid-cols-3`}
+        className={`${filtrosAbertos ? "mt-4 grid" : "hidden"} gap-2.5 md:mt-5 md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]`}
       >
         <Input
           label="Paciente"
@@ -136,44 +163,86 @@ export function CompanyAttendancesPage() {
         <Input label="Até" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
       </div>
 
-      <FilterRow className="mt-4 md:mt-5">
-        {FILTERS.map((f) => (
-          <Chip key={f.key} selecionado={filter === f.key} onClick={() => setFilter(f.key)}>
-            {f.label}
-          </Chip>
-        ))}
-      </FilterRow>
+      <Tabs
+        abas={abas}
+        atual={filter}
+        onChange={setFilter}
+        label="Recorte dos atendimentos"
+        className="mt-5"
+      />
 
-      <p className="mt-5 mb-2.5 text-note text-ink-subtle">
-        {visible.length} {visible.length === 1 ? "atendimento" : "atendimentos"}
-      </p>
-
-      {visible.length === 0 ? (
-        <p className="rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
-          Nenhum atendimento{" "}
-          {filter === "all" && filtrosAtivos === 0 ? "cadastrado" : "encontrado com esses filtros"}.
+      {/* A linha de contexto do recorte: quanto está visível e, quando há filtro de texto ou
+          período, a saída para desfazê-lo. Sem essa saída, lista vazia por filtro vira beco. */}
+      <div className="mt-3 mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+        <p className="text-meta text-ink-subtle">
+          {visible.length === all.length
+            ? `${all.length} ${all.length === 1 ? "atendimento" : "atendimentos"}`
+            : `${visible.length} de ${all.length} ${all.length === 1 ? "atendimento" : "atendimentos"}`}
         </p>
-      ) : (
-        <div className={LIST_GRID}>
-          {visible.map((a) => {
+        {filtrosAtivos > 0 && (
+          <button
+            type="button"
+            onClick={limparFiltros}
+            className="inline-flex min-h-11 items-center gap-1 text-meta font-semibold text-accent transition-colors duration-150 ease-out hover:text-accent-strong pointer-fine:min-h-6"
+          >
+            <X size={12} /> Limpar filtros
+          </button>
+        )}
+      </div>
+
+      <AttendanceList>
+        {visible.length === 0 ? (
+          <li>
+            <Vazio
+              acao={
+                filtrosAtivos > 0 ? (
+                  <button
+                    type="button"
+                    onClick={limparFiltros}
+                    className="text-note font-semibold text-accent underline decoration-accent/40 underline-offset-2"
+                  >
+                    Limpar filtros
+                  </button>
+                ) : filter === "all" ? (
+                  <ButtonLink to="/empresa/atendimentos/novo" size="sm">
+                    <Plus size={14} /> Novo atendimento
+                  </ButtonLink>
+                ) : undefined
+              }
+            >
+              {filter === "all" && filtrosAtivos === 0
+                ? "Nenhum atendimento cadastrado ainda."
+                : filtrosAtivos > 0
+                  ? "Nenhum atendimento neste recorte. Os outros continuam na lista — é o filtro que está estreito."
+                  : "Nenhum atendimento neste recorte."}
+            </Vazio>
+          </li>
+        ) : (
+          visible.map((a) => {
             const applications = state.applications.filter((ap) => ap.attendanceId === a.id).length;
             return (
-              <AttendanceCard
+              <AttendanceRow
                 key={a.id}
                 attendance={a}
+                to={`/empresa/atendimentos/${a.id}`}
                 patientName={patientName(a.patientId)}
                 caregiverName={caregiverName(a.confirmedCaregiverId)}
                 caregiverId={a.confirmedCaregiverId}
+                /* Ação rápida só onde existe ação: o plantão que ainda espera cuidador.
+                   Antes ela aparecia em quase toda linha — inclusive nas concluídas, onde
+                   "Candidaturas" é arquivo e não próximo passo — e cada linha ganhava 30px de
+                   altura por um link que ninguém ia clicar. Com o recorte, a lista volta a ter
+                   56px por registro e a linha mais alta passa a significar alguma coisa. */
                 actions={
-                  a.status === "draft" || a.status === "cancelled" ? null : (
+                  isAwaitingCaregiver(a) ? (
                     <AttendanceOpenActions attendance={a} applicationsCount={applications} />
-                  )
+                  ) : null
                 }
               />
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </AttendanceList>
     </div>
   );
 }

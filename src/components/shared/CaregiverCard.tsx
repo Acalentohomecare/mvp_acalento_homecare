@@ -17,7 +17,7 @@ export function CaregiverCard({ caregiver, rating, to, favorite }: CaregiverCard
   return (
     <Link
       to={to}
-      className="block rounded-card border border-linha bg-surface-raised p-3.5 shadow-card transition-[border-color,box-shadow] duration-150 ease-out hover:border-accent/45 hover:shadow-raised"
+      className="block rounded-card border border-linha bg-surface-raised p-3.5 transition-colors duration-150 ease-out hover:border-accent/45 hover:bg-surface-sunken/40"
     >
       <div className="flex items-start gap-3">
         <Avatar name={caregiver.name} />

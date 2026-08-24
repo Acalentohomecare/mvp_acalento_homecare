@@ -3,8 +3,8 @@
 > Padrão obrigatório para qualquer componente de front do projeto.
 > Fonte de verdade dos tokens: [`src/index.css`](../src/index.css) (bloco `@theme`).
 > Fonte de verdade dos componentes: [`src/components/ui/`](../src/components/ui/).
-> Arquivo-mestre da marca: [`public/logo-mark.png`](../public/logo-mark.png) (lockup completo
-> em [`public/logo-lockup.png`](../public/logo-lockup.png)).
+> Arquivo-mestre da marca: [`public/logo_new.jpeg`](../public/logo_new.jpeg) — **um arquivo só**,
+> o mesmo para a interface, o favicon e o ícone de app.
 
 **Nenhuma alteração visual importante entra no produto sem que esta página seja criada ou
 atualizada junto.** Se um padrão novo nasce durante o desenvolvimento, ele é documentado aqui
@@ -40,6 +40,7 @@ Marcadores de situação usados na página inteira:
 | 1 | [Marca](#1-marca) |
 | 2 | [Cor — o ambiente](#2-cor--o-ambiente) |
 | 3 | [Cor — estado e categoria (os crachás)](#3-cor--estado-e-categoria-os-crachás) |
+| 3.1 | [O marcador de estado — forma antes de cor](#31-o-marcador-de-estado--forma-antes-de-cor-) |
 | 4 | [Tipografia](#4-tipografia) |
 | 5 | [Forma — espaçamento, grid, raio, borda, elevação](#5-forma--espaçamento-grid-raio-borda-elevação) |
 | 6 | [Movimento — duração, curva, microinteração, transição](#6-movimento--duração-curva-microinteração-transição) |
@@ -57,7 +58,7 @@ Marcadores de situação usados na página inteira:
 
 ## 0. As cinco regras
 
-1. **Nunca escreva cor, raio ou sombra literal.** Nada de `bg-[#025658]`, `rounded-[12px]`,
+1. **Nunca escreva cor, raio ou sombra literal.** Nada de `bg-[#175260]`, `rounded-[12px]`,
    `shadow-lg`, `text-blue-600`. Use os tokens desta página. Se falta um token para o que você
    precisa, o token é que precisa nascer — em `@theme`, com nome semântico e comentário.
 2. **Antes de criar um componente, procure em `src/components/ui/`.** Botão, card, campo, crachá,
@@ -65,8 +66,9 @@ Marcadores de situação usados na página inteira:
 3. **Cor nunca é a única portadora de informação.** Todo estado tem rótulo em texto; todo item
    ativo tem peso, posição ou traço além do tom. Daltonismo e tela ao sol não são exceção nesse
    público.
-4. **Cor saturada é reservada.** O ambiente é branco e cinza levemente esverdeado. Verde cheio
-   só aparece na ação primária da tela e nos crachás que carregam significado.
+4. **Cor saturada é reservada.** O ambiente é branco e cinza levemente azul-esverdeado. Teal cheio
+   só aparece na ação primária da tela e nos crachás que carregam significado — e os degraus
+   claros do teal não aparecem em lugar nenhum da interface: são da marca.
 5. **Escreva para tela pequena primeiro.** A coordenadora decide plantão do celular, em pé, com
    pressa. Piso de 12px de texto, alvo de toque de 44px, nada essencial escondido em `hover`.
    A regra completa está na [seção 11](#11-mobile-first--regras-transversais).
@@ -75,37 +77,64 @@ Marcadores de situação usados na página inteira:
 
 ## 1. Marca
 
-O símbolo é a rede de cuidado: um núcleo em verde petróleo e cinco elos que saem dele — três em
-sálvia, dois em petróleo. O arquivo oficial é [`public/logo-mark.png`](../public/logo-mark.png), e
-o lockup completo (símbolo + palavra) é [`public/logo-lockup.png`](../public/logo-lockup.png).
-**Nada é redesenhado em código.**
+O símbolo é a rede de cuidado: um núcleo e cinco elos que saem dele — três claros, dois escuros.
+O arquivo oficial é [`public/logo_new.jpeg`](../public/logo_new.jpeg), e é o **único** arquivo de
+marca do repositório: a interface, o favicon e o ícone de app apontam todos para ele. **Nada é
+redesenhado em código, e não existe versão derivada** — derivada é o que sai do lugar quando a
+arte muda.
 
-A arte tem duas tintas, e são só estas duas:
+A arte tem três tintas, e elas formam uma escala:
 
 | Cor da marca | Token | Hex | Onde |
 |---|---|---|---|
-| Verde petróleo | `--brand` | `#025658` | Núcleo e elos escuros — 20,7% dos pixels opacos. É também `--accent`. |
-| Verde sálvia | `--brand-sage` | `#6CA079` | Elos claros — 10,1% dos pixels opacos. Só preenche forma. |
-| Sálvia de texto | `--brand-sage-ink` | `#41704C` | A sálvia rebaixada até aguentar letra (5,8:1 sobre branco). |
+| Teal profundo | `--brand` | `#175260` | Elos escuros e hastes. É também `--accent`. |
+| Teal médio | `--brand-mid` | `#236D77` | O núcleo do símbolo. |
+| Aqua | `--brand-aqua` | `#88C3C9` | Elos claros. Só preenche forma. |
+| Aqua de texto | `--brand-aqua-ink` | `#2A787F` | O aqua rebaixado até aguentar letra (5,1:1 sobre branco). |
 
-Os valores foram amostrados pixel a pixel do arquivo, não estimados.
+Os valores foram amostrados pixel a pixel do arquivo (mediana por região), não estimados.
 
-`--brand-sage` **nunca carrega texto**: a sálvia da arte fica em 3,0:1 sobre branco. Onde a sálvia
-precisa virar palavra — o "Gestão" do lockup — quem entra é `--brand-sage-ink`.
+### A matiz gira, e é isso que segura a escala
+
+| | L | C | H |
+|---|---|---|---|
+| Teal profundo | 0,408 | 0,063 | **217°** |
+| Teal médio | 0,494 | 0,072 | **208°** |
+| Aqua | 0,779 | 0,061 | **204°** |
+
+Conforme o tom clareia, a matiz anda 13° em direção ao ciano. Não é ruído de JPEG: é o que
+diferencia esta escala de três opacidades da mesma tinta, e é por isso que a marca parece
+desenhada. Quem criar qualquer tom novo no eixo da marca repete essa torção — mais fundo, mais
+azul.
+
+### A marca fica com os três degraus; a interface, com um só
+
+É esta a separação entre as duas paletas, e é o que deixa o logo mais marcante que o produto sem
+precisar manter duas versões da mesma cor:
+
+- o produto usa **apenas `#175260`**, o degrau mais fundo — cor institucional, que recua;
+- o símbolo usa **os três**, e o aqua é o degrau que mais nada tem. Em 1,96:1 sobre branco ele é
+  claro demais para qualquer papel de interface, e é justamente por isso que a marca se destaca de
+  tudo o que está em volta dela.
+
+`--brand-aqua` **nunca carrega texto**. Onde ele precisa virar palavra — o "Gestão" do lockup —
+quem entra é `--brand-aqua-ink`.
 
 ### O símbolo vai sem fundo, em lugar nenhum
 
-As duas tintas da arte são escuras o bastante para se sustentarem sozinhas sobre qualquer
-superfície clara do produto — o petróleo em 8,5:1 e a sálvia em 3,0:1 sobre branco. Não há elo
-quase branco a proteger, que era o problema da marca azul anterior e o que obrigava a discutir
-ladrilho de fundo.
+O arquivo é JPEG, e JPEG não tem transparência: ele carrega um fundo `#F7F7F7` opaco. Quem resolve
+isso é `mix-blend-darken` no `<LogoMark>`, e não um recorte salvo à parte.
 
-Conferido sobre branco, sobre a barra lateral (`#F1F3EF`), sobre o fundo do conteúdo e sobre o véu
-da entrada, de 170px até 16px.
+`darken` mantém, canal a canal, o menor valor entre o arquivo e a superfície de baixo. Toda
+superfície onde a marca aparece é mais escura que `#F7F7F7` nos três canais — a barra lateral
+(`#EDF2F3`), o fundo do app (`#F4F6F7`) e o véu da entrada (`#DFF1F3`) —, então o fundo do JPEG é
+substituído pela superfície **exatamente**: 1,000:1 de diferença, conferido por cálculo. As três
+tintas do símbolo são mais escuras que qualquer uma dessas superfícies e passam intactas.
 
-Por isso **não existe fundo por trás da marca em lugar nenhum** — nem na interface, nem nos
-favicons. A única exceção é o `apple-touch-icon`, que leva fundo branco porque o iOS pinta preto
-atrás de PNG transparente na tela de início.
+`multiply` foi o primeiro candidato e perde: escurece o fundo em ~3% em vez de casá-lo, deixando um
+quadrado de 1,07:1 visível em toda superfície. A única superfície onde `darken` deixaria resíduo é
+o **branco puro**, e a marca não é usada sobre ele em lugar nenhum do produto — se um dia for,
+esta seção é que precisa mudar primeiro.
 
 ```tsx
 import { Logo, LogoMark } from "../components/ui";
@@ -121,16 +150,19 @@ import { Logo, LogoMark } from "../components/ui";
 | Barra lateral (desktop) | `Logo variant="stacked" size={40}` |
 | Cabeçalho do celular | `Logo variant="inline" size={30}` |
 | Entrada / cadastro | `Logo variant="stacked" align="center" size={76}` / `{58}` |
-| Aba do navegador | `public/favicon-32.png` e `favicon.png` (transparentes) |
-| Ícone de app / iOS | `public/apple-touch-icon.png` (fundo branco, exigência do iOS) |
+| Aba do navegador | `public/logo_new.jpeg` |
+| Ícone de app / iOS | `public/logo_new.jpeg` |
 
-O de 32px é renderizado à parte porque reduzir 256→16 automaticamente transforma os elos finos
-em papa.
+Aba e iOS usam o mesmo arquivo da interface. Ali o fundo opaco do JPEG não atrapalha — a aba é
+clara nos dois temas, e no iOS ele é até conveniente, porque o sistema pinta preto atrás de PNG
+transparente na tela de início.
 
 **O nome é texto, não imagem, vem abaixo do símbolo e em caixa normal** — "Acalento Gestão", nunca
-"ACALENTO GESTÃO". "Gestão" sai em `--accent`, que é o eco do lockup original, onde a segunda
-palavra sempre teve cor própria. Sendo texto, ele acompanha a fonte do produto, fica nítido em
-qualquer densidade e é lido por leitor de tela.
+"ACALENTO GESTÃO". "Acalento" sai em `--brand` e "Gestão" em `--brand-aqua-ink`: a mesma escala do
+símbolo, na mesma ordem, e o eco do lockup original, onde a segunda palavra sempre teve cor
+própria. O lockup fica inteiro na tinta da marca — nenhuma das duas palavras usa cor de interface,
+e é isso que faz ele se ler como marca e não como título de tela. Sendo texto, acompanha a fonte
+do produto, fica nítido em qualquer densidade e é lido por leitor de tela.
 
 A variante `inline` (nome ao lado) existe só para o cabeçalho do celular, onde empilhar o lockup
 somaria uma terceira linha a uma barra que já é apertada.
@@ -143,30 +175,31 @@ outro peso; colocar fundo atrás do símbolo.
 ## 2. Cor — o ambiente
 
 Produto de saúde e de gestão: o fundo é claro e quieto. Toda a escala neutra puxa levemente para
-o verde (nenhum cinza puro, nenhum preto puro), o que faz o verde da marca parecer da mesma
-família em vez de um adesivo colado.
+a matiz da marca — um grafite azul-esverdeado em H ≈ 208°, com croma sempre abaixo de 0,012
+(nenhum cinza puro, nenhum preto puro). Não é detalhe de gosto: é o que faz o teal parecer da
+mesma família do ambiente em vez de um adesivo colado sobre cinza neutro.
 
 ### Neutros
 
 | Token | Utilidade | Hex | Uso |
 |---|---|---|---|
-| `--color-ink` | `text-ink` `bg-ink` | `#202321` | Texto principal. Verde-grafite, nunca `#000`. |
-| `--color-ink-muted` | `text-ink-muted` | `#4E5552` | Texto secundário. |
-| `--color-ink-subtle` | `text-ink-subtle` | `#616865` | Terciário, ícone, placeholder. |
-| `--color-surface` | `bg-surface` | `#F7F7F5` | Fundo do app. |
+| `--color-ink` | `text-ink` `bg-ink` | `#1D2122` | Texto principal. Grafite frio, nunca `#000`. |
+| `--color-ink-muted` | `text-ink-muted` | `#525859` | Texto secundário. |
+| `--color-ink-subtle` | `text-ink-subtle` | `#656C6D` | Terciário, ícone, placeholder. |
+| `--color-surface` | `bg-surface` | `#F4F6F7` | Fundo do app. |
 | `--color-surface-raised` | `bg-surface-raised` | `#FFFFFF` | Card, campo, `hover` de item de navegação. |
-| `--color-surface-sunken` | `bg-surface-sunken` | `#EDEFEB` | Faixa de apoio, contador, cabeçalho de tabela. |
-| `--color-surface-nav` | `bg-surface-nav` | `#F1F3EF` | Cromo de navegação: barra lateral, cabeçalho do celular, barra inferior. |
-| `--color-linha` | `border-linha` | `#E1E4DF` | Divisor e borda de card. **Não serve para delimitar controle.** |
-| `--color-linha-strong` | `border-linha-strong` | `#889089` | Borda de campo e de controle — 3,3:1 sobre branco. |
+| `--color-surface-sunken` | `bg-surface-sunken` | `#E8EEEF` | Faixa de apoio, contador, cabeçalho de tabela. |
+| `--color-surface-nav` | `bg-surface-nav` | `#EDF2F3` | Cromo de navegação: barra lateral, cabeçalho do celular, barra inferior. |
+| `--color-linha` | `border-linha` | `#D9E1E2` | Divisor e borda de card. **Não serve para delimitar controle.** |
+| `--color-linha-strong` | `border-linha-strong` | `#838D8E` | Borda de campo e de controle — 3,4:1 sobre branco. |
 
 **Hierarquia de texto por token** — não invente cinzas, e **nunca** faça degrau com opacidade:
 
 | Papel | Classe | Pior contraste no produto |
 |---|---|---|
-| Texto principal | `text-ink` | 13,2:1 |
-| Texto secundário, rótulo de campo | `text-ink-muted` | 6,4:1 |
-| Apoio, legenda, metadado, ícone, placeholder, vazio | `text-ink-subtle` | 4,8:1 |
+| Texto principal | `text-ink` | 13,9:1 |
+| Texto secundário, rótulo de campo | `text-ink-muted` | 6,2:1 |
+| Apoio, legenda, metadado, ícone, placeholder, vazio | `text-ink-subtle` | 4,6:1 |
 
 > **Por que não `text-ink/50`.** A hierarquia já foi feita com opacidade — `text-ink/45`,
 > `/50`, `/60` — em 154 lugares. Opacidade mistura a tinta com o fundo, e o resultado ia de
@@ -183,17 +216,22 @@ família em vez de um adesivo colado.
 
 | Token | Utilidade | Hex | Uso |
 |---|---|---|---|
-| `--color-accent` | `bg-accent` `text-accent` | `#025658` | Ação primária, item de navegação ativo, foco, valor em destaque. |
-| `--color-accent-strong` | `hover:bg-accent-strong` | `#014143` | `hover` / pressionado da ação primária. |
+| `--color-accent` | `bg-accent` `text-accent` | `#175260` | Ação primária, item de navegação ativo, foco, valor em destaque. |
+| `--color-accent-strong` | `hover:bg-accent-strong` | `#003D4A` | `hover` / pressionado da ação primária. |
 | `--color-accent-ink` | `text-accent-ink` | `#FFFFFF` | Texto e ícone **sobre** `--accent`. |
-| `--color-accent-ink-muted` | `text-accent-ink-muted` | `#C2D5D0` | Apoio **sobre** `--accent` (carimbo de hora na bolha de mensagem). |
-| `--color-accent-soft` | `bg-accent-soft` | `#E2EDE9` | Fundo tonal: nav ativa, avatar, botão `secondary`, véu da entrada. |
-| `--color-rating` | `fill-rating` `text-rating` | `#B4801E` | **Só** preenchimento de estrela de avaliação. |
+| `--color-accent-ink-muted` | `text-accent-ink-muted` | `#B8D2D5` | Apoio **sobre** `--accent` (carimbo de hora na bolha de mensagem). |
+| `--color-accent-soft` | `bg-accent-soft` | `#DFF1F3` | Fundo tonal: nav ativa, avatar, botão `secondary`, véu da entrada. |
+| `--color-rating` | `fill-rating` `text-rating` | `#B1812C` | **Só** preenchimento de estrela de avaliação. |
+
+> **`--accent` é `--brand`, e é o único degrau da marca que a interface tem direito de usar.** O
+> teal médio e o aqua ficam reservados ao símbolo ([seção 1](#1-marca)). Se a interface também os
+> usasse, o logo perderia o que tem de próprio e viraria mais um elemento da tela.
 
 > `--rating` não carrega letra, mas **carrega informação**: estrela cheia é o que diz a nota. Por
-> isso ele responde pelos 3:1 da WCAG 1.4.11 e não pelos 4,5:1 de texto — e por isso o ouro claro
-> de antes (`#D9A036`, 2,3:1 sobre branco) não servia. Estrela na cor da marca lia como botão, o
-> que continua verdade; a saída é o ouro mais fundo, não a marca.
+> isso ele responde pelos 3:1 da WCAG 1.4.11 e não pelos 4,5:1 de texto — 3,5:1 sobre branco.
+> Estrela na cor da marca lia como botão; a saída é o ouro, não a marca. O ouro é também o único
+> complementar do sistema: contra um ambiente inteiro em teal frio, o âmbar quente é o par que
+> fecha a roda em vez de brigar com ela.
 
 **Uma ação primária por tela.** Se duas coisas na mesma tela são `bg-accent`, uma delas está
 errada — vira `ghost` ou `secondary`.
@@ -205,43 +243,95 @@ errada — vira `ghost` ou `secondary`.
 ### O semáforo do produto
 
 O produto tem um semáforo obrigatório, em versões dessaturadas para conviver com o ambiente
-verde: **âmbar = espera alguém agir**, **verde = combinado de pé**, **vermelho = caiu**. Somam-se
-a ele o petróleo vivo do que acontece agora e a ardósia do que já é histórico.
+teal: **âmbar = espera alguém agir**, **verde = combinado de pé**, **vermelho = caiu**. Somam-se
+a ele o teal vivo do que acontece agora e a ardósia do que já é histórico.
 
 Cada estado é um **par**: a cor base (texto, ícone, ponto) e o `-soft` (fundo do chip).
 
 | Estado | Token base | Base | Soft | Significado |
 |---|---|---|---|---|
-| Em busca / convite / candidaturas | `status-aberto` | `#87550A` | `#FBF0DC` | Pendente — espera uma decisão. |
-| Confirmado | `status-confirmado` | `#2C6A45` | `#E7F1E7` | Combinado de pé. |
-| Em andamento | `status-andamento` | `#0F6E70` | `#DFEFEE` | Acontecendo agora. |
-| Concluído / avaliado | `status-concluido` | `#576460` | `#EBEEEA` | Encerrado, já é histórico. |
-| Cancelado / recusado | `status-cancelado` | `#A33F30` | `#FAE9E4` | Caiu. |
-| Bloqueado | `status-bloqueado` | `#78291F` | `#F3E2DE` | Decisão posterior da empresa sobre quem já estava no quadro (R12). |
-| Rascunho | `status-rascunho` | `#5C6560` | `#EDEFEB` | Ainda não publicado. |
+| Em busca / convite / candidaturas | `status-aberto` | `#79520A` | `#FDEED4` | Pendente — espera uma decisão. |
+| Confirmado | `status-confirmado` | `#346B45` | `#E1F4E5` | Combinado de pé. |
+| Em andamento | `status-andamento` | `#006877` | `#DAF2F6` | Acontecendo agora. |
+| Concluído / avaliado | `status-concluido` | `#5D6567` | `#E8EEEF` | Encerrado, já é histórico. |
+| Cancelado / recusado | `status-cancelado` | `#94392D` | `#FFE6E0` | Caiu. |
+| Bloqueado | `status-bloqueado` | `#771814` | `#FFE0DA` | Decisão posterior da empresa sobre quem já estava no quadro (R12). |
+| Rascunho | `status-rascunho` | `#616666` | `#E8EEEF` | Ainda não publicado. |
 
 Bloqueado é vermelho mais profundo que cancelado de propósito: uma recusa é uma decisão pontual
 sobre o cadastro que chegou; um bloqueio é uma decisão posterior sobre alguém que já estava dentro.
 
+### 3.1 O marcador de estado — forma antes de cor ✅
+
+**Crachá é pessoa; marcador é estado.** É a separação que organiza esta seção inteira, e ela nasceu
+na revisão 13.
+
+O `<Cracha>` — a pastilha redonda com furo de lanyard — identifica **uma pessoa**: categoria do
+cuidador, selo de verificado, registro no conselho. Continua sendo o elemento de assinatura do
+design system.
+
+Estado de atendimento **não é credencial de ninguém**; é a situação de um registro dentro de um
+sistema. Usar a mesma pastilha para as duas coisas fazia a lista de plantões parecer um mural de
+etiquetas, e era o que mais empurrava o módulo para a estética de painel genérico. Quem responde
+por estado é o `<StatusAtendimento>`.
+
+Ele carrega a informação em **três eixos ao mesmo tempo** — forma, cor e palavra — e a forma é a
+primária. Nove status, cinco formas:
+
+| Forma | Desenho | Estados | Leitura |
+|---|---|---|---|
+| `aguarda` | anel vazado | Rascunho, Em busca, Convite enviado, Candidaturas | Falta alguém decidir. O vazio é literal: o plantão não tem dono. |
+| `firmado` | ponto cheio | Confirmado | Combinado de pé. |
+| `agora` | ponto cheio com halo | Em andamento | Está acontecendo neste momento. |
+| `fechado` | quadrado cheio | Concluído, Avaliado | Encerrou, virou histórico. Quadrado porque parou. |
+| `caiu` | quadrado vazado | Cancelado | A forma do fechado, sem o preenchimento. |
+
+É a regra 3 resolvida na **estrutura**, e não num `aria-label`: uma coluna de trinta plantões é
+varrida sem ler rótulo nenhum, e continua legível para quem não distingue âmbar de verde.
+
+**Três variantes, três lugares:**
+
+| Variante | Forma | Onde |
+|---|---|---|
+| `linha` (padrão) | marcador + palavra na tinta do estado, **sem fundo** | Toda lista de atendimentos. |
+| `bloco` | crachá quadrado (`rounded-marker`), fundo `-soft` + borda | Cabeçalho da ficha, onde o estado é a manchete. |
+| `ponto` | só o marcador, com o rótulo em `sr-only` | Onde a palavra já está escrita ao lado. |
+
+Na variante `linha` o rótulo sai na forma curta (`ATTENDANCE_STATUS_SHORT`) — "Candidaturas", não
+"Candidaturas recebidas" — e a forma longa vai junto em `sr-only`. Não é economia por gosto: a
+coluna de estado é a última da linha, e o rótulo longo comia metade da largura que sobra para o
+nome do paciente num telefone de 320px.
+
+```tsx
+<StatusAtendimento status={attendance.status} />                  // na lista
+<StatusAtendimento status={attendance.status} variant="bloco" />  // na ficha
+```
+
+**Não faça:** pôr estado de atendimento num `<Cracha>`; usar `rounded-full` num crachá de estado;
+usar a variante `bloco` dentro de uma lista, onde ela vira uma coluna de pastilhas coloridas.
+
+---
+
 ### Categoria do cuidador (a credencial)
 
 É o elemento que mais aparece na jornada e o que diferencia a plataforma (R2/R3). A escala corre
-pelo **próprio eixo da marca** — sálvia, petróleo médio, petróleo cheio: **quanto mais alta a
-credencial, mais fundo o verde e mais perto da cor institucional.** É o único lugar do produto
-onde as duas tintas do símbolo aparecem como escala, e não por acaso: credencial é exatamente a
-grandeza que a marca já desenha como profundidade.
+pelo **próprio eixo da marca** e repete a torção de matiz que o símbolo desenha ([seção
+1](#a-matiz-gira-e-é-isso-que-segura-a-escala)): **quanto mais alta a credencial, mais fundo e
+mais azul o teal** — 199° → 211° → 225°. Credencial é exatamente a grandeza que a marca já
+desenha como profundidade.
 
-| Categoria | Token | Base | Soft |
-|---|---|---|---|
-| Informal | `cat-informal` | `#41704C` | `#E6F0E7` |
-| Técnico | `cat-tecnico` | `#136B6D` | `#DFEDED` |
-| Superior | `cat-superior` | `#025658` | `#DDE9E7` |
+| Categoria | Token | Base | Soft | H |
+|---|---|---|---|---|
+| Informal | `cat-informal` | `#1C7376` | `#DFF3F4` | 199° |
+| Técnico | `cat-tecnico` | `#005F6C` | `#DDF1F5` | 211° |
+| Superior | `cat-superior` | `#004559` | `#DBEFF6` | 225° |
 
 ### Regra de contraste
 
-Todo par base/`-soft` acima fecha **4,5:1 ou mais** do texto base sobre o próprio fundo soft.
-Se você criar um par novo, confira antes — não é opcional. É por isso que os tons base são mais
-escuros do que "a cor pura": `#8A5D0B` é o âmbar que sobrevive a essa conta, `#E8A33D` não era.
+Todo par base/`-soft` acima fecha **4,5:1 ou mais** do texto base sobre o próprio fundo soft —
+o mais apertado é `cat-informal`, em 4,85:1. Se você criar um par novo, confira antes: não é
+opcional. É por isso que os tons base são mais escuros do que "a cor pura": `#79520A` é o âmbar
+que sobrevive a essa conta, `#E8A33D` não era.
 
 ### Onde as cores de estado moram
 
@@ -369,18 +459,29 @@ dentro dela:
 390px produz nome de paciente truncado — e o nome do paciente é a informação que a tela existe
 para mostrar.
 
-### Raio — três, por papel
+### Raio — quatro, por papel
 
 | Utilidade | Valor | Uso |
 |---|---|---|
-| `rounded-control` | 10px | Botão, campo, item de lista, bloco pequeno. |
-| `rounded-card` | 14px | Card e blocos de conteúdo. |
-| `rounded-panel` | 18px | Modal, bottom sheet e painéis grandes. |
-| `rounded-full` | — | Crachá, chip de filtro, avatar, ponto. |
+| `rounded-marker` | 3px | Crachá de estado, marcador, pastilha de contagem. |
+| `rounded-control` | 6px | Botão, campo, chip, item de lista. |
+| `rounded-card` | 9px | Card, painel, moldura de lista. |
+| `rounded-panel` | 12px | Modal e folha do celular. |
+| `rounded-full` | — | **Só** avatar, crachá de credencial e ponto. Nada mais. |
 
 Raio nunca é decorativo: ele diz o tamanho do papel. Um bloco com `rounded-panel` dentro de um card
 com `rounded-card` inverte a hierarquia e sempre parece errado, mesmo quando ninguém sabe dizer
 por quê.
+
+**Os valores caíram na revisão 13** (10 / 14 / 18 → 6 / 9 / 12). Não é ajuste de gosto: quinze
+plantões numa lista, cada um em 14px de canto, param de parecer registros e passam a parecer
+cartões. Canto muito arredondado é a assinatura visual de template — e custa densidade, porque
+raio grande exige padding grande para o conteúdo não encostar na curva.
+
+**`rounded-full` deixou de ser padrão.** Era a forma de crachá de estado, de chip de filtro, de
+pastilha de contagem e de etiqueta de foto. Pílula em toda parte é o que mais fazia o produto
+parecer um painel genérico; hoje a cápsula está reservada ao que é **redondo por natureza** —
+avatar, ponto, e o crachá de credencial, que imita um crachá de verdade.
 
 ### Borda
 
@@ -388,22 +489,32 @@ Sempre `border-linha`. Campo de formulário usa `border-[1.5px]` (a borda de 1px
 todo o resto usa 1px. `hover` de card ou item clicável: `hover:border-accent/45` — nunca a cor
 cheia, que faz a lista inteira piscar quando o mouse passa.
 
-Borda **tracejada** (`border-dashed`) tem um significado só: estado vazio. Nunca use como enfeite.
+Borda **tracejada** (`border-dashed`) não existe mais neste produto. Era a moldura do estado
+vazio, e saiu junto com ela na revisão 13: ver seção 8.2.
 
-### Elevação — três, e só
+### Elevação — sombra significa **uma** coisa
 
 | Utilidade | Uso |
 |---|---|
-| `shadow-card` | Padrão de card, chip primário, item de lista. |
-| `shadow-raised` | Card em `hover`, barra inferior do celular, card da tela de entrada. |
-| `shadow-overlay` | Modal e bottom sheet. |
+| `shadow-raised` | Barra de ação flutuante do celular, barra inferior de navegação. |
+| `shadow-overlay` | Modal e folha do celular. |
+| `shadow-card` | Token que sobrou para casos futuros. **Não use em card nem em item de lista.** |
 
-As três são **esverdeadas** (`rgb(32 35 33 / …)`), não pretas: sombra preta sobre este fundo
-produz aquele cinza sujo que faz a tela parecer template.
+As três usam a tinta fria do ambiente (`rgb(29 33 34 / …)`), nunca preta: sombra preta sobre este
+fundo produz aquele cinza sujo que faz a tela parecer template.
 
-Em celular, `shadow-raised` aparece em um lugar só — a barra inferior, para separá-la do conteúdo
-que rola por baixo. Card em celular fica em `shadow-card`: não há `hover` para gastar elevação, e
-uma lista de cards flutuando vira ruído.
+**A regra mudou na revisão 13, e é curta:**
+
+> Sombra é **elevação de verdade** — o que está por cima de outra coisa e pode ser fechado ou
+> rolado por baixo. Modal, folha, barra flutuante. Nada mais.
+
+Antes, `shadow-card` estava em todo card, em todo item de lista, no botão primário e no chip
+aceso. O efeito somado não era profundidade: era uma tela inteira de objetos flutuando a 1px de
+altura, que é exatamente a textura de um template moderno. O que separa conteúdo agora é **borda
+de 1px e espaço**, e a hierarquia vem de posição e densidade.
+
+Card em `hover` também perdeu a sombra: onde existe `hover`, quem responde é a cor de fundo
+(`hover:bg-surface-sunken/60`) ou a borda, não a altura.
 
 ---
 
@@ -513,7 +624,7 @@ decisão.
 
 | Variante | Visual | Quando |
 |---|---|---|
-| `primary` | `bg-accent`, texto `accent-ink`, `shadow-card` | A ação da tela. **Uma por tela.** |
+| `primary` | `bg-accent`, texto `accent-ink`, sem sombra | A ação da tela. **Uma por tela.** |
 | `secondary` | `bg-ink`, texto `surface` | Alternativa de mesmo peso. |
 | `ghost` | Branco com `border-linha` | Ação de apoio que precisa existir sem disputar atenção. |
 | `destructive` | `bg-status-cancelado`, texto branco | O que não dá para desfazer. |
@@ -608,7 +719,7 @@ esquerda.
 
 | Modo | Selecionado | Quando |
 |---|---|---|
-| `unico` (padrão) | `bg-accent text-accent-ink shadow-card` | Só um item aceso por vez: abas, período, categoria. |
+| `unico` (padrão) | `bg-accent text-accent-ink` | Só um item aceso por vez. Para **abas de lista**, use `<Tabs>`. |
 | `multiplo` | `border-accent/35 bg-accent-soft text-accent` | Vários acesos juntos: dias da semana, turnos. |
 
 Sete pastilhas azuis sólidas lado a lado — os dias da semana, todos marcados — pesam mais que o
@@ -637,13 +748,96 @@ sem nenhuma affordance.
 
 ---
 
+### `<Painel>` ✅ — o contêiner de conteúdo
+
+**Objetivo.** Delimitar uma região de conteúdo com cabeçalho, sem fingir altura. É o contêiner que
+substituiu a maior parte dos `<Card>` do módulo de Atendimentos.
+
+**A diferença é de papel, não de estilo:**
+
+| | O que é | Forma |
+|---|---|---|
+| `<Card>` | uma **superfície solta no fluxo** — caixa de entrada, resumo lateral | borda 1px, `rounded-card`, `p-3.5` |
+| `<Painel>` | um **bloco do documento** com cabeçalho e conteúdo estruturado | borda 1px, cabeçalho em faixa rebaixada, sem sombra |
+| nenhum dos dois | listas de registro | usam a moldura do próprio `<AttendanceList>` |
+
+**Estrutura.** Cabeçalho opcional (`title` + `count` + `actions`) numa faixa `bg-surface-sunken/60`
+com `border-b`; conteúdo com `p-3.5`, ou colado à borda com `flush` quando o filho é uma lista.
+
+```tsx
+<Painel title="Em aberto" count={4} flush actions={<Link …>Ver todos</Link>}>
+  <ul className="divide-y divide-linha">{/* linhas */}</ul>
+</Painel>
+```
+
+**Restrições.** Painel dentro de painel é erro, como card dentro de card. Um painel contém listas,
+tabelas e linhas de dado — nunca outro contêiner com moldura. Para separar blocos **dentro** de um
+painel, use um fio (`border-t border-linha pt-3.5`) e um rótulo `text-dado uppercase`, nunca uma
+segunda caixa.
+
+---
+
+### `<ListaDeDados>` · `<Dado>` ✅
+
+**Objetivo.** Par termo/valor alinhado — o jeito de mostrar dados operacionais de um registro:
+data, horário, endereço, perfil exigido, cuidador, valor.
+
+**Onde.** Ficha do atendimento, próximo atendimento do cuidador, proposta de convite, resumo do
+novo atendimento.
+
+**Estrutura.** `<dl>` de verdade, com `divide-y` entre as linhas: termo à esquerda em
+`text-ink-subtle`, valor à direita em `text-ink`. A coluna de valores alinha sozinha, que é o que
+faz um bloco de dados parecer registro e não texto corrido — e quem usa leitor de tela ouve o par
+em vez de duas frases soltas.
+
+```tsx
+<ListaDeDados>
+  <Dado termo="Quando"><span className="numero">Ter, 25/08 · 07:00</span></Dado>
+  <Dado termo="Valor"><span className="numero">R$ 180</span></Dado>
+</ListaDeDados>
+```
+
+**Substituiu** os blocos `grid grid-cols-2` que existiam para mostrar duas informações dentro de um
+card. Todo número vai com `.numero`, senão a coluna da direita não alinha.
+
+---
+
+### `<Tabs>` ✅ — escolher **um** recorte
+
+**Objetivo.** Alternar entre recortes de uma mesma lista, com a contagem de cada um à vista.
+
+**Onde.** Atendimentos (Todos / Em aberto / Agendados / Encerrados / Rascunhos), Escala (Hoje /
+7 dias).
+
+**Estrutura.** Aba sublinhada: o item aceso é dito por **posição e traço** (`border-b-2`), não por
+um bloco de cor. A linha de base corre por baixo de todas e amarra a fila ao conteúdo abaixo. A
+aba inativa carrega a mesma borda em transparente — assim não muda de altura ao acender, que é o
+pulo que mais denuncia componente montado às pressas.
+
+```tsx
+<Tabs abas={abas} atual={filter} onChange={setFilter} label="Recorte dos atendimentos" />
+```
+
+**Por que não `<Chip>`.** O filtro era uma fila de pastilhas de 999px com a selecionada pintada de
+teal cheio. Cinco pastilhas coloridas no topo de uma lista competem com a lista. `<Chip>` continua
+sendo o certo para **seleção** — dia, turno, atividade, vários acesos ao mesmo tempo.
+
+**Contagem.** Vem de `<Contador>` (retângulo de 3px, tabular), e é calculada **dentro do recorte
+corrente** de busca e período — senão a aba promete dez e entrega dois. `0` aparece: é informação.
+
+**Mobile.** Rola na horizontal, sangrando até a borda (`-mx-6 px-6`), pelo mesmo motivo do
+`<FilterRow>`.
+
+---
+
 ### `<Card>` ✅
 
 **Objetivo.** A superfície padrão de todo conteúdo. Separa um item do fundo sem virar caixa pesada.
 
 **Onde.** Listas de atendimento, cuidador, convite, candidatura; blocos de detalhe e formulário.
 
-**Estrutura visual.** `rounded-card border border-linha bg-surface-raised p-3.5 shadow-card`.
+**Estrutura visual.** `rounded-card border border-linha bg-surface-raised p-3.5` — **sem sombra**
+desde a revisão 13. Para conteúdo com cabeçalho e estrutura interna, use `<Painel>`.
 
 **Variações.** Uma só. O que muda é o conteúdo, não a moldura. Card clicável acrescenta
 `transition-[border-color,box-shadow] duration-150 ease-out hover:border-accent/45
@@ -718,7 +912,7 @@ Safari do iPhone dá zoom sozinho ao focar o campo**, o formulário sai do enqua
 precisa fechar o zoom com dois dedos a cada campo. A altura resultante do campo é ~44px, o que
 resolve o alvo de toque no mesmo movimento.
 
-A borda usa `--linha-strong` (`#889089`) e não `--linha`, e tem 1,5px. As duas coisas resolvem
+A borda usa `--linha-strong` (`#838D8E`) e não `--linha`, e tem 1,5px. As duas coisas resolvem
 problemas diferentes: a espessura é para a tela do celular sob luz ambiente forte; o token é para
 a WCAG 1.4.11, que cobra 3:1 de qualquer coisa que delimite um controle. Num campo vazio a borda
 é a única coisa que diz onde o campo começa — com `--linha` ela ficava em 1,27:1, e engrossar
@@ -964,23 +1158,46 @@ A pulsação (`.esqueleto`) é por **opacidade**, 1,6s `ease-in-out` — **nunca
 > existe hoje uma lista que carregue sozinha dentro de uma página já renderizada. É o componente a
 > usar quando essa situação aparecer — não crie outro.
 
-### 8.2 Vazio ✅
+### 8.2 Vazio ✅ — `<Vazio>`
 
 ```tsx
-<p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink/45">
-  Nenhum atendimento aguardando cuidador.
-</p>
+<Vazio acao={<ButtonLink to="/empresa/atendimentos/novo" size="sm">Novo atendimento</ButtonLink>}>
+  Nenhum atendimento cadastrado ainda.
+</Vazio>
+
+<Vazio porte="linha">Nada pendente no momento.</Vazio>
 ```
 
-**Estrutura.** Borda tracejada, fundo branco a 50%, texto centralizado em `text-ink/45`, `py-7`.
+**Estrutura.** Texto **alinhado à esquerda**, na medida do conteúdo que substituiria, com a ação à
+direita. Sem moldura, sem centralização, sem borda tracejada.
 
-**Regras de texto.** A borda tracejada diz "aqui vai aparecer coisa" sem parecer erro. **O texto
-diz o que falta, nunca só "vazio"** — "Nenhum atendimento aguardando cuidador", não "Sem
-resultados". Quando existe uma ação que resolve o vazio, ela vem junto, como `<Button size="sm"
-variant="ghost">` logo abaixo do texto.
+**A borda tracejada saiu na revisão 13.** Ela estava copiada em oito telas com quatro paddings
+diferentes, e é o clichê de estado vazio: desenha um buraco no lugar do conteúdo e chama atenção
+justamente para o que não existe. O vazio deste produto é **quieto** — uma anotação onde o
+registro estaria.
 
-**Mobile.** Largura total, uma frase, no máximo duas linhas a 390px. Estado vazio com ilustração
-não existe neste produto: come meia tela do celular para dizer o que uma frase já disse.
+**Dois portes:** `bloco` (`py-6`) para uma lista inteira vazia; `linha` (`py-3`) para uma seção
+pequena dentro de um painel.
+
+**Duas naturezas, e elas não são a mesma coisa** — a frase precisa dizer qual é:
+
+| Natureza | O que aconteceu | A saída |
+|---|---|---|
+| Vazio de verdade | não existe registro nenhum ainda | criar o primeiro |
+| Vazio de filtro | existe registro, o recorte não achou | afrouxar o filtro |
+
+"Nenhum atendimento neste recorte. Os outros continuam na lista — é o filtro que está estreito."
+Sem essa distinção, a pessoa acha que perdeu os dados.
+
+**Regras de texto.** Diz o que falta, nunca só "vazio". Sem "Ops!", sem exclamação. Quando existe
+uma saída, ela vem junto: estado vazio sem porta de saída é um beco.
+
+**Painel vazio que repete o que a tela já disse não deve existir.** No Início, "Atendimentos de
+hoje" some quando não há nenhum — a frase de abertura já disse "Nenhum atendimento hoje", e o
+painel vazio custava ~110px do topo da tela mais usada do produto.
+
+**Mobile.** Uma frase, no máximo duas linhas a 390px. Estado vazio com ilustração não existe neste
+produto: come meia tela do celular para dizer o que uma frase já disse.
 
 ### 8.3 Erro ✅ — `<Aviso>`
 
@@ -1079,15 +1296,143 @@ coisas aconteceu).
 Padrões que não são um componente único, mas uma combinação fixa que já se repete no produto e
 **não pode ser reinventada a cada tela**.
 
-### 9.1 Histórico de atividades ✅
+### 9.0 O registro de atendimentos ✅ — `<AttendanceRow>` · `<AttendanceList>`
+
+**Objetivo.** Mostrar muitos atendimentos de uma vez, de forma que a coordenadora **varra** em vez
+de ler. É o padrão mais importante do produto: aparece em Atendimentos, Início, Escala e na agenda
+do cuidador.
+
+**Substituiu o `<AttendanceCard>` na revisão 13**, e a troca é estrutural. O card punha cada
+plantão numa caixa com borda, raio de 14px e sombra: quinze plantões viravam quinze objetos
+flutuando, ~150px cada, e nenhum dado ficava na mesma posição de uma caixa para a outra.
+
+#### A anatomia
+
+```
+celular (3 col × 3 linhas)            desktop lg (5 col × 2 linhas)
+┌──────┬─────────────────┬───────┐   ┌──────┬───────────┬─────────┬───────┬────────┐
+│14/03 │ Marli Gonçalves │ R$180 │   │14/03 │ Marli G.  │ Sandra  │ R$180 │ ● Em   │
+│07:00 │ Plantão 12h ·…  │ ● Em  │   │07:00 │ Plantão…  │ Oliveira│       │ andam. │
+│      │ Sandra Oliveira │ andam.│   └──────┴───────────┴─────────┴───────┴────────┘
+└──────┴─────────────────┴───────┘
+```
+
+**Uma grade só, o mesmo DOM.** O que muda entre celular e desktop é **onde cada célula cai**
+(`col-start` / `row-start`), não o conteúdo. O nome do cuidador é o mesmo nó nos dois casos —
+nunca uma segunda cópia escondida com `lg:hidden`, que duplica conteúdo para leitor de tela e sai
+de sincronia na primeira alteração.
+
+**As nove informações do briefing, e onde cada uma cai:**
+
+| # | Informação | Onde | Peso |
+|---|---|---|---|
+| 1 | Paciente | col. 2, linha 1 | `text-note` 600, `--ink` — **principal** |
+| 2 | Quando (data + hora) | col. 1, coluna própria | `.numero` 500 — **operacional** |
+| 3 | Tipo e duração | col. 2, linha 2 | `text-meta`, `--ink-subtle` — **contextual** |
+| 4 | Onde (bairro) | col. 2, linha 2 | idem |
+| 5 | Cuidador | col. 3 (desktop) / col. 2 linha 3 | `text-note`, `--ink-muted` |
+| 6 | Valor | col. 4, à direita | `.numero` — **complementar** |
+| 7 | Status | col. 5, à direita | `<StatusAtendimento>` |
+| 8 | Recado | linha 3, quando existe | `text-meta` |
+| 9 | Próxima ação | linha 3, quando existe | `ROW_ACTION_CLASS` |
+
+**Quatro pesos, e nenhum é só cor** — tamanho, peso, posição e agrupamento fazem a hierarquia.
+
+**O horário fica numa coluna própria, à esquerda de tudo**, porque numa escala **quando** é a
+primeira pergunta — antes até de quem. É o que uma escala impressa sempre fez.
+
+#### Nenhum ícone
+
+A versão anterior abria cada dado com um ícone de 12px, na sequência
+`📅 data ◷ hora 📍 local 👤 cuidador`. Nenhum acelerava reconhecimento: data já se reconhece por
+ser data, e quatro ícones cinzas na mesma linha viram textura. O que separa os dados agora é
+**posição de coluna**.
+
+Ícone só entra onde carrega significado que o texto não dá — o cadeado do endereço trancado
+("isto abre quando você aceitar") — ou onde representa uma ação.
+
+#### A moldura
+
+`<AttendanceList>` é **uma** borda para o conjunto e um fio de 1px entre as linhas, em vez de
+borda e sombra em cada item. É a diferença entre uma planilha e uma pilha de post-its.
+
+Usa `overflow-clip`, **não** `overflow-hidden`: `hidden` cria um contêiner de rolagem e o
+cabeçalho de grupo `sticky` pararia de grudar no topo da janela.
+
+#### Densidade e altura
+
+| | Altura | Antes (card) |
+|---|---|---|
+| desktop, linha simples | ~56px | ~150px |
+| celular, linha simples | ~74px | ~150px |
+| linha com ação | +30px | — |
+
+**Só a linha que pede trabalho fica mais alta.** A ação rápida aparece apenas onde existe ação —
+o plantão que ainda espera cuidador. Numa lista, a exceção deve se destacar da regra, não ser
+nivelada com ela.
+
+#### Grupos
+
+`<AttendanceGroupHeader>` é o cabeçalho de dia da escala: faixa `bg-surface-sunken`, rótulo
+`text-dado uppercase`, contagem à direita, e `sticky top-0`. Em escala longa, saber de que dia é a
+linha que se está lendo não pode depender de rolar de volta. Os grupos entram como `<Fragment>`
+dentro da mesma `<ul>` — um nível a mais de lista tiraria as linhas de baixo do `divide-y`.
+
+#### Estados
+
+| Estado | Comportamento |
+|---|---|
+| `hover` | `bg-surface-sunken/60` na linha inteira. Sem sombra, sem mudança de borda. |
+| foco de teclado | anel no nome do paciente, que é o link esticado. |
+| clique | qualquer ponto da linha abre a ficha (`after:absolute after:inset-0` no nome). |
+| links internos | `relative z-10` para ficarem por cima do link esticado. |
+| sem cuidador | `text-status-aberto` **só** enquanto o plantão espera alguém; fora disso, `—`. |
+| carregando | `<SkeletonLista>` — a mesma grade, as mesmas colunas. |
+
+---
+
+### 9.1 Histórico de atividades ✅ — `<LinhaDoTempo>`
 
 **Objetivo.** Mostrar o que aconteceu, quando e por quem — em ordem, sem que o histórico dispute
 atenção com o conteúdo vivo da tela. É requisito de rastreabilidade (R12).
 
-**Onde.** "Registro de atividade" em Configurações da empresa (aprovação, recusa, bloqueio,
-cancelamento) e "Observações" no registro do atendimento.
+**Onde.** "Atividade recente" no Início, "Histórico" na ficha do atendimento, "Registro de
+atividade" em Configurações.
 
-**Estrutura visual.** Lista sem card, separada por divisores — **não** uma pilha de cards:
+**A revisão 13 deu estrutura ao evento.** Era uma `<ul>` de parágrafos — frase, carimbo, borda
+embaixo, repete — que lia como notas soltas e não como o registro de uma operação. Hoje toda
+entrada tem os mesmos quatro campos:
+
+```
+●─┐  Check-in registrado                          07:04
+  │  Sandra Oliveira · Vila Mariana, portaria
+  │
+●─┘  Cuidador confirmado                          ontem, 18:22
+     Coordenação
+```
+
+| Campo | Papel | Forma |
+|---|---|---|
+| `evento` | o que aconteceu | `text-note` peso 500, `--ink`. Verbo no particípio. |
+| `quando` | o carimbo | `.numero`, `text-meta`, encostado à direita |
+| `contexto` | quem e onde | `text-meta`, `--ink-subtle`, linha própria |
+| `tom` | a natureza do evento | marcador: `feito` · `agora` · `previsto` · `caiu` |
+
+**O conector é um fio de 1px atrás dos marcadores**, não uma borda em cada item: fio contínuo é o
+que faz uma sequência parecer uma sequência. Ele some no último evento, senão a lista parece
+continuar para fora de si.
+
+**A ordenação usa o ISO de origem**, nunca o carimbo já formatado — "02/01" vem depois de "28/12"
+no calendário e antes dele em ordem alfabética.
+
+**Restrição.** Evento de histórico **nunca ganha caixa própria**. A regra do módulo é linha,
+conector e separador — nada de card por evento.
+
+```tsx
+<LinhaDoTempo eventos={[{ id, evento: "Check-out registrado", contexto: "3 de 3 tarefas", quando: "24/08 19:02" }]} />
+```
+
+**A forma antiga**, ainda válida para listas simples de observação:
 
 ```tsx
 <ul>
@@ -1198,7 +1543,7 @@ invólucro que estica — o cinza acompanha a altura da página, sem degrau no m
 página longa. Conteúdo em `mx-auto max-w-2xl px-6 py-7`.
 
 **O cromo é mais escuro que o conteúdo, não mais claro.** Barra lateral, cabeçalho do celular e
-barra inferior usam `--surface-nav` (`#F1F3EF`); o conteúdo fica em `--surface` e os cards em
+barra inferior usam `--surface-nav` (`#EDF2F3`); o conteúdo fica em `--surface` e os cards em
 branco. A navegação recua, o conteúdo avança.
 
 O cabeçalho do celular e a barra inferior são translúcidos (`/90`, `/95`) com `backdrop-blur-md`:
@@ -1496,6 +1841,115 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 13 — o módulo de Atendimentos virou registro (agosto/2026)
+
+O módulo inteiro — lista, ficha, escala, matching, candidaturas, convites e os dois painéis de
+Início — foi redesenhado para parecer o que é: **software de operação, usado todo dia para
+preencher escala**, e não um painel bonito de apresentação.
+
+Cinco padrões se somavam para produzir a estética de template, e todos saíram:
+
+- **Todo atendimento era um card.** Virou `<AttendanceRow>`: linha de registro com coluna fixa
+  para cada dado, dentro de **uma** moldura (`<AttendanceList>`). A altura caiu de ~150px para
+  ~56px no desktop e ~74px no celular, **com mais informação dentro** — e a leitura virou
+  varredura vertical, porque a coluna de horários, a de valores e a de estados alinham. Seção 9.0.
+- **Estado era sempre uma pastilha de 999px.** Nasceu o `<StatusAtendimento>`, com cinco **formas**
+  para nove estados — anel vazado espera decisão, ponto está firmado, ponto com halo acontece
+  agora, quadrado cheio encerrou, quadrado vazado caiu. O `<Cracha>` continua, e ficou com o que
+  sempre foi dele: **credencial de pessoa**. Seção 3.1.
+- **Um ícone antes de cada dado.** A fila `📅 data ◷ hora 📍 local 👤 cuidador` sumiu inteira. O que
+  separa dado de dado agora é posição de coluna. Ícone só onde carrega significado (o cadeado do
+  endereço trancado) ou representa ação.
+- **Sombra em tudo.** `shadow-card` estava em card, item de lista, botão primário e chip aceso.
+  Sombra passou a significar **uma** coisa: elevação de verdade — modal, folha, barra flutuante.
+  O que separa conteúdo é borda de 1px e espaço. Seção 5.
+- **Canto muito arredondado.** Os raios caíram de 10/14/18px para 6/9/12px, e nasceu o
+  `--radius-marker` de 3px. `rounded-full` deixou de ser padrão e ficou só no que é redondo por
+  natureza: avatar, ponto, crachá de credencial. Seção 5.
+
+**Componentes que nasceram:** `<Painel>`, `<ListaDeDados>`/`<Dado>`, `<StatusAtendimento>`,
+`<Tabs>`, `<LinhaDoTempo>`, `<Vazio>`, `<Contador>`, `<AttendanceRow>`/`<AttendanceList>`/
+`<AttendanceGroupHeader>`, e os formatadores de data em `utils/date.ts`.
+
+**Componentes que morreram:** `<AttendanceCard>` (virou linha) e `<StatStrip>` (nunca foi usado por
+tela nenhuma, e era a fila de cartões de métrica que esta revisão existe para eliminar).
+
+**Dívidas que a revisão fechou de passagem:**
+
+- **`<Stepper>` estava documentado e não era chamado por tela nenhuma.** Virou a régua do ciclo no
+  cabeçalho da ficha — publicado → cuidador → confirmado → check-in → check-out → avaliado — que é
+  o lugar para o qual ele sempre foi escrito. Ganhou forma de celular: abaixo de `sm`, os seis
+  rótulos viram a frase "Etapa 3 de 6 · Confirmado", porque seis rótulos em colunas de 48px
+  quebravam no meio da palavra.
+- **`<SkeletonLista>` também nunca era chamado.** As listas de atendimento passaram a carregar com
+  a moldura já desenhada e as linhas chegando — antes a tela inteira sumia atrás de "Carregando…"
+  e voltava com outro layout.
+- **`startDate.split("-").reverse().join("/")` estava escrito à mão em onze telas**, cada uma com
+  um formato. Virou `utils/date.ts` — `diaMes`, `dataCompleta`, `rotuloDoDia` ("Hoje"/"Amanhã"),
+  `carimbo`. O `rotuloDoDia` usa data **local**, não `toISOString()`: às 22h em Brasília o UTC já
+  virou o dia seguinte e "Hoje" apareceria em cima do plantão de amanhã.
+- **A ficha do atendimento não tinha saída no estado de erro.** "Atendimento não encontrado" era
+  uma frase centralizada no vazio, sem link nenhum.
+- **A pendência do Início não levava a lugar nenhum.** Lia-se "Candidaturas aguardando decisão" e
+  era preciso procurar o atendimento na mão; agora cada pendência é uma linha clicável que leva ao
+  lugar onde a decisão é tomada.
+- **A contagem das abas não respeitava o filtro corrente**, então a aba prometia dez e entregava
+  dois.
+- **`overflow-hidden` na moldura da lista** teria matado o `sticky` do cabeçalho de dia da escala —
+  `hidden` cria contêiner de rolagem. Trocado por `overflow-clip`, que recorta o canto sem criar o
+  contêiner.
+
+**Verificação:** três rodadas de captura em Chrome headless sobre o produto rodando, em 1440px e
+390px, cobrindo Início (empresa e cuidador), Atendimentos, Escala, ficha, matching, candidaturas,
+convites e o estado de "não encontrado" — **0 erro de console**. Cada rodada devolveu defeitos
+que a rodada seguinte corrigiu: a ação rápida em toda linha (a lista do celular caiu de 1760px
+para 1556px), o âmbar de "Sem cuidador" aceso em rascunho e cancelado, a folga acumulada entre as
+colunas de nome e cuidador, o painel "Atendimentos de hoje" vazio no topo do Início, o fio de
+separação cortado pelo `prosa` e as quatro linhas por candidato no matching (a tela caiu de 1315px
+para 1141px).
+
+### Revisão 12 — a marca virou teal, e o logo ganhou paleta própria (agosto/2026)
+
+Chegou uma arte nova da marca: **mesmo símbolo, mesma geometria, repintado**. Saiu o par verde
+sálvia + verde petróleo, entrou uma escala de teal em três degraus. O produto inteiro estava
+montado sobre o verde.
+
+- **A paleta saiu do verde e foi para o teal.** `--brand`/`--accent` foi de `#025658` para
+  `#175260`; `--accent-soft` de `#E2EDE9` para `#DFF1F3`. Os três valores da marca foram
+  amostrados pixel a pixel de `public/logo_new.jpeg` — mediana por região, não estimativa a olho.
+- **A arte tem três tintas agora, não duas.** `--brand-sage` e `--brand-sage-ink` morreram. No
+  lugar entraram `--brand-mid` (o núcleo do símbolo, que antes era da mesma tinta dos elos
+  escuros), `--brand-aqua` (os elos claros) e `--brand-aqua-ink` (o aqua rebaixado até virar
+  letra).
+- **A marca e a interface passaram a ter paletas separadas, e é a decisão de fundo desta
+  revisão.** A marca fica com os três degraus; a interface, só com o mais fundo. O aqua é o
+  degrau que mais nada no produto tem — 1,96:1 sobre branco, claro demais para qualquer papel de
+  interface —, e é exatamente por isso que o logo se destaca de tudo em volta. Custou zero token
+  extra: é separação por **uso**, não por criar uma segunda versão de cada cor.
+- **A escala neutra virou fria.** Era um cinza esverdeado, porque a marca era verde; agora é um
+  grafite azul-esverdeado em H ≈ 208° (`#1D2122` / `#F4F6F7`), pela mesma razão de sempre — o
+  neutro puxa para a matiz da marca para que ela pareça da família e não um adesivo colado.
+  A sombra acompanhou: `rgb(29 33 34)`, que é o próprio `--ink`.
+- **A escala de credencial passou a repetir a torção de matiz do símbolo.** No arquivo, a matiz
+  anda 217° → 208° → 204° conforme o tom clareia. A credencial faz o caminho inverso e explícito
+  — 199° → 211° → 225° —, então quanto mais alta a formação, mais fundo **e mais azul** o teal.
+- **Um arquivo de marca só.** `logo-mark.png`, `logo-lockup.png` e o `apple-touch-icon` deixaram
+  de ser usados: interface, favicon e ícone de app apontam todos para `public/logo_new.jpeg`.
+  Versão derivada é o que sai do lugar quando a arte muda, e foi o que aconteceu nesta revisão.
+- **O fundo opaco do JPEG é resolvido em CSS, não em arquivo.** `mix-blend-darken` no
+  `<LogoMark>`: como toda superfície onde a marca aparece é mais escura que `#F7F7F7` nos três
+  canais, o fundo do arquivo é substituído pela superfície **exatamente** (1,000:1 de diferença,
+  por cálculo). `multiply` deixaria um quadrado de 1,07:1 em toda superfície.
+- **O lockup ficou inteiro na tinta da marca.** "Acalento" em `--brand`, "Gestão" em
+  `--brand-aqua-ink` — a mesma escala do símbolo, na mesma ordem. Antes a primeira palavra saía
+  em `--ink`, cor de interface, o que fazia o lockup se ler como título de tela.
+- **`--rating` foi de `#B4801E` para `#B1812C`** (3,5:1, mesmo piso). Contra um ambiente todo em
+  teal frio, o âmbar deixou de ser só a cor da estrela e passou a ser o complementar do sistema.
+- **Verificação:** os quatro contratos de contraste recalculados sobre a paleta inteira — os três
+  degraus de texto contra a **pior** superfície do produto, todo par base/`-soft`, os não-texto
+  (`--linha-strong`, `--rating`) contra os 3:1 da 1.4.11, e a ação primária. **0 falhas.** O par
+  mais apertado é `cat-informal` sobre o próprio soft, em 4,85:1.
 
 ### Revisão 11 — passagem final: os buracos que sobraram (agosto/2026)
 

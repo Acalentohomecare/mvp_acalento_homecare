@@ -24,97 +24,141 @@
 @theme {
   /* ------------------------------------------------------------------ marca */
   /*
-    Amostrados pixel a pixel de `public/logo-mark.png` e `public/logo-lockup.png`, os arquivos
-    oficiais da marca. Só existem duas tintas na arte, e são estas: o verde petróleo dos elos
-    escuros (20,7% dos pixels opacos do símbolo) e o verde sálvia dos elos claros (10,1%).
+    Amostrados pixel a pixel de `public/logo_new.jpeg`, o arquivo corrente da marca — mediana por
+    região, não estimativa a olho. A arte é a mesma rede de cuidado de sempre: mesmo símbolo,
+    mesma geometria, repintado. Saiu o par verde sálvia + verde petróleo, entrou uma **escala de
+    teal em três degraus**.
 
-    É a paleta que o `CLAUDE.md` §5–6 sempre pediu — "verde sálvia ou verde petróleo suave".
-    O azul que estava aqui antes vinha de `docs/Logo/Logo 4.png`, uma versão da marca que não é
-    mais a corrente; a interface inteira tinha sido montada sobre ela.
+      teal profundo  #175260   elos escuros e hastes    L 0,408  C 0,063  H 217°
+      teal médio     #236D77   núcleo do símbolo        L 0,494  C 0,072  H 208°
+      aqua           #88C3C9   elos claros              L 0,779  C 0,061  H 204°
+
+    Repare no desenho: a matiz **gira** conforme o tom clareia — 217° → 208° → 204°. Não é ruído
+    de JPEG, é o que dá liga à escala: o degrau fundo puxa para o azul, o claro para o ciano. Três
+    opacidades da mesma tinta não teriam essa torção, e é ela que faz a marca parecer desenhada
+    em vez de gerada.
+
+    **A marca fica com os três degraus; a interface fica com um só.** É essa a separação entre as
+    duas paletas, e é ela que deixa o logo mais marcante que o produto sem precisar de duas
+    versões da mesma cor:
+
+      · o produto usa apenas `#175260`, o degrau mais fundo — cor institucional, que recua;
+      · o símbolo usa os três, e o aqua é o degrau que ninguém mais tem. Em 1,96:1 sobre branco
+        ele é claro demais para qualquer papel de interface, e é justamente por isso que o logo
+        se destaca de tudo o que está ao redor dele.
+
+    O aqua **nunca carrega texto**. Onde ele precisa virar palavra — o "Gestão" do lockup — quem
+    entra é `--brand-aqua-ink`, o mesmo aqua rebaixado até 5,1:1 sobre branco.
   */
-  --color-brand: #025658; /* petróleo — elos escuros e núcleo do símbolo */
-  --color-brand-sage: #6ca079; /* sálvia — elos claros. Só preenche forma, nunca carrega texto */
-  --color-brand-sage-ink: #41704c; /* a mesma sálvia rebaixada até aguentar texto (5,8:1) */
+  --color-brand: #175260; /* teal profundo — elos escuros e hastes. É também `--accent` */
+  --color-brand-mid: #236d77; /* teal médio — o núcleo do símbolo */
+  --color-brand-aqua: #88c3c9; /* aqua — elos claros. Só preenche forma, nunca carrega texto */
+  --color-brand-aqua-ink: #2a787f; /* o mesmo aqua rebaixado até aguentar letra (5,1:1) */
 
-  /* ------------------------------------------ neutros (cinza levemente verde) */
+  /* ------------------------------------------ neutros (grafite frio, teal) */
   /*
-    Três degraus de texto, e cada um passa em 4,5:1 sobre TODAS as superfícies claras do
-    produto — inclusive sobre `--accent-soft`, que é a mais escura delas.
+    A escala neutra puxa para a matiz da marca. Antes era um cinza esverdeado, porque a marca era
+    verde; agora é um grafite levemente azul-esverdeado (H ≈ 208°, croma sempre abaixo de 0,012).
+    Não é detalhe de gosto: é o que faz o teal parecer da mesma família do ambiente em vez de um
+    adesivo colado sobre cinza neutro.
 
-    Existem porque a hierarquia era feita com `text-ink/45`, `/50`, `/60`: opacidade sobre o
-    fundo, que rendia de 2,4:1 a 4,1:1. O sistema de tokens estava certo e era contornado no
-    call site. Agora o degrau é o token.
+    Três degraus de texto, e cada um passa em 4,5:1 sobre TODAS as superfícies claras do produto
+    — medido contra a pior delas, `--surface-sunken`, não contra branco.
   */
-  --color-ink: #202321; /* texto principal — 13,2:1 no pior fundo */
-  --color-ink-muted: #4e5552; /* texto secundário — 6,4:1 no pior fundo */
-  --color-ink-subtle: #616865; /* terciário, ícone e placeholder — 4,8:1 no pior fundo */
+  --color-ink: #1d2122; /* texto principal — 13,9:1 no pior fundo */
+  --color-ink-muted: #525859; /* texto secundário — 6,2:1 no pior fundo */
+  --color-ink-subtle: #656c6d; /* terciário, ícone e placeholder — 4,6:1 no pior fundo */
 
-  --color-surface: #f7f7f5; /* fundo do app (CLAUDE.md §6) */
+  --color-surface: #f4f6f7; /* fundo do app */
   --color-surface-raised: #ffffff; /* cards e superfícies elevadas */
-  --color-surface-sunken: #edefeb; /* faixas, cabeçalhos, áreas de apoio */
+  --color-surface-sunken: #e8eeef; /* faixas, cabeçalhos, áreas de apoio */
   /* Cromo de navegação: barra lateral, cabeçalho do celular e barra inferior. Um degrau abaixo
      do conteúdo, para a navegação recuar e o conteúdo (que é branco) avançar. */
-  --color-surface-nav: #f1f3ef;
+  --color-surface-nav: #edf2f3;
 
   /*
     Duas linhas, dois trabalhos. `--linha` separa (divisor, borda de card) e pode ser fraca.
     `--linha-strong` **delimita controle** — a borda de um campo é o que diz onde o campo
-    começa, e a WCAG 1.4.11 cobra 3:1 disso. A borda antiga ficava em 1,27:1: engrossá-la para
-    1,5px, como estava feito, não resolve contraste.
+    começa, e a WCAG 1.4.11 cobra 3:1 disso.
   */
-  --color-linha: #e1e4df; /* divisor e borda de card */
-  --color-linha-strong: #889089; /* borda de campo e de controle — 3,3:1 sobre branco */
+  --color-linha: #d9e1e2; /* divisor e borda de card */
+  --color-linha-strong: #838d8e; /* borda de campo e de controle — 3,4:1 sobre branco */
 
   /* ------------------------------------------------------------------ ação */
-  --color-accent: #025658; /* ação primária = o petróleo da marca */
-  --color-accent-strong: #014143; /* hover/pressionado da ação primária */
+  /*
+    A ação primária é o degrau mais fundo da marca, e **só ele**. O teal médio e o aqua ficam
+    reservados ao símbolo: se a interface também os usasse, o logo perderia o que tem de próprio
+    e viraria mais um elemento da tela.
+  */
+  --color-accent: #175260; /* ação primária = o teal profundo da marca — 8,7:1 com branco */
+  --color-accent-strong: #003d4a; /* hover/pressionado da ação primária */
   --color-accent-ink: #ffffff; /* texto e ícone sobre --accent */
-  --color-accent-ink-muted: #c2d5d0; /* apoio sobre --accent (carimbo de hora na bolha) */
-  --color-accent-soft: #e2ede9; /* fundo tonal — o petróleo diluído */
+  --color-accent-ink-muted: #b8d2d5; /* apoio sobre --accent (carimbo de hora na bolha) — 5,5:1 */
+  --color-accent-soft: #dff1f3; /* fundo tonal — o teal diluído */
 
-  /* Ouro de avaliação: preenche estrela, e estrela cheia é informação, não enfeite — por isso
-     precisa dos 3:1 da WCAG 1.4.11. O ouro claro de antes ficava em 2,3:1 sobre branco. */
-  --color-rating: #b4801e;
+  /*
+    Ouro de avaliação. Estrela cheia é informação, não enfeite, então ele responde pelos 3:1 da
+    WCAG 1.4.11 — 3,5:1 sobre branco. O ouro é também o único complementar do sistema: contra um
+    ambiente inteiro em teal frio, o âmbar quente é o par que fecha a roda em vez de brigar com
+    ela. Estrela na cor da marca leria como botão.
+  */
+  --color-rating: #b1812c;
 
   /* --------------------------------------- categoria de cuidador (credencial) */
-  /* A escala de credencial corre pelo próprio eixo da marca: sálvia -> petróleo médio ->
-     petróleo cheio. Quanto mais fundo o verde, mais alta a formação exigida. */
-  --color-cat-informal: #41704c;
-  --color-cat-informal-soft: #e6f0e7;
-  --color-cat-tecnico: #136b6d;
-  --color-cat-tecnico-soft: #dfeded;
-  --color-cat-superior: #025658;
-  --color-cat-superior-soft: #dde9e7;
+  /*
+    A escala de credencial corre pelo eixo da marca e repete a torção de matiz que o símbolo
+    desenha: quanto mais alta a formação, **mais fundo e mais azul** o teal — 199° → 211° → 225°.
+    Credencial é exatamente a grandeza que a marca já desenha como profundidade.
+  */
+  --color-cat-informal: #1c7376;
+  --color-cat-informal-soft: #dff3f4;
+  --color-cat-tecnico: #005f6c;
+  --color-cat-tecnico-soft: #ddf1f5;
+  --color-cat-superior: #004559;
+  --color-cat-superior-soft: #dbeff6;
 
   /* ------------------------------------------------------- estado (crachás) */
   /* Semáforo pedido pelo produto — âmbar pendente, verde confirmado, vermelho cancelado —
-     dessaturado, para conviver com o ambiente verde sem gritar. */
-  --color-status-aberto: #87550a; /* âmbar — pendente, aguardando alguém agir */
-  --color-status-aberto-soft: #fbf0dc;
-  --color-status-confirmado: #2c6a45; /* verde — confirmado, combinado de pé */
-  --color-status-confirmado-soft: #e7f1e7;
-  --color-status-andamento: #0f6e70; /* petróleo vivo — acontecendo agora */
-  --color-status-andamento-soft: #dfefee;
-  --color-status-concluido: #576460; /* ardósia — encerrado, já é histórico */
-  --color-status-concluido-soft: #ebeeea;
-  --color-status-cancelado: #a33f30; /* vermelho queimado — cancelado, recusado */
-  --color-status-cancelado-soft: #fae9e4;
-  --color-status-bloqueado: #78291f; /* vermelho profundo — decisão posterior da empresa */
-  --color-status-bloqueado-soft: #f3e2de;
-  --color-status-rascunho: #5c6560; /* cinza — ainda não publicado */
-  --color-status-rascunho-soft: #edefeb;
+     dessaturado, para conviver com o ambiente teal sem gritar. */
+  --color-status-aberto: #79520a; /* âmbar — pendente, aguardando alguém agir */
+  --color-status-aberto-soft: #fdeed4;
+  --color-status-confirmado: #346b45; /* verde — confirmado, combinado de pé */
+  --color-status-confirmado-soft: #e1f4e5;
+  --color-status-andamento: #006877; /* teal vivo — acontecendo agora */
+  --color-status-andamento-soft: #daf2f6;
+  --color-status-concluido: #5d6567; /* ardósia — encerrado, já é histórico */
+  --color-status-concluido-soft: #e8eeef;
+  --color-status-cancelado: #94392d; /* vermelho queimado — cancelado, recusado */
+  --color-status-cancelado-soft: #ffe6e0;
+  --color-status-bloqueado: #771814; /* vermelho profundo — decisão posterior da empresa */
+  --color-status-bloqueado-soft: #ffe0da;
+  --color-status-rascunho: #616666; /* cinza — ainda não publicado */
+  --color-status-rascunho-soft: #e8eeef;
 
   /* ------------------------------------------------------------------ raio */
-  /* Três raios por papel. Nada de valor arbitrário no meio do className. */
-  --radius-control: 10px; /* botão, campo, item de lista, chip retangular */
-  --radius-card: 14px; /* card e blocos de conteúdo */
-  --radius-panel: 18px; /* modal e painéis grandes */
+  /*
+    Quatro raios por papel, e todos desceram na revisão do módulo de Atendimentos.
+
+    O valor antigo (10 / 14 / 18px) vinha de uma leitura de "produto humano" que a operação não
+    confirmou: quinze plantões numa lista, cada um numa caixa de 14px, param de parecer registros
+    e passam a parecer cartões. Canto muito arredondado é a assinatura de template — e, num
+    software que a coordenadora abre todo dia para preencher escala, ele custa densidade, porque
+    raio grande exige padding grande para não cortar o conteúdo no canto.
+
+    O piso é o raio do marcador: 3px. Abaixo disso o canto some e o elemento vira retângulo duro,
+    o que este produto não é.
+  */
+  --radius-marker: 3px; /* crachá de estado, marcador, pastilha de contagem */
+  --radius-control: 6px; /* botão, campo, chip, item de lista */
+  --radius-card: 9px; /* card, painel de lista, bloco de conteúdo */
+  --radius-panel: 12px; /* modal e folha do celular */
 
   /* -------------------------------------------------------------- elevação */
-  /* Sombra esverdeada (nunca preta): mantém o ambiente coeso e evita o cinza sujo. */
-  --shadow-card: 0 1px 2px 0 rgb(32 35 33 / 0.04), 0 1px 3px 0 rgb(32 35 33 / 0.05);
-  --shadow-raised: 0 2px 4px -2px rgb(32 35 33 / 0.06), 0 10px 22px -8px rgb(32 35 33 / 0.14);
-  --shadow-overlay: 0 24px 48px -12px rgb(32 35 33 / 0.3);
+  /* Sombra na tinta fria do ambiente (nunca preta): mantém tudo coeso e evita o cinza sujo.
+     rgb(29 33 34) é o próprio --ink, que acompanhou a virada do verde para o teal. */
+  --shadow-card: 0 1px 2px 0 rgb(29 33 34 / 0.04), 0 1px 3px 0 rgb(29 33 34 / 0.05);
+  --shadow-raised: 0 2px 4px -2px rgb(29 33 34 / 0.06), 0 10px 22px -8px rgb(29 33 34 / 0.14);
+  --shadow-overlay: 0 24px 48px -12px rgb(29 33 34 / 0.3);
 
   /*
     ---------------------------------------------------------------- tipografia

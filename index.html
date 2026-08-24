@@ -3,16 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <!--
-      Favicons servidos direto de `public/logo-mark.png`, o arquivo oficial da marca: PNG com
-      transparência real, que segura tanto na aba clara quanto na escura porque cada forma da
-      arte já traz o próprio contorno.
+      Favicon e ícone de app servidos direto de `public/logo_new.jpeg`, o arquivo corrente da
+      marca — o mesmo que a interface usa. É um arquivo só para tudo, de propósito: não existe
+      versão derivada da marca neste repositório para sair do lugar quando a arte mudar.
 
-      O apple-touch-icon é o único com fundo (branco) e por isso é um arquivo à parte, gerado a
-      partir do mesmo símbolo: o iOS pinta preto atrás de PNG transparente na tela de início.
+      Sendo JPEG, ele traz um fundo #F7F7F7 opaco em vez de transparência. Na aba do navegador
+      isso não atrapalha, e no iOS é até o que se quer: o sistema pinta preto atrás de PNG
+      transparente na tela de início, e aqui não há o que pintar. Dentro da interface, quem
+      resolve o fundo é o `mix-blend-multiply` do <LogoMark>.
     -->
-    <link rel="icon" type="image/png" href="/logo-mark.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#025658" />
+    <link rel="icon" type="image/jpeg" href="/logo_new.jpeg" />
+    <link rel="apple-touch-icon" href="/logo_new.jpeg" />
+    <meta name="theme-color" content="#175260" />
     <!--
       viewport-fit=cover é o que faz env(safe-area-inset-*) valer alguma coisa no iOS. Sem ele o
       inset vale zero e a barra de abas fica por baixo do indicador de início do iPhone, mesmo

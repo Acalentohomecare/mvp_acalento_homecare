@@ -1,8 +1,15 @@
-import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ButtonLink, PRODUTO_NOME, TelaCarregando } from "../../components/ui";
-import { AttendanceCard } from "../../components/shared/AttendanceCard";
+import {
+  ButtonLink,
+  LinhaDoTempo,
+  PRODUTO_NOME,
+  Painel,
+  SkeletonLista,
+  Vazio,
+  type EventoLinhaDoTempo,
+} from "../../components/ui";
+import { AttendanceRow } from "../../components/shared/AttendanceRow";
 import { AttendanceOpenActions } from "../../components/shared/AttendanceOpenActions";
 import { rosterQueue } from "../../services/roster";
 import { compatibleCaregivers } from "../../services/matching";
@@ -21,41 +28,21 @@ import {
   upcomingAttendances,
 } from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
+import { carimbo } from "../../utils/date";
 import { PAGE_WORK } from "../../components/layout/page";
 
-function Section({
-  title,
-  count,
-  children,
-  className = "",
-}: {
-  title: string;
-  count?: number;
-  children: ReactNode;
-  /** No desktop a grade é que separa as seções, então quem entra nela zera o `mt`. */
-  className?: string;
-}) {
-  return (
-    <section className={`mt-8 ${className}`}>
-      <h2 className="mb-2.5 flex items-center gap-2 text-heading text-ink">
-        {title}
-        {count !== undefined && count > 0 && (
-          <span className="rounded-full bg-surface-sunken px-1.5 py-0.5 numero text-meta leading-none text-ink-muted">
-            {count}
-          </span>
-        )}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function Empty({ text }: { text: string }) {
-  return (
-    <p className="rounded-card border border-dashed border-linha bg-surface-raised/50 py-7 text-center text-note text-ink-subtle">
-      {text}
-    </p>
-  );
+/**
+ * Pendência — o que espera uma decisão da coordenadora.
+ *
+ * `urgencia` decide a tinta do marcador, e só existem duas: **âmbar** para o que espera decisão e
+ * **vermelho** para o que já está atrasado. Três níveis de urgência num painel de dez itens não
+ * são lidos como três níveis; são lidos como enfeite.
+ */
+interface Pendencia {
+  id: string;
+  texto: string;
+  para: string;
+  urgente?: boolean;
 }
 
 export function CompanyDashboardPage() {
@@ -63,7 +50,14 @@ export function CompanyDashboardPage() {
   const { state } = useAppState();
 
   if (!state) {
-    return <TelaCarregando />;
+    return (
+      <div className={PAGE_WORK}>
+        <h1 className="text-display">Início</h1>
+        <div className="mt-6">
+          <SkeletonLista itens={3} />
+        </div>
+      </div>
+    );
   }
 
   const company = state.companies.find((c) => c.id === session?.companyId);
@@ -86,29 +80,40 @@ export function CompanyDashboardPage() {
     id ? state.caregivers.find((c) => c.id === id)?.name : undefined;
 
   // O quadro é responsabilidade da empresa: cadastro parado na fila trava os plantões.
-  const pendencies = [
+  const pendencias: Pendencia[] = [
     ...(awaitingApproval.length > 0
       ? [
           {
             id: "roster",
-            text: `${awaitingApproval.length} cuidador(es) aguardando sua aprovação para entrar no quadro.`,
+            texto: `${awaitingApproval.length} cuidador(es) aguardando aprovação para o quadro`,
+            para: "/empresa/cuidadores",
           },
         ]
       : []),
     ...lateCheckins.map((a) => ({
       id: `chk-${a.id}`,
-      text: `Check-in pendente — ${patientName(a.patientId)}, ${a.startTime}.`,
+      texto: `Check-in pendente — ${patientName(a.patientId)}, ${a.startTime}`,
+      para: `/empresa/atendimentos/${a.id}`,
+      urgente: true,
     })),
     ...toReview.map((a) => ({
       id: `app-${a.id}`,
-      text: `Candidaturas aguardando sua decisão — ${patientName(a.patientId)}.`,
+      texto: `Candidaturas aguardando decisão — ${patientName(a.patientId)}`,
+      para: `/empresa/atendimentos/${a.id}/candidaturas`,
     })),
     ...drafts.map((a) => ({
       id: `dft-${a.id}`,
-      text: `Rascunho não publicado — ${patientName(a.patientId)}.`,
+      texto: `Rascunho não publicado — ${patientName(a.patientId)}`,
+      para: `/empresa/atendimentos/${a.id}`,
     })),
-    ...alerts.map((a) => ({ id: a.id, text: a.text })),
+    ...alerts.map((a) => ({ id: a.id, texto: a.text, para: "/empresa/atendimentos" })),
   ];
+
+  const eventos: EventoLinhaDoTempo[] = activity.map((entry) => ({
+    id: entry.id,
+    evento: entry.text,
+    quando: carimbo(entry.at),
+  }));
 
   const dateLabel = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
@@ -167,7 +172,7 @@ export function CompanyDashboardPage() {
       <p className="mt-1.5 text-meta text-ink-subtle">
         {patients.length} {patients.length === 1 ? "paciente" : "pacientes"} · {activeCount}{" "}
         {activeCount === 1 ? "cuidador ativo" : "cuidadores ativos"} ·{" "}
-        {Math.round(completedHours(all))}h realizadas
+        <span className="numero">{Math.round(completedHours(all))}h</span> realizadas
       </p>
 
       {/*
@@ -180,81 +185,105 @@ export function CompanyDashboardPage() {
         celular a ordem certa é outra — pendência primeiro, fila depois. Sem grade, o documento já
         sai nessa ordem, e é por isso que Pendências vem escrita antes da fila mesmo aparecendo à
         direita no desktop.
-
-        "Atividade recente" não entra na coluna de apoio: ela é o fim da leitura da operação (hoje
-        → em aberto → à frente → o que acabou de acontecer) e fica no pé da coluna larga. Na
-        coluna de apoio ela abriria um vão que nenhuma regra de conteúdo determina — só a
-        aritmética de linhas da grade.
       */}
-      <div className="mt-3 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-x-8">
-        <Section
+      <div className="mt-6 flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-x-8">
+        <Painel
           title="Pendências"
-          count={pendencies.length}
+          count={pendencias.length}
+          flush
           className="lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1"
         >
-          {pendencies.length === 0 ? (
-            <Empty text="Nada pendente no momento." />
+          {pendencias.length === 0 ? (
+            <Vazio porte="linha">Nada pendente no momento.</Vazio>
           ) : (
-            <ul className="flex flex-col gap-1.5">
-              {pendencies.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-start gap-2.5 rounded-control border border-linha bg-surface-raised px-3 py-2.5 text-body text-ink-muted shadow-card"
-                >
-                  <span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-status-aberto" />
-                  {p.text}
+            /* Cada pendência é uma linha clicável que leva ao lugar onde a decisão é tomada. Eram
+               itens de lista com borda e sombra que não levavam a lugar nenhum: a coordenadora
+               lia "Candidaturas aguardando decisão" e precisava procurar o atendimento na mão. */
+            <ul className="divide-y divide-linha">
+              {pendencias.map((p) => (
+                <li key={p.id}>
+                  <Link
+                    to={p.para}
+                    className="flex items-start gap-2.5 px-3.5 py-2.5 text-note text-ink-muted transition-colors duration-150 ease-out hover:bg-surface-sunken/60 hover:text-ink"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`mt-[7px] size-1.5 shrink-0 rounded-full ${
+                        p.urgente ? "bg-status-cancelado" : "bg-status-aberto"
+                      }`}
+                    />
+                    <span className="min-w-0">{p.texto}</span>
+                  </Link>
                 </li>
               ))}
             </ul>
           )}
-        </Section>
+        </Painel>
 
-        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-          <Section title="Atendimentos de hoje" count={today.length} className="lg:mt-0">
-            {today.length === 0 ? (
-              <Empty text="Nenhum atendimento agendado para hoje." />
-            ) : (
-              <div className="flex flex-col gap-2.5">
+        <div className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-1">
+          {/* Sem atendimento hoje, este painel não aparece — a frase acima já disse "Nenhum
+              atendimento hoje", e repetir a mesma informação num painel vazio custa ~110px do
+              topo da tela mais usada do produto. Painel vazio só se justifica quando o vazio é
+              notícia; aqui a notícia já foi dada. */}
+          {today.length > 0 && (
+            <Painel title="Atendimentos de hoje" count={today.length} flush>
+              <ul className="divide-y divide-linha">
                 {today.map((a) => (
-                  <AttendanceCard
+                  <AttendanceRow
                     key={a.id}
                     attendance={a}
+                    to={`/empresa/atendimentos/${a.id}`}
                     patientName={patientName(a.patientId)}
                     caregiverName={caregiverName(a.confirmedCaregiverId)}
                     caregiverId={a.confirmedCaregiverId}
+                    showDate={false}
                   />
                 ))}
-              </div>
-            )}
-          </Section>
+              </ul>
+            </Painel>
+          )}
 
-          <Section title="Em aberto — aguardando cuidador" count={awaiting.length}>
+          <Painel
+            title="Em aberto"
+            count={awaiting.length}
+            flush
+            actions={
+              awaiting.length > 0 && (
+                <Link
+                  to="/empresa/atendimentos?filtro=awaiting"
+                  className="text-meta font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50"
+                >
+                  Ver todos
+                </Link>
+              )
+            }
+          >
             {awaiting.length === 0 ? (
-              <Empty text="Nenhum atendimento aguardando cuidador." />
+              <Vazio porte="linha">Nenhum plantão aguardando cuidador.</Vazio>
             ) : (
-              <div className="flex flex-col gap-2.5">
+              <ul className="divide-y divide-linha">
                 {awaiting.map((a) => {
                   const compatible = compatibleCaregivers(state, a).length;
                   const applications = state.applications.filter(
                     (ap) => ap.attendanceId === a.id,
                   ).length;
                   return (
-                    <AttendanceCard
+                    <AttendanceRow
                       key={a.id}
                       attendance={a}
+                      to={`/empresa/atendimentos/${a.id}`}
                       patientName={patientName(a.patientId)}
                       caregiverName={caregiverName(a.confirmedCaregiverId)}
                       caregiverId={a.confirmedCaregiverId}
                       note={
                         compatible === 0 ? (
                           <span className="text-status-cancelado">
-                            Nenhum cuidador compatível no quadro ainda.
+                            Nenhum cuidador compatível no quadro
                           </span>
                         ) : (
                           <span className="text-ink-subtle">
-                            {compatible}{" "}
-                            {compatible === 1 ? "cuidador compatível" : "cuidadores compatíveis"} no
-                            quadro.
+                            <span className="numero">{compatible}</span>{" "}
+                            {compatible === 1 ? "compatível" : "compatíveis"} no quadro
                           </span>
                         )
                       }
@@ -264,44 +293,51 @@ export function CompanyDashboardPage() {
                     />
                   );
                 })}
-              </div>
+              </ul>
             )}
-          </Section>
+          </Painel>
 
-          <Section title="Próximos atendimentos" count={upcoming.length}>
+          <Painel
+            title="Próximos"
+            count={upcoming.length}
+            flush
+            actions={
+              upcoming.length > 4 && (
+                <Link
+                  to="/empresa/agenda"
+                  className="text-meta font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50"
+                >
+                  Ver escala
+                </Link>
+              )
+            }
+          >
             {upcoming.length === 0 ? (
-              <Empty text="Nenhum atendimento confirmado à frente." />
+              <Vazio porte="linha">Nenhum atendimento confirmado à frente.</Vazio>
             ) : (
-              <div className="flex flex-col gap-2.5">
+              <ul className="divide-y divide-linha">
                 {upcoming.slice(0, 4).map((a) => (
-                  <AttendanceCard
+                  <AttendanceRow
                     key={a.id}
                     attendance={a}
+                    to={`/empresa/atendimentos/${a.id}`}
                     patientName={patientName(a.patientId)}
                     caregiverName={caregiverName(a.confirmedCaregiverId)}
                     caregiverId={a.confirmedCaregiverId}
                   />
                 ))}
-              </div>
-            )}
-          </Section>
-
-          <Section title="Atividade recente" className="mb-2">
-            {activity.length === 0 ? (
-              <Empty text="Sem movimentação registrada." />
-            ) : (
-              <ul>
-                {activity.map((entry) => (
-                  <li key={entry.id} className="border-b border-linha py-2.5 last:border-0">
-                    <p className="text-body text-ink-muted">{entry.text}</p>
-                    <p className="mt-0.5 numero text-meta text-ink-subtle">
-                      {new Date(entry.at).toLocaleString("pt-BR")}
-                    </p>
-                  </li>
-                ))}
               </ul>
             )}
-          </Section>
+          </Painel>
+
+          {/* Fim da leitura da operação: hoje → em aberto → à frente → o que acabou de acontecer. */}
+          <Painel title="Atividade recente">
+            {eventos.length === 0 ? (
+              <Vazio porte="linha">Sem movimentação registrada.</Vazio>
+            ) : (
+              <LinhaDoTempo eventos={eventos} />
+            )}
+          </Painel>
         </div>
       </div>
     </div>

@@ -217,7 +217,7 @@ Paleta base
 
 Background principal:
 
-#F7F7F5
+#F4F6F7
 
 Surface:
 
@@ -225,19 +225,21 @@ Surface:
 
 Texto principal:
 
-#202321
+#1D2122
 
 Texto secundário:
 
-#6B716D
+#525859
 
 Accent:
 
-verde sálvia ou verde petróleo suave;
+teal profundo da marca (#175260), amostrado do logo em public/logo_new.jpeg;
 
 usar com moderação;
 
-apenas uma cor principal de destaque.
+apenas uma cor principal de destaque;
+
+os degraus claros do teal (#236D77 e #88C3C9) são da marca e não entram na interface.
 
 Estados:
 

@@ -1,7 +1,21 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, Info, Plus } from "lucide-react";
-import { Aviso, Button, Card, Check, Chip, Cracha, Input, Select, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
+import { Copy, Plus } from "lucide-react";
+import {
+  Aviso,
+  Button,
+  Check,
+  Chip,
+  Cracha,
+  Dado,
+  Input,
+  ListaDeDados,
+  Painel,
+  Select,
+  TelaCarregando,
+  Textarea,
+  VoltarLink,
+} from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { useToast } from "../../hooks/useToast";
@@ -16,6 +30,7 @@ import { companyAttendances, createAttendance, todayISO } from "../../services/a
 import { allActivities, createCustomActivity } from "../../services/activities";
 import { companyPatients, createPatient, splitAddress } from "../../services/patients";
 import { formatCurrency } from "../../utils/format";
+import { dataCompleta } from "../../utils/date";
 import type { AttendanceType, CaregiverCategory } from "../../types";
 import { MOBILE_ACTION_BAR, MOBILE_ACTION_SPACER, PAGE_WORK } from "../../components/layout/page";
 
@@ -28,16 +43,6 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <legend className="mb-1 block text-label text-ink-muted">{label}</legend>
       {children}
     </fieldset>
-  );
-}
-
-/** Linha do resumo lateral: termo à esquerda, valor à direita. */
-function Resumo({ termo, children }: { termo: string; children: ReactNode }) {
-  return (
-    <div className="flex justify-between gap-4">
-      <dt className="shrink-0 text-ink-subtle">{termo}</dt>
-      <dd className="min-w-0 truncate text-right font-medium text-ink">{children}</dd>
-    </div>
   );
 }
 
@@ -231,25 +236,29 @@ export function NewAttendancePage() {
       */}
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
       <div className="min-w-0">
+      {/* Reaproveitar é um atalho, não uma etapa: perdeu a caixa e virou uma linha acima do
+          formulário. Como card, ele parecia o primeiro campo a preencher. */}
       {previous.length > 0 && (
-        <Card className="mt-5">
-          <div className="mb-2 flex items-center gap-1.5 text-note font-semibold text-ink-muted">
-            <Copy size={13} /> Reaproveitar atendimento anterior
+        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-linha pb-4">
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-note text-ink-muted">
+            <Copy size={13} aria-hidden="true" /> Reaproveitar anterior
+          </span>
+          <div className="min-w-56 flex-1">
+            <Select
+              aria-label="Reaproveitar atendimento anterior"
+              defaultValue=""
+              onChange={(e) => reuse(e.target.value)}
+            >
+              <option value="">Começar do zero</option>
+              {previous.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {patients.find((p) => p.id === a.patientId)?.name ?? "Paciente"} ·{" "}
+                  {ATTENDANCE_TYPE_LABEL[a.type]} · {formatCurrency(a.value)}
+                </option>
+              ))}
+            </Select>
           </div>
-          <Select
-            aria-label="Reaproveitar atendimento anterior"
-            defaultValue=""
-            onChange={(e) => reuse(e.target.value)}
-          >
-            <option value="">Começar do zero</option>
-            {previous.map((a) => (
-              <option key={a.id} value={a.id}>
-                {patients.find((p) => p.id === a.patientId)?.name ?? "Paciente"} ·{" "}
-                {ATTENDANCE_TYPE_LABEL[a.type]} · {formatCurrency(a.value)}
-              </option>
-            ))}
-          </Select>
-        </Card>
+        </div>
       )}
 
       {/* onChange no form limpa o erro assim que o usuário corrige qualquer campo. */}
@@ -264,27 +273,26 @@ export function NewAttendancePage() {
           <option value={NEW_PATIENT}>+ Cadastrar novo paciente</option>
         </Select>
 
+        {/* A ficha do paciente escolhido é **contexto do campo acima**, não um bloco novo: por
+            isso ela recua para a superfície rebaixada em vez de subir para um card branco. */}
         {selectedPatient && (
-          <Card className="flex items-start gap-2.5">
-            <Info size={15} className="mt-0.5 shrink-0 text-ink-subtle" />
-            <div className="text-note text-ink-muted">
-              <p className="font-semibold text-ink">
-                {selectedPatient.name}, {selectedPatient.age} anos
-              </p>
-              <p className="mt-1">
-                {selectedPatient.walksAlone ? "Anda sozinho(a)" : "Mobilidade reduzida"}
-                {selectedPatient.usesOxygen && " · usa oxigênio"}
-                {selectedPatient.usesFeedingTube && " · usa sonda"}
-                {` · animais em casa: ${selectedPatient.petsAtHome}`}
-              </p>
-              {selectedPatient.notes && <p className="mt-1 text-ink-muted">{selectedPatient.notes}</p>}
-            </div>
-          </Card>
+          <div className="-mt-1 rounded-card border border-linha bg-surface-sunken/60 px-3.5 py-3 text-note text-ink-muted">
+            <p className="font-semibold text-ink">
+              {selectedPatient.name}, <span className="numero">{selectedPatient.age}</span> anos
+            </p>
+            <p className="mt-1">
+              {selectedPatient.walksAlone ? "Anda sozinho(a)" : "Mobilidade reduzida"}
+              {selectedPatient.usesOxygen && " · usa oxigênio"}
+              {selectedPatient.usesFeedingTube && " · usa sonda"}
+              {` · animais em casa: ${selectedPatient.petsAtHome}`}
+            </p>
+            {selectedPatient.notes && <p className="prosa mt-1">{selectedPatient.notes}</p>}
+          </div>
         )}
 
         {isNewPatient && (
-          <Card className="flex flex-col gap-3">
-            <p className="text-note font-semibold text-ink-muted">Dados do novo paciente</p>
+          <Painel title="Dados do novo paciente" className="flex flex-col">
+            <div className="flex flex-col gap-3">
             <Input label="Nome" value={pName} onChange={(e) => setPName(e.target.value)} />
             <div className="grid grid-cols-2 gap-3">
               <Input
@@ -317,7 +325,8 @@ export function NewAttendancePage() {
               value={pNotes}
               onChange={(e) => setPNotes(e.target.value)}
             />
-          </Card>
+            </div>
+          </Painel>
         )}
 
         <Field label="Tipo de atendimento">
@@ -424,7 +433,7 @@ export function NewAttendancePage() {
             como compatível para algo que não devia.
           */}
           {addingActivity ? (
-            <Card className="mt-3 flex flex-col gap-3">
+            <div className="mt-3 flex flex-col gap-3 rounded-card border border-linha bg-surface-sunken/60 p-3.5">
               <Input
                 label="Nome da atividade"
                 value={newActivityName}
@@ -465,7 +474,7 @@ export function NewAttendancePage() {
                   Cancelar
                 </Button>
               </div>
-            </Card>
+            </div>
           ) : (
             <Button
               type="button"
@@ -517,55 +526,57 @@ export function NewAttendancePage() {
       </div>
 
       <aside className="mt-5 hidden lg:sticky lg:top-6 lg:block">
-        <Card>
-          <h2 className="text-heading text-ink">
-            Resumo
-          </h2>
-
-          <dl className="mt-3 flex flex-col gap-2 text-note">
-            <Resumo termo="Paciente">
+        <Painel title="Resumo">
+          <ListaDeDados>
+            <Dado termo="Paciente">
               {isNewPatient ? pName.trim() || "Novo paciente" : (selectedPatient?.name ?? "—")}
-            </Resumo>
-            <Resumo termo="Tipo">{ATTENDANCE_TYPE_LABEL[type]}</Resumo>
-            <Resumo termo="Quando">
+            </Dado>
+            <Dado termo="Tipo">{ATTENDANCE_TYPE_LABEL[type]}</Dado>
+            <Dado termo="Quando">
               <span className="numero">
-                {startDate ? startDate.split("-").reverse().join("/") : "—"} {startTime}
+                {startDate ? dataCompleta(startDate) : "—"} {startTime}
               </span>
-            </Resumo>
-            <Resumo termo="Duração">
+            </Dado>
+            <Dado termo="Duração">
               <span className="numero">{durationHours}h</span>
-            </Resumo>
-            <Resumo termo="Bairro">{neighborhood.trim() || "—"}</Resumo>
-            <Resumo termo="Atividades">
-              {activityIds.length === 0
-                ? "nenhuma marcada"
-                : `${activityIds.length} ${activityIds.length === 1 ? "marcada" : "marcadas"}`}
-            </Resumo>
-            <Resumo termo="Valor">
+            </Dado>
+            <Dado termo="Bairro">{neighborhood.trim() || "—"}</Dado>
+            <Dado termo="Atividades">
+              {activityIds.length === 0 ? (
+                <span className="text-ink-subtle">nenhuma marcada</span>
+              ) : (
+                <>
+                  <span className="numero">{activityIds.length}</span>{" "}
+                  {activityIds.length === 1 ? "marcada" : "marcadas"}
+                </>
+              )}
+            </Dado>
+            <Dado termo="Valor">
               <span className="numero">{Number(value) ? formatCurrency(Number(value)) : "—"}</span>
-            </Resumo>
-          </dl>
+            </Dado>
+          </ListaDeDados>
 
           {/* A decisão que mais pesa no formulário — quem pode ser convidado depende dela. Fica
               destacada do resto do resumo por uma divisória, não por mais uma caixa. */}
           <div className="mt-3.5 border-t border-linha pt-3.5">
-            <p className="text-heading text-ink">
-              Perfil necessário
-            </p>
+            <p className="text-dado text-ink-subtle uppercase">Perfil necessário</p>
             <div className="mt-2">
               {requiredCategory ? (
-                <Cracha label={CATEGORY_LABEL[requiredCategory]} className={CATEGORY_CLASS[requiredCategory]} />
+                <Cracha
+                  label={CATEGORY_LABEL[requiredCategory]}
+                  className={CATEGORY_CLASS[requiredCategory]}
+                />
               ) : (
                 <span className="text-note text-ink-subtle">Não escolhido</span>
               )}
             </div>
-            <p className="mt-2 text-note text-ink-muted">
+            <p className="mt-2 text-meta text-ink-subtle">
               {requiredCategory
                 ? "Só cuidadores dessa categoria ou acima aparecem para convite ou candidatura."
                 : "Escolha o perfil necessário no formulário."}
             </p>
           </div>
-        </Card>
+        </Painel>
       </aside>
       </div>
     </div>

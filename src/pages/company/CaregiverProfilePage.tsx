@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { BadgeCheck, Heart, Star } from "lucide-react";
-import { Avatar, Button, Card, Cracha, Modal, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
+import { Avatar, Button, Card, Cracha, Modal, StatusAtendimento, TelaCarregando, Textarea, VoltarLink } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import {
   APPROVAL_STATUS_CLASS,
@@ -31,9 +31,10 @@ import {
   rosterStatus,
 } from "../../services/roster";
 import { caregiverHistory } from "../../services/evaluations";
-import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL } from "../../constants/attendance";
+
 import { useSession } from "../../hooks/useSession";
 import { formatCurrency, formatRating } from "../../utils/format";
+import { dataCompleta } from "../../utils/date";
 import { PAGE_WORK } from "../../components/layout/page";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -281,22 +282,18 @@ export function CompanyCaregiverProfilePage() {
           {history.length === 0 ? (
             <p className="text-note text-ink-subtle">Nenhum atendimento com esta empresa ainda.</p>
           ) : (
-            <ul className="flex flex-col gap-1.5">
+            /* O histórico virou registro com moldura única — a mesma forma da lista de
+               atendimentos, para que "atendimento" tenha uma aparência só no produto inteiro. */
+            <ul className="divide-y divide-linha overflow-hidden rounded-card border border-linha bg-surface-raised">
               {history.map((a) => (
-                <li
-                  key={a.id}
-                  className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2"
-                >
-                  <span className="numero text-note text-ink-muted">
-                    {a.startDate.split("-").reverse().join("/")}
+                <li key={a.id} className="flex items-center gap-3 px-3.5 py-2.5">
+                  <span className="numero shrink-0 text-note text-ink-muted">
+                    {dataCompleta(a.startDate)}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-note">
+                  <span className="min-w-0 flex-1 truncate text-note text-ink">
                     {state.patients.find((p) => p.id === a.patientId)?.name}
                   </span>
-                  <Cracha
-                    label={ATTENDANCE_STATUS_LABEL[a.status]}
-                    className={ATTENDANCE_STATUS_CLASS[a.status]}
-                  />
+                  <StatusAtendimento status={a.status} />
                 </li>
               ))}
             </ul>

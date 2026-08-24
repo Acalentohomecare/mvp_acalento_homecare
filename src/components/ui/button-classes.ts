@@ -16,7 +16,7 @@ export type ButtonSize = "md" | "sm";
  * de dizer "selecionado" nos alternadores do cadastro, onde `ghost` é o não-selecionado.
  */
 export const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-accent text-accent-ink shadow-card hover:bg-accent-strong",
+  primary: "bg-accent text-accent-ink hover:bg-accent-strong",
   secondary: "bg-accent-soft text-accent hover:brightness-[0.97]",
   ghost: "border border-linha bg-surface-raised text-ink-muted hover:border-accent/45 hover:text-ink",
   destructive: "bg-status-cancelado text-white hover:brightness-95",
@@ -45,6 +45,20 @@ export const BUTTON_BASE_CLASS =
  * tela. Estava escrita à mão em três telas com a mesma string; duas delas ficaram para trás na
  * revisão de alvo de toque e continuavam com 32px no dedo.
  */
+/**
+ * Ação dentro de uma **linha de registro** — "Buscar cuidadores", "Candidaturas (2)".
+ *
+ * Mais leve que o `ACTION_LINK_CLASS`, e de propósito: numa lista de quinze plantões, dois botões
+ * com borda por linha somam trinta retângulos e a lista deixa de se ler. Aqui a ação é texto na
+ * cor da marca, com sublinhado que só aparece no ponteiro.
+ *
+ * O `min-h-11` continua: o alvo de 44px é obrigação de toque (seção 11), e ele existe mesmo
+ * quando não se vê. Onde o ponteiro é preciso, encolhe — senão duas ações abrem 44px de vão
+ * dentro de uma linha de 56px.
+ */
+export const ROW_ACTION_CLASS =
+  "inline-flex min-h-11 items-center rounded-control text-label font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50 pointer-fine:min-h-7";
+
 export const ACTION_LINK_CLASS =
   "inline-flex min-h-11 items-center rounded-control border border-linha px-3 text-label font-semibold transition-colors duration-150 ease-out hover:border-accent pointer-fine:min-h-8 pointer-fine:px-2.5";
 

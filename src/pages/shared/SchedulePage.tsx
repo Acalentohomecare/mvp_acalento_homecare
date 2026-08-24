@@ -1,100 +1,102 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Chip, Cracha, TelaCarregando } from "../../components/ui";
+import { Fragment, useState } from "react";
+import { SkeletonLista, Tabs, Vazio, type Aba } from "../../components/ui";
+import {
+  AttendanceGroupHeader,
+  AttendanceList,
+  AttendanceRow,
+} from "../../components/shared/AttendanceRow";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
-import { ATTENDANCE_STATUS_CLASS, ATTENDANCE_STATUS_LABEL } from "../../constants/attendance";
 import { companyAttendances, scheduleDays } from "../../services/attendances";
-import { formatCurrency } from "../../utils/format";
+import { rotuloDoDia } from "../../utils/date";
 import { PAGE_LIST } from "../../components/layout/page";
 
-const WEEKDAY = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+type Range = "1" | "7";
 
 export function SchedulePage() {
   const { session } = useSession();
   const { state } = useAppState();
-  const [range, setRange] = useState<1 | 7>(7);
-
-  if (!state) {
-    return <TelaCarregando />;
-  }
+  const [range, setRange] = useState<Range>("7");
 
   const isCompany = session?.role === "company";
+  const titulo = isCompany ? "Escala" : "Minha agenda";
+
+  if (!state) {
+    return (
+      <div className={PAGE_LIST}>
+        <h1 className="text-display">{titulo}</h1>
+        <div className="mt-6">
+          <SkeletonLista />
+        </div>
+      </div>
+    );
+  }
+
   const list = isCompany
     ? companyAttendances(state, session?.companyId)
     : state.attendances.filter((a) => a.confirmedCaregiverId === session?.caregiverId);
 
-  const days = scheduleDays(list, new Date(), range);
+  const days = scheduleDays(list, new Date(), Number(range));
   const total = days.reduce((sum, d) => sum + d.items.length, 0);
+  const hoje = scheduleDays(list, new Date(), 1).reduce((s, d) => s + d.items.length, 0);
   const base = isCompany ? "/empresa/atendimentos" : "/cuidador/atendimentos";
+
+  const abas: Aba<Range>[] = [
+    { key: "1", label: "Hoje", count: hoje },
+    { key: "7", label: "7 dias", count: scheduleDays(list, new Date(), 7).reduce((s, d) => s + d.items.length, 0) },
+  ];
 
   return (
     <div className={PAGE_LIST}>
-      <h1 className="text-display">
-        {isCompany ? "Escala" : "Minha agenda"}
-      </h1>
+      <h1 className="text-display">{titulo}</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">
-        {total} {total === 1 ? "atendimento" : "atendimentos"} no período.
+        {total === 0
+          ? "Nenhum atendimento no período."
+          : `${total} ${total === 1 ? "atendimento" : "atendimentos"} no período.`}
       </p>
 
-      <div className="mt-4 flex gap-1.5">
-        {([1, 7] as const).map((r) => (
-          <Chip key={r} selecionado={range === r} onClick={() => setRange(r)}>
-            {r === 1 ? "Hoje" : "Semana"}
-          </Chip>
+      <Tabs abas={abas} atual={range} onChange={setRange} label="Período da escala" className="mt-5" />
+
+      {/*
+        A escala é **um registro só**, com o dia como cabeçalho de grupo grudado no topo — não uma
+        pilha de blocos, um por dia, cada um com o próprio cabeçalho e a própria lista solta.
+
+        A diferença aparece na semana cheia: com blocos separados, a pessoa perde de vista de que
+        dia é a linha que está lendo assim que rola dois dias; com cabeçalho `sticky`, o dia
+        acompanha. É o comportamento de uma agenda de verdade.
+      */}
+      <AttendanceList className="mt-4">
+        {/* Fragmento, e não um `<li>` com `<ul>` dentro: o `divide-y` da moldura desenha o fio
+            entre **filhos diretos**, e um nível a mais de lista tiraria todas as linhas do dia de
+            baixo dele — cada grupo voltaria a ser um bloco solto, que é justamente o que saiu. */}
+        {days.map((day) => (
+          <Fragment key={day.date}>
+            <AttendanceGroupHeader label={rotuloDoDia(day.date)} count={day.items.length} />
+            {day.items.length === 0 ? (
+              <li>
+                <Vazio porte="linha">Nenhum atendimento neste dia.</Vazio>
+              </li>
+            ) : (
+              day.items.map((a) => {
+                const patient = state.patients.find((p) => p.id === a.patientId);
+                const caregiver = state.caregivers.find((c) => c.id === a.confirmedCaregiverId);
+                return (
+                  <AttendanceRow
+                    key={a.id}
+                    attendance={a}
+                    to={`${base}/${a.id}`}
+                    patientName={patient?.name ?? "Paciente"}
+                    /* A empresa precisa saber quem cobre o plantão; o cuidador é ele mesmo. */
+                    caregiverName={isCompany ? caregiver?.name : undefined}
+                    caregiverId={isCompany ? a.confirmedCaregiverId : undefined}
+                    showDate={false}
+                  />
+                );
+              })
+            )}
+          </Fragment>
         ))}
-      </div>
-
-      <div className="mt-5 flex flex-col gap-4">
-        {days.map((day) => {
-          const [, month, dayNumber] = day.date.split("-");
-          const weekday = WEEKDAY[new Date(`${day.date}T12:00`).getDay()];
-          return (
-            <div key={day.date}>
-              <div className="mb-2 flex items-baseline gap-2 border-b border-linha pb-1.5">
-                <span className="numero text-note font-semibold">
-                  {dayNumber}/{month}
-                </span>
-                <span className="text-note text-ink-subtle">{weekday}</span>
-              </div>
-
-              {day.items.length === 0 ? (
-                <p className="py-1 text-note text-ink-subtle">Sem atendimentos.</p>
-              ) : (
-                <div className="flex flex-col gap-1.5">
-                  {day.items.map((a) => {
-                    const patient = state.patients.find((p) => p.id === a.patientId);
-                    const caregiver = state.caregivers.find((c) => c.id === a.confirmedCaregiverId);
-                    return (
-                      <Link
-                        key={a.id}
-                        to={`${base}/${a.id}`}
-                        className="flex items-center gap-3 rounded-control border border-linha bg-surface-raised px-3 py-2.5 transition-colors duration-150 ease-out hover:border-accent"
-                      >
-                        <span className="numero text-note text-ink-muted">{a.startTime}</span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-note font-semibold">
-                            {patient?.name}
-                          </span>
-                          <span className="block truncate text-meta text-ink-subtle">
-                            {isCompany
-                              ? (caregiver?.name ?? "Sem cuidador definido")
-                              : `${a.neighborhood} · ${formatCurrency(a.value)}`}
-                          </span>
-                        </span>
-                        <Cracha
-                          label={ATTENDANCE_STATUS_LABEL[a.status]}
-                          className={ATTENDANCE_STATUS_CLASS[a.status]}
-                        />
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      </AttendanceList>
     </div>
   );
 }
