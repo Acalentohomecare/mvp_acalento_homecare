@@ -41,6 +41,7 @@ Marcadores de situação usados na página inteira:
 | 2 | [Cor — o ambiente](#2-cor--o-ambiente) |
 | 3 | [Cor — estado e categoria (os crachás)](#3-cor--estado-e-categoria-os-crachás) |
 | 3.1 | [O marcador de estado — forma antes de cor](#31-o-marcador-de-estado--forma-antes-de-cor-) |
+| 3.2 | [Níveis de sinalização](#32-níveis-de-sinalização---pontonivel) |
 | 4 | [Tipografia](#4-tipografia) |
 | 5 | [Forma — espaçamento, grid, raio, borda, elevação](#5-forma--espaçamento-grid-raio-borda-elevação) |
 | 6 | [Movimento — duração, curva, microinteração, transição](#6-movimento--duração-curva-microinteração-transição) |
@@ -309,6 +310,75 @@ nome do paciente num telefone de 320px.
 
 **Não faça:** pôr estado de atendimento num `<Cracha>`; usar `rounded-full` num crachá de estado;
 usar a variante `bloco` dentro de uma lista, onde ela vira uma coluna de pastilhas coloridas.
+
+---
+
+### 3.2 Níveis de sinalização ✅ — `<PontoNivel>`
+
+**O problema que isto resolve.** O painel de Pendências do Início pintava o ponto de cada linha a
+partir de um booleano `urgente`: âmbar quando falso, vermelho quando verdadeiro. Duas tintas sem
+regra escrita, e a ordem da lista não acompanhava nenhuma delas — um check-in atrasado podia
+aparecer abaixo de um rascunho, com o vermelho no meio da coluna sem nada explicando por quê.
+**Cor que não acompanha a ordem não é sinal, é decoração.**
+
+O produto passa a ter **quatro níveis**, e nenhuma matiz nova. Cada um se apoia num token que já
+existe, porque a [regra 4](#0-as-cinco-regras) reserva uma única cor de destaque e uma quinta
+matiz saturada afastaria a interface do teal da marca.
+
+| Nível | Token | Base | Significa | Exemplos |
+|---|---|---|---|---|
+| `critico` | `status-cancelado` | `#94392D` | Já passou do prazo. Alguém está esperando agora. | Check-in atrasado, cancelamento, atraso |
+| `atencao` | `status-aberto` | `#79520A` | Espera uma decisão sua, e ainda dá tempo. | Fila de aprovação do quadro, candidaturas, convite sem resposta |
+| `informacao` | `accent` | `#175260` | Contexto. Nada quebra se ficar para amanhã. | Rascunho não publicado, aviso `severity: "info"`, nova mensagem |
+| `sucesso` | `status-confirmado` | `#346B45` | Resolvido. Não há o que fazer. | "Nada pendente", confirmação |
+
+**Sobre o azul.** O nível `informacao` é o azul do produto, e ele é o `--accent`: um teal profundo
+que, num ponto de 5px, lê como azul-petróleo. Não existe `blue` nesta paleta e não deve existir —
+o ambiente é teal, e um azul genérico ao lado dele leria como erro de token, não como decisão.
+
+#### Três vocabulários de cor, e eles não se misturam
+
+| Vocabulário | Responde | Onde mora |
+|---|---|---|
+| Estado do atendimento | *em que situação está este registro?* | `<StatusAtendimento>` ([3.1](#31-o-marcador-de-estado--forma-antes-de-cor-)) — forma antes de cor |
+| **Nível de sinalização** | *quanta urgência esta linha carrega para quem lê?* | `<PontoNivel>`, `<Aviso>` |
+| Tom da linha do tempo | *onde no tempo isto aconteceu?* | `<LinhaDoTempo>` ([9.1](#91-histórico-de-atividades---linhadotempo)) |
+
+Um "Confirmado" na coluna de estado e um ponto verde de nível dizem coisas diferentes, e é por
+isso que os dois nunca aparecem na mesma linha.
+
+#### As regras
+
+1. **Um nível por linha.** Dois pontos na mesma linha é enfeite, não informação.
+2. **O nível vem do dado** — `severity`, tipo da notificação, estado do atendimento —, nunca
+   escrito à mão no JSX. Onde o dado tem gravidade, a tela traduz; onde não tem, o nível é uma
+   constante da própria lista.
+3. **A ordem acompanha a cor.** Toda lista com nível ordena por `NIVEL_ORDEM` antes de renderizar.
+   É isso que faz o vermelho significar alguma coisa: ele está no topo porque é vermelho.
+4. **Cor não é a única portadora** ([regra 3](#0-as-cinco-regras)): a ordenação carrega o nível na
+   tela, e o `<PontoNivel>` carrega `NIVEL_ROTULO` em `sr-only` para quem ouve.
+
+#### O tamanho
+
+**5px, e é ponto final.** O ponto é um índice, não o elemento principal da linha: ao lado de um
+texto de 14px, o antigo ponto de 6px lia como marcador de lista e virava a primeira coisa que o
+olho encontrava, quando o trabalho dele é ser a segunda. Não existe variante grande — onde o
+nível precisa ser a manchete de uma tela, quem responde é o `<Aviso>`, que tem ícone e frase.
+
+```tsx
+<PontoNivel nivel="critico" className="mt-2" />   // alinhado à primeira linha do texto ao lado
+<Aviso tom="atencao" acao={<ButtonLink …/>}>…</Aviso>
+```
+
+Os tons do `<Aviso>` são os mesmos quatro níveis, com os nomes que a caixa já tinha:
+`erro` = crítico, `atencao` = atenção, `info` = informação, `sucesso` = sucesso.
+
+As cores moram em [`constants/nivel.ts`](../src/constants/nivel.ts) — `NIVEL_PONTO`,
+`NIVEL_TINTA`, `NIVEL_ROTULO`, `NIVEL_ORDEM`. Nunca escreva a tinta do nível na tela.
+
+**Não faça:** criar uma matiz nova para um nível; usar nível em lista que não tem urgência
+nenhuma (nome de paciente não tem nível); aumentar o ponto para "dar destaque" — o destaque é a
+posição; misturar nível com estado de atendimento na mesma linha.
 
 ---
 
@@ -769,6 +839,20 @@ com `border-b`; conteúdo com `p-3.5`, ou colado à borda com `flush` quando o f
   <ul className="divide-y divide-linha">{/* linhas */}</ul>
 </Painel>
 ```
+
+**Duas variantes, e a diferença é de peso:**
+
+| | `padrao` | `quieto` |
+|---|---|---|
+| Superfície | `bg-surface-raised` — o bloco branco | `bg-transparent` — só a moldura de 1px |
+| Cabeçalho | faixa `bg-surface-sunken/60` + `border-b` | sem faixa e sem borda; `px-3 pt-2.5 pb-1.5` |
+| Contagem | pastilha `<Contador>` | número puro, `numero text-meta text-ink-subtle` |
+
+`quieto` é **ainda um card** — a moldura fica —, mas sobre o fundo `--surface` ele deixa de flutuar
+e passa a delimitar, que é a definição de painel. É a forma do bloco de **apoio**, que precisa
+estar sempre à vista sem competir com o conteúdo principal ao lado: Pendências, no Início da
+empresa. Um painel quieto costuma vir sem `divide-y` na lista interna — o divisor é o que faz dez
+linhas parecerem dez caixas empilhadas.
 
 **Restrições.** Painel dentro de painel é erro, como card dentro de card. Um painel contém listas,
 tabelas e linhas de dado — nunca outro contêiner com moldura. Para separar blocos **dentro** de um
@@ -1841,6 +1925,26 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 14 — a cor de sinalização ganhou uma escala (agosto/2026)
+
+O painel de Pendências tinha ponto âmbar e ponto vermelho decididos por um booleano `urgente`.
+Ninguém conseguia dizer o que separava um do outro, a lista não ordenava por gravidade, e o campo
+`DashboardAlert.severity` existia no tipo e nos mocks sendo **ignorado** pela tela.
+
+O que mudou:
+
+- Nasceram os **quatro níveis** ([3.2](#32-níveis-de-sinalização---pontonivel)) sobre tokens que
+  já existiam — nenhuma matiz nova, e o azul de "informação" é o próprio `--accent`.
+- **A ordem passou a acompanhar a cor.** É o que faz o vermelho significar alguma coisa.
+- O ponto caiu de 6px para **5px**: índice da linha, não o elemento principal dela.
+- O `<Painel>` ganhou a variante **`quieto`** — menos cara de card, ainda um card — e o painel de
+  Pendências passou a cortar em cinco linhas com "mais N".
+- O `<Aviso>` ganhou o 4º tom (`atencao`), e a faixa de convites do cuidador, que era uma caixa
+  âmbar montada à mão, passou a usá-lo.
+- Em Notificações, o sino repetido em vinte linhas deu lugar ao ponto de nível.
+
+**Componentes que nasceram:** `<PontoNivel>` e `constants/nivel.ts`.
 
 ### Revisão 13 — o módulo de Atendimentos virou registro (agosto/2026)
 

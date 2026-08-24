@@ -27,6 +27,7 @@ export { LinhaDoTempo } from "./Linhadotempo";
 export type { EventoLinhaDoTempo } from "./Linhadotempo";
 export { Logo, LogoMark, PRODUTO_NOME } from "./Logo";
 export { Modal } from "./Modal";
+export { PontoNivel } from "./Nivel";
 export { Contador, Dado, ListaDeDados, Painel } from "./Painel";
 export { Select } from "./Select";
 export { Skeleton, SkeletonCard, SkeletonLinha, SkeletonLista } from "./Skeleton";

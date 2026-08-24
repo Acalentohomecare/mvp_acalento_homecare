@@ -1,9 +1,9 @@
-import { Bell } from "lucide-react";
-import { Button, TelaCarregando } from "../../components/ui";
+import { Button, PontoNivel, TelaCarregando, Vazio } from "../../components/ui";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { markAllRead, sessionNotifications } from "../../services/notifications";
 import type { NotificationType } from "../../types";
+import type { Nivel } from "../../constants/nivel";
 import { PAGE_LIST } from "../../components/layout/page";
 
 const TYPE_LABEL: Record<NotificationType, string> = {
@@ -16,6 +16,25 @@ const TYPE_LABEL: Record<NotificationType, string> = {
   application: "Candidatura",
   approval: "Cadastro",
   delay: "Atraso",
+};
+
+/**
+ * O nível de cada tipo de notificação (design system, seção 3.2).
+ *
+ * Toda linha desta tela tinha o mesmo sino cinza. Vinte sinos idênticos não informam nada: quem
+ * abre a tela quer saber, sem ler, se ali dentro tem alguma coisa pegando fogo. O ponto de nível
+ * responde isso na largura de cinco pixels.
+ */
+const TYPE_NIVEL: Record<NotificationType, Nivel> = {
+  cancellation: "critico",
+  checkin_pending: "critico",
+  delay: "critico",
+  invitation: "atencao",
+  application: "atencao",
+  reminder: "atencao",
+  approval: "informacao",
+  new_message: "informacao",
+  confirmation: "sucesso",
 };
 
 export function NotificationsPage() {
@@ -46,9 +65,9 @@ export function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <p className="mt-6 rounded-card border border-dashed border-linha py-10 text-center text-body text-ink-subtle">
-          Nenhuma notificação.
-        </p>
+        <div className="mt-5 rounded-card border border-linha">
+          <Vazio porte="bloco">Nenhuma notificação.</Vazio>
+        </div>
       ) : (
         <ul className="mt-5 flex flex-col gap-1.5">
           {notifications.map((n) => (
@@ -58,7 +77,9 @@ export function NotificationsPage() {
                 n.read ? "border-linha bg-transparent" : "border-accent/40 bg-surface-raised"
               }`}
             >
-              <Bell size={14} className={`mt-0.5 shrink-0 ${n.read ? "text-ink-subtle" : "text-accent"}`} />
+              {/* O ponto índice a linha pelo nível; a palavra do tipo, logo abaixo, é quem
+                  carrega o significado por escrito (regra 3). */}
+              <PontoNivel nivel={TYPE_NIVEL[n.type]} className="mt-[10px]" />
               <div className="min-w-0">
                 <p className="text-body text-ink-muted">{n.text}</p>
                 <p className="mt-0.5 numero text-meta text-ink-subtle">

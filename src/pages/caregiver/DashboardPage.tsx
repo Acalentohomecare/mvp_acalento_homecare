@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
 import {
+  Aviso,
   ButtonLink,
   Dado,
   ListaDeDados,
@@ -63,17 +64,20 @@ export function CaregiverDashboardPage() {
         junto. Sem convite, a faixa não existe e a tela começa pelo próximo atendimento.
       */}
       {invitations.length > 0 && (
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 rounded-card border border-status-aberto/30 bg-status-aberto-soft px-3.5 py-3">
-          <p className="min-w-0 text-note text-status-aberto">
-            <span className="font-semibold">
-              {invitations.length} {invitations.length === 1 ? "convite" : "convites"}
-            </span>{" "}
-            {invitations.length === 1 ? "aguardando sua resposta" : "aguardando sua resposta"}.
-          </p>
-          <ButtonLink to="/cuidador/convites" size="sm" className="shrink-0">
-            Ver {invitations.length === 1 ? "convite" : "convites"}
-          </ButtonLink>
-        </div>
+        <Aviso
+          tom="atencao"
+          className="mt-5"
+          acao={
+            <ButtonLink to="/cuidador/convites" size="sm">
+              Ver {invitations.length === 1 ? "convite" : "convites"}
+            </ButtonLink>
+          }
+        >
+          <span className="font-semibold">
+            {invitations.length} {invitations.length === 1 ? "convite" : "convites"}
+          </span>{" "}
+          aguardando sua resposta.
+        </Aviso>
       )}
 
       <div className="mt-5 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8">

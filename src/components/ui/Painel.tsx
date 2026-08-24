@@ -14,6 +14,12 @@ import type { ReactNode } from "react";
  * Sem essa distinção, tudo virava card: quinze plantões em quinze caixas com sombra, e dentro de
  * cada tela mais caixas dentro de caixas. Card dentro de card é sempre erro; painel dentro de
  * painel também. Um painel pode conter listas, tabelas e linhas de dado — não outro painel.
+ *
+ * A variante `quieto` desce mais um degrau: mantém a moldura de 1px e perde o preenchimento
+ * branco e a faixa do cabeçalho. Sobre o fundo `--surface`, ele deixa de flutuar e passa a
+ * **delimitar** — que é a própria definição de painel. É a forma certa para o bloco de apoio que
+ * acompanha a leitura (Pendências, no Início da empresa): ainda é um card, mas não pede a
+ * atenção que a fila de plantões ao lado precisa ter.
  */
 
 interface PainelProps {
@@ -25,6 +31,12 @@ interface PainelProps {
   actions?: ReactNode;
   /** Remove o padding interno — para quando o filho é uma lista que sangra até a borda. */
   flush?: boolean;
+  /**
+   * `padrao` — superfície branca e cabeçalho em faixa afundada. É o painel de conteúdo.
+   * `quieto` — a mesma moldura de 1px, **sem** o preenchimento branco e sem a faixa do
+   *   cabeçalho. Para o bloco de apoio que acompanha a leitura sem disputar com ela.
+   */
+  variant?: "padrao" | "quieto";
   children: ReactNode;
   className?: string;
 }
@@ -34,25 +46,41 @@ export function Painel({
   count,
   actions,
   flush = false,
+  variant = "padrao",
   children,
   className = "",
 }: PainelProps) {
+  const quieto = variant === "quieto";
+
   return (
     <section
-      className={`overflow-hidden rounded-card border border-linha bg-surface-raised ${className}`}
+      className={`overflow-hidden rounded-card border border-linha ${
+        quieto ? "bg-transparent" : "bg-surface-raised"
+      } ${className}`}
     >
       {title && (
-        <header className="flex items-center justify-between gap-3 border-b border-linha bg-surface-sunken/60 px-3.5 py-2">
+        <header
+          className={`flex items-center justify-between gap-3 ${
+            quieto
+              ? "px-3 pt-2.5 pb-1.5"
+              : "border-b border-linha bg-surface-sunken/60 px-3.5 py-2"
+          }`}
+        >
           <h2 className="flex min-w-0 items-center gap-2 text-heading text-ink">
             <span className="truncate">{title}</span>
-            {count !== undefined && (
-              <Contador valor={count} />
-            )}
+            {count !== undefined &&
+              /* No painel quieto a contagem é número puro: a pastilha é mais uma caixinha, e o
+                 painel existe justamente para ter menos caixa. */
+              (quieto ? (
+                <span className="numero shrink-0 text-meta text-ink-subtle">{count}</span>
+              ) : (
+                <Contador valor={count} />
+              ))}
           </h2>
           {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </header>
       )}
-      <div className={flush ? "" : "p-3.5"}>{children}</div>
+      <div className={flush ? "" : quieto ? "px-3 pb-3" : "p-3.5"}>{children}</div>
     </section>
   );
 }

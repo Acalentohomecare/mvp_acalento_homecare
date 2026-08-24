@@ -1,10 +1,12 @@
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   ButtonLink,
   LinhaDoTempo,
   PRODUTO_NOME,
   Painel,
+  PontoNivel,
   SkeletonLista,
   Vazio,
   type EventoLinhaDoTempo,
@@ -29,25 +31,38 @@ import {
 } from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
 import { carimbo } from "../../utils/date";
+import { NIVEL_ORDEM, type Nivel } from "../../constants/nivel";
 import { PAGE_WORK } from "../../components/layout/page";
 
 /**
  * Pendência — o que espera uma decisão da coordenadora.
  *
- * `urgencia` decide a tinta do marcador, e só existem duas: **âmbar** para o que espera decisão e
- * **vermelho** para o que já está atrasado. Três níveis de urgência num painel de dez itens não
- * são lidos como três níveis; são lidos como enfeite.
+ * O `nivel` é o da seção 3.2 do design system, e ele faz duas coisas ao mesmo tempo: decide a
+ * tinta do ponto **e** a posição da linha na lista. Antes era um booleano `urgente`, e a cor
+ * ficava solta — um check-in atrasado podia aparecer abaixo de um rascunho, com o vermelho no
+ * meio da lista sem nada explicando por quê. Cor que não acompanha a ordem não é sinal, é
+ * decoração.
  */
 interface Pendencia {
   id: string;
   texto: string;
   para: string;
-  urgente?: boolean;
+  nivel: Nivel;
 }
+
+/**
+ * Quantas pendências a coluna mostra antes de dobrar o resto.
+ *
+ * A coluna acompanha a rolagem: se ela cresce até quinze linhas, deixa de caber na tela e o
+ * "acompanha" vira "rola junto", que é exatamente o que ela existe para não fazer. Cinco cobre a
+ * operação de um dia normal; o excedente continua a um clique.
+ */
+const PENDENCIAS_VISIVEIS = 5;
 
 export function CompanyDashboardPage() {
   const { session } = useSession();
   const { state } = useAppState();
+  const [verTodas, setVerTodas] = useState(false);
 
   if (!state) {
     return (
@@ -87,27 +102,41 @@ export function CompanyDashboardPage() {
             id: "roster",
             texto: `${awaitingApproval.length} cuidador(es) aguardando aprovação para o quadro`,
             para: "/empresa/cuidadores",
+            nivel: "atencao" as const,
           },
         ]
       : []),
+    // Atrasado é o único nível crítico daqui: o plantão começou e ninguém registrou chegada.
     ...lateCheckins.map((a) => ({
       id: `chk-${a.id}`,
       texto: `Check-in pendente — ${patientName(a.patientId)}, ${a.startTime}`,
       para: `/empresa/atendimentos/${a.id}`,
-      urgente: true,
+      nivel: "critico" as const,
     })),
     ...toReview.map((a) => ({
       id: `app-${a.id}`,
       texto: `Candidaturas aguardando decisão — ${patientName(a.patientId)}`,
       para: `/empresa/atendimentos/${a.id}/candidaturas`,
+      nivel: "atencao" as const,
     })),
+    // Rascunho não trava ninguém hoje: é lembrete, não decisão vencendo.
     ...drafts.map((a) => ({
       id: `dft-${a.id}`,
       texto: `Rascunho não publicado — ${patientName(a.patientId)}`,
       para: `/empresa/atendimentos/${a.id}`,
+      nivel: "informacao" as const,
     })),
-    ...alerts.map((a) => ({ id: a.id, texto: a.text, para: "/empresa/atendimentos" })),
-  ];
+    // O aviso já vem com a sua gravidade do dado; a tela só a traduz para o nível.
+    ...alerts.map((a) => ({
+      id: a.id,
+      texto: a.text,
+      para: "/empresa/atendimentos",
+      nivel: (a.severity === "warning" ? "atencao" : "informacao") as Nivel,
+    })),
+  ].sort((a, b) => NIVEL_ORDEM[a.nivel] - NIVEL_ORDEM[b.nivel]);
+
+  const pendenciasVisiveis = verTodas ? pendencias : pendencias.slice(0, PENDENCIAS_VISIVEIS);
+  const pendenciasOcultas = pendencias.length - pendenciasVisiveis.length;
 
   const eventos: EventoLinhaDoTempo[] = activity.map((entry) => ({
     id: entry.id,
@@ -187,36 +216,59 @@ export function CompanyDashboardPage() {
         direita no desktop.
       */}
       <div className="mt-6 flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-x-8">
+        {/*
+          Painel `quieto`: a moldura fica, o preenchimento branco sai. Pendência é coluna de
+          apoio — ela precisa estar sempre à vista, não precisa competir com a fila de plantões
+          ao lado. Sem os divisores e sem a faixa do cabeçalho, dez linhas param de parecer dez
+          caixas empilhadas e voltam a parecer uma lista.
+        */}
         <Painel
           title="Pendências"
           count={pendencias.length}
           flush
+          variant="quieto"
           className="lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1"
         >
           {pendencias.length === 0 ? (
-            <Vazio porte="linha">Nada pendente no momento.</Vazio>
+            <Vazio porte="linha">
+              <PontoNivel nivel="sucesso" className="mr-2 inline-block align-middle" />
+              Nada pendente no momento.
+            </Vazio>
           ) : (
             /* Cada pendência é uma linha clicável que leva ao lugar onde a decisão é tomada. Eram
                itens de lista com borda e sombra que não levavam a lugar nenhum: a coordenadora
                lia "Candidaturas aguardando decisão" e precisava procurar o atendimento na mão. */
-            <ul className="divide-y divide-linha">
-              {pendencias.map((p) => (
-                <li key={p.id}>
-                  <Link
-                    to={p.para}
-                    className="flex items-start gap-2.5 px-3.5 py-2.5 text-note text-ink-muted transition-colors duration-150 ease-out hover:bg-surface-sunken/60 hover:text-ink"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`mt-[7px] size-1.5 shrink-0 rounded-full ${
-                        p.urgente ? "bg-status-cancelado" : "bg-status-aberto"
-                      }`}
-                    />
-                    <span className="min-w-0">{p.texto}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="px-1 pb-1">
+                {pendenciasVisiveis.map((p) => (
+                  <li key={p.id}>
+                    <Link
+                      to={p.para}
+                      className="flex min-h-11 items-start gap-2 rounded-control px-2 py-2 text-note text-ink-muted transition-colors duration-150 ease-out hover:bg-surface-sunken/60 hover:text-ink pointer-fine:min-h-0 pointer-fine:py-1.5"
+                    >
+                      <PontoNivel nivel={p.nivel} className="mt-2" />
+                      <span className="min-w-0">{p.texto}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {pendencias.length > PENDENCIAS_VISIVEIS && (
+                <button
+                  type="button"
+                  onClick={() => setVerTodas((v) => !v)}
+                  className="flex min-h-11 w-full items-center gap-1 px-3 pb-2 text-meta text-ink-subtle transition-colors duration-150 ease-out hover:text-ink pointer-fine:min-h-8"
+                >
+                  <ChevronDown
+                    size={13}
+                    aria-hidden="true"
+                    className={`transition-transform duration-200 ease-out ${verTodas ? "rotate-180" : ""}`}
+                  />
+                  {verTodas
+                    ? "Mostrar menos"
+                    : `mais ${pendenciasOcultas} ${pendenciasOcultas === 1 ? "pendência" : "pendências"}`}
+                </button>
+              )}
+            </>
           )}
         </Painel>
 
