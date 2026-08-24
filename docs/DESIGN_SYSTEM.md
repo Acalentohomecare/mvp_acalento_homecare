@@ -860,7 +860,7 @@ substituiu a maior parte dos `<Card>` do módulo de Atendimentos.
 |---|---|---|
 | `<Card>` | uma **superfície solta no fluxo** — caixa de entrada, resumo lateral | borda 1px, `rounded-card`, `p-3.5` |
 | `<Painel>` | um **bloco do documento** com cabeçalho e conteúdo estruturado | borda 1px, cabeçalho em faixa rebaixada, sem sombra |
-| `<Secao>` | uma **região nomeada** cujo conteúdo já se delimita sozinho | nenhuma moldura: rótulo + conteúdo |
+| `<Secao>` | uma **região nomeada** cujo conteúdo já se delimita sozinho | nenhuma moldura: rótulo + conteúdo, com uma de duas tintas |
 | nenhum dos três | listas de registro | usam a moldura do próprio `<AttendanceList>` |
 
 **Estrutura.** Cabeçalho opcional (`title` + `count` + `actions`) numa faixa `bg-surface-sunken/60`
@@ -934,10 +934,35 @@ fundo. Solta sobre a página ela vira mais uma caixinha — exatamente o que a s
 ter. O ponto médio é `aria-hidden`: quem ouve a tela recebe "Atendimentos de hoje 3".
 
 ```tsx
-<Secao title="Atendimentos de hoje" count={3}>
+<Secao title="Atendimentos de hoje" count={3} variant="destaque">
   <AttendanceList variant="fluxo">{/* linhas */}</AttendanceList>
 </Secao>
 ```
+
+#### As duas tintas — `padrao` e `destaque`
+
+| | `padrao` | `destaque` |
+|---|---|---|
+| Rótulo | `--ink-muted` | **`--ink`** |
+| Contagem | `--ink-subtle` | `--ink-muted` |
+| Contêiner, fundo, borda, raio, espaço | — | **idênticos**. Nada além da tinta muda. |
+
+`destaque` é a **única** diferença permitida entre duas seções da mesma coluna, e é assim de
+propósito. Numa tela sem molduras, onde todas as regiões estão no mesmo plano, subir o rótulo um
+degrau de tinta é um contraste que se vê de relance e não custa um pixel de altura nem uma linha
+a mais de desenho.
+
+Use em uma ou duas regiões por tela — as que a pessoa abriu a tela para ver. No Início da empresa
+são "Atendimentos de hoje" e "Em aberto"; "Próximos" e "Atividade recente" ficam no `padrao`,
+porque são contexto e histórico. Se todo rótulo é `--ink`, nenhum é.
+
+**Não existe variante com superfície, e a tentativa está registrada.** A revisão 18 experimentou
+dar à seção inteira um fundo branco com moldura de 1px e `rounded-card` — sem sombra, uma caixa
+por região e não por registro. Não passou: **borda + raio + fundo é a assinatura do card**,
+qualquer que seja o conteúdo, e duas dessas empilhadas no topo do Início reconstroem exatamente a
+pilha de painéis que a revisão 15 desmontou. Vale a regra da seção 5 até o fim — o que separa
+conteúdo é borda de 1px e espaço, e a hierarquia vem de posição, densidade e tinta. Se uma região
+precisa mesmo de moldura, ela não era uma seção: era um `<Painel>`.
 
 **A ação do cabeçalho é um alvo de 44px.** "Ver todos" e "Ver escala" eram texto de 13px solto num
 cabeçalho: ~18px de altura clicável, abaixo do piso da seção 11, num link que a coordenadora usa de
@@ -2445,6 +2470,50 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 18 — a coluna do Início recuperou hierarquia (sem recuperar a caixa) (agosto/2026)
+
+**O problema.** A revisão 15 tirou as molduras do Início e a 16 tirou a última. O acúmulo de
+caixas acabou — e apareceu o defeito oposto: com quatro regiões seguidas sem contêiner **e com os
+quatro rótulos no mesmo cinza `--ink-muted`**, a coluna ficou num plano só. "Atendimentos de hoje"
+e "Em aberto" chegavam com o mesmo peso de "Atividade recente", que é histórico, e o começo de
+cada região dependia exclusivamente do espaço em branco entre elas.
+
+**A tentativa que não passou.** A primeira correção foi dar às duas seções operacionais uma
+superfície própria: `bg-surface-raised`, `border border-linha`, `rounded-card`, **sem sombra**,
+uma caixa por região e não por registro. No papel obedecia todas as regras — a regra da revisão 13
+(sombra é só elevação de verdade), a proibição de card por atendimento, o teto de duas por tela.
+
+Na tela, leu como card. E o motivo é o que fica desta revisão:
+
+> **Borda + raio + fundo é a assinatura do card, qualquer que seja o conteúdo da caixa.** Tirar a
+> sombra não desfaz a assinatura, e "é uma caixa por região, não por registro" é uma distinção que
+> existe no código, não no olho de quem abre a tela.
+
+Duas dessas no topo do Início reconstroem a pilha de painéis que a revisão 15 desmontou — com o
+agravante de serem só duas, o que faz as outras duas seções parecerem inacabadas em vez de
+calmas.
+
+**O que ficou.** A hierarquia veio da tinta, e só dela: `<Secao variant="destaque">` em
+"Atendimentos de hoje" e "Em aberto" — rótulo em `--ink` no lugar de `--ink-muted`, contagem em
+`--ink-muted` no lugar de `--ink-subtle`. Contêiner, fundo, borda, raio e espaço ficaram
+**idênticos** aos do `padrao`. "Próximos" e "Atividade recente" não mudaram.
+
+| | Antes | Depois |
+|---|---|---|
+| Rótulo das seções operacionais | `--ink-muted`, igual às outras | **`--ink`** |
+| Contagem delas | `--ink-subtle` | `--ink-muted` |
+| Moldura, fundo, raio, altura | nenhum | **nenhum** — o CSS do build não ganhou uma classe |
+
+**A regra que isto vira.** Numa coluna sem molduras, hierarquia se faz com tinta, posição e
+densidade — nessa ordem —, nunca reintroduzindo contêiner. Se uma região precisa mesmo de
+moldura, ela não era uma seção: era um `<Painel>`.
+
+**Onde bateu.** `Secao` (a variante de tinta e a nota da superfície reprovada), Início da empresa
+(as duas seções e a nota de arquitetura da coluna). Nenhum outro call site mudou — a variante
+nasce opt-in e o padrão continua sendo a região sem moldura em `--ink-muted`.
+
+---
 
 ### Revisão 17 — o plantão em aberto ganhou camadas (agosto/2026)
 

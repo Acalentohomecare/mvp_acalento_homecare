@@ -32,6 +32,25 @@ import type { ReactNode } from "react";
  * Quando usar cada um: se o conteúdo é uma lista ou uma tabela que já se delimita sozinha, use
  * `<Secao>`. Se é conteúdo solto que precisa ser recortado do resto da página (um resumo, um
  * formulário curto, um bloco de dados), use `<Painel>`.
+ *
+ * --------------------------------------------------------------- as duas tintas do rótulo
+ *
+ * `destaque` é a única diferença possível entre duas seções, e ela vive **no rótulo**: tinta
+ * cheia (`--ink`) em vez de `--ink-muted`, contagem um degrau acima. Nada mais muda — mesmo
+ * desenho, mesmo espaço, nenhuma moldura, nenhum fundo.
+ *
+ * Isso parece pouco para separar "o que exige decisão agora" de "o que é histórico", e é
+ * deliberado. A alternativa óbvia — dar uma superfície à seção inteira, fundo branco com moldura
+ * de 1px e canto arredondado — foi tentada e reprovada na revisão 18: mesmo sem sombra e mesmo
+ * sendo uma caixa por região (não por registro), o resultado lê como **card**. Borda mais raio
+ * mais fundo é a assinatura do card, independentemente do que a caixa contenha, e uma coluna com
+ * duas dessas no topo volta a ser a pilha de painéis que o `<Secao>` nasceu para desfazer.
+ *
+ * A regra que sobrou é a da seção 5 do design system, aplicada até o fim: **o que separa
+ * conteúdo é borda de 1px e espaço, e a hierarquia vem de posição, densidade e tinta.** Numa
+ * coluna sem molduras, subir o rótulo de `--ink-muted` para `--ink` é um degrau de contraste que
+ * se vê de relance — e é o degrau mais barato que existe, porque não custa um pixel de altura
+ * nem uma linha a mais de desenho.
  */
 
 interface SecaoProps {
@@ -41,11 +60,26 @@ interface SecaoProps {
   count?: number;
   /** À direita do rótulo: link "ver todos", filtro curto. Use `SECAO_LINK_CLASS` nos links. */
   actions?: ReactNode;
+  /**
+   * `padrao` — rótulo em `--ink-muted`. O repouso da tela.
+   * `destaque` — o mesmo desenho, com o rótulo em tinta cheia. Para a região que a pessoa
+   *   precisa ler primeiro. **Só a tinta muda**: nenhuma moldura, nenhum fundo, nenhum raio.
+   */
+  variant?: "padrao" | "destaque";
   children: ReactNode;
   className?: string;
 }
 
-export function Secao({ title, count, actions, children, className = "" }: SecaoProps) {
+export function Secao({
+  title,
+  count,
+  actions,
+  variant = "padrao",
+  children,
+  className = "",
+}: SecaoProps) {
+  const destaque = variant === "destaque";
+
   return (
     <section className={className}>
       {/* `items-center`, e não `items-baseline`: a ação do cabeçalho é um alvo de 44px no toque
@@ -53,10 +87,14 @@ export function Secao({ title, count, actions, children, className = "" }: Secao
           do link 12px abaixo do rótulo da seção. Centralizados, os dois voltam a ler como uma
           linha só, em qualquer altura de alvo. */}
       <header className="flex items-center justify-between gap-3 pb-1.5">
-        <h2 className="flex min-w-0 items-baseline gap-1 text-dado text-ink-muted uppercase">
+        <h2
+          className={`flex min-w-0 items-baseline gap-1 text-dado uppercase ${
+            destaque ? "text-ink" : "text-ink-muted"
+          }`}
+        >
           <span className="truncate">{title}</span>
           {count !== undefined && (
-            <span className="numero shrink-0 text-ink-subtle">
+            <span className={`numero shrink-0 ${destaque ? "text-ink-muted" : "text-ink-subtle"}`}>
               <span aria-hidden="true">· </span>
               {count}
             </span>

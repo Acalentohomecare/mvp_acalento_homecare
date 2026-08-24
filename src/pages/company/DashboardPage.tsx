@@ -312,6 +312,18 @@ export function CompanyDashboardPage() {
             por isso que as três precisavam mudar juntas: uma caixa sobrando no meio de listas
             soltas não lê como "esta é diferente", lê como sobra.
 
+            O que faltava depois disso era hierarquia **dentro** da coluna: com os quatro rótulos
+            no mesmo cinza, "Atendimentos de hoje" e "Em aberto" chegavam com o mesmo peso de
+            "Atividade recente", que é histórico. Numa tela que a coordenadora abre para saber o
+            que fazer agora, isso é hierarquia invertida.
+
+            A correção é de tinta, e só de tinta: as duas seções operacionais usam
+            `variant="destaque"` (rótulo em `--ink`, contagem em `--ink-muted`); contexto e
+            histórico ficam no `padrao`. Dar a elas uma superfície própria — fundo branco, moldura
+            de 1px, canto arredondado — foi tentado e desfeito na revisão 18: mesmo sem sombra, e
+            mesmo sendo uma caixa por região e não por registro, lia como card, e duas delas no
+            topo desta coluna reconstroem a pilha de painéis que a revisão 15 desmontou.
+
             A disposição muda junto: aqui são três ou quatro registros por seção, não trinta.
             Densidade deixa de ser o problema e legibilidade de relance passa a ser — daí o
             `empilhado`, com hora e estado na primeira linha e alvo de toque folgado.
@@ -321,7 +333,7 @@ export function CompanyDashboardPage() {
             produto. Vazio só se justifica quando o vazio é notícia; aqui a notícia já foi dada.
           */}
           {today.length > 0 && (
-            <Secao title="Atendimentos de hoje" count={today.length}>
+            <Secao title="Atendimentos de hoje" count={today.length} variant="destaque">
               <AttendanceList variant="fluxo">
                 {today.map((a) => (
                   <AttendanceRow
@@ -342,6 +354,7 @@ export function CompanyDashboardPage() {
           <Secao
             title="Em aberto"
             count={awaiting.length}
+            variant="destaque"
             actions={
               awaiting.length > 0 && (
                 <Link
