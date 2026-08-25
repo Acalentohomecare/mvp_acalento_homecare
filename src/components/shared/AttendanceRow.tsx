@@ -56,12 +56,13 @@ import type { Attendance } from "../../types";
  * O mesmo componente, o mesmo DOM e a mesma hierarquia servem dois trabalhos diferentes, e o que
  * os separa é **quantos registros a pessoa vai varrer de uma vez**:
  *
- * `denso` — a escala inteira: Atendimentos, Escala, agenda do cuidador. Trinta plantões numa
- *   tela, e o que importa é caber. No desktop tudo entra numa faixa de ~56px, cinco colunas.
+ * `denso` — a escala inteira: Atendimentos e a Escala da empresa. Trinta plantões numa tela, e o
+ *   que importa é caber. No desktop tudo entra numa faixa de ~56px, cinco colunas.
  *
- * `empilhado` — o recorte curto do Início: os plantões de hoje, os que esperam cuidador. São três
- *   ou quatro registros, e ali densidade não é o problema — legibilidade de relance é. Cada
- *   informação ganha a sua linha, o dedo tem alvo folgado e a leitura desce em vez de atravessar.
+ * `empilhado` — o recorte curto: os plantões de hoje no Início, os que esperam cuidador, e o dia
+ *   escolhido na agenda do cuidador. São um a quatro registros, e ali densidade não é o problema —
+ *   legibilidade de relance é. Cada informação ganha a sua linha, o dedo tem alvo folgado e a
+ *   leitura desce em vez de atravessar.
  *
  * Não são dois componentes porque não são duas hierarquias: paciente continua sendo o dado
  * principal, hora continua sendo a âncora, valor e estado continuam encostados à direita. O que

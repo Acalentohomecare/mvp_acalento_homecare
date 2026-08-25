@@ -88,6 +88,28 @@ export const ACTION_LINK_CLASS =
 export const SECAO_LINK_CLASS =
   "inline-flex min-h-11 items-center rounded-control text-meta font-semibold text-accent underline decoration-transparent underline-offset-2 transition-colors duration-150 ease-out hover:decoration-accent/50 active:text-accent-strong active:decoration-accent-strong/60 pointer-fine:min-h-0";
 
+/**
+ * Seta de período — a que anda no tempo, na escala da empresa e no calendário do cuidador.
+ *
+ * **Alvo de 44px, desenho de 24px.** É a técnica da seção 11 do design system, a mesma do fechar
+ * do `<Modal>`: `size-11` com `-mx-2.5` devolvendo a folga ao layout. Sem ela o dilema é escolher
+ * entre uma seta discreta que não se acerta com o polegar e um botão emoldurado que rouba a
+ * atenção do rótulo; com ela, o ícone encosta no rótulo e continua com o alvo inteiro por baixo.
+ *
+ * Sem borda e sem fundo em repouso, ao contrário do `variant="ghost"`: dois retângulos brancos
+ * cercando o rótulo transformariam o grupo em três caixas, que é o oposto do que ele deve ser.
+ * O hover pinta o fundo e a tinta sobe para `--ink` — a resposta aparece quando é pedida.
+ *
+ * No ponteiro o alvo encolhe junto com a margem (`size-8` / `-mx-1`), e é preciso mexer nas duas:
+ * a margem de 10px foi calculada contra uma caixa de 44px, e sobre uma de 32px ela comeria mais da
+ * metade do botão — o ícone passaria a encostar no texto sem folga nenhuma.
+ *
+ * Mora aqui, e não na tela, desde que passou a ter dois donos: a escala anda por dia e por semana,
+ * o calendário anda por mês, e as duas setas são o mesmo controle fazendo o mesmo gesto.
+ */
+export const SETA_PERIODO_CLASS =
+  "-mx-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-control text-ink-subtle transition-colors duration-150 ease-out hover:bg-surface-sunken hover:text-ink active:text-accent pointer-fine:-mx-1 pointer-fine:size-8";
+
 export function buttonClass(
   variant: ButtonVariant = "primary",
   size: ButtonSize = "md",

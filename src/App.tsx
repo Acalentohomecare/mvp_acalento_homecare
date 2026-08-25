@@ -11,9 +11,9 @@ import { PendingApprovalPage } from "./pages/PendingApprovalPage";
 import { CompanyLayout } from "./layouts/CompanyLayout";
 import { CaregiverLayout } from "./layouts/CaregiverLayout";
 import { AttendanceDetailPage } from "./pages/shared/AttendanceDetailPage";
-import { SchedulePage } from "./pages/shared/SchedulePage";
 import { NotificationsPage } from "./pages/shared/NotificationsPage";
 import { ReportsPage } from "./pages/company/ReportsPage";
+import { CompanySchedulePage } from "./pages/company/SchedulePage";
 import { CompanyDashboardPage } from "./pages/company/DashboardPage";
 import { CompanyAttendancesPage } from "./pages/company/AttendancesPage";
 import { NewAttendancePage } from "./pages/company/NewAttendancePage";
@@ -26,6 +26,7 @@ import { CaregiverDashboardPage } from "./pages/caregiver/DashboardPage";
 import { CaregiverProfilePage } from "./pages/caregiver/ProfilePage";
 import { CaregiverAttendancesPage } from "./pages/caregiver/AttendancesPage";
 import { CaregiverInvitationsPage } from "./pages/caregiver/InvitationsPage";
+import { CaregiverSchedulePage } from "./pages/caregiver/SchedulePage";
 
 function IndexRedirect() {
   const { session } = useSession();
@@ -61,7 +62,7 @@ function AppRoutes() {
         <Route path="/empresa/atendimentos/:attendanceId/cuidadores" element={<MatchingPage />} />
         <Route path="/empresa/atendimentos/:attendanceId/candidaturas" element={<ApplicationsPage />} />
         <Route path="/empresa/atendimentos/:attendanceId" element={<AttendanceDetailPage />} />
-        <Route path="/empresa/agenda" element={<SchedulePage />} />
+        <Route path="/empresa/agenda" element={<CompanySchedulePage />} />
         <Route path="/empresa/relatorios" element={<ReportsPage />} />
         <Route path="/empresa/notificacoes" element={<NotificationsPage />} />
         <Route path="/empresa/configuracoes" element={<CompanySettingsPage />} />
@@ -78,7 +79,7 @@ function AppRoutes() {
         <Route path="/cuidador" element={<CaregiverDashboardPage />} />
         <Route path="/cuidador/perfil" element={<CaregiverProfilePage />} />
         <Route path="/cuidador/convites" element={<CaregiverInvitationsPage />} />
-        <Route path="/cuidador/agenda" element={<SchedulePage />} />
+        <Route path="/cuidador/agenda" element={<CaregiverSchedulePage />} />
         <Route path="/cuidador/notificacoes" element={<NotificationsPage />} />
         <Route path="/cuidador/atendimentos" element={<CaregiverAttendancesPage />} />
         <Route path="/cuidador/atendimentos/:attendanceId" element={<AttendanceDetailPage />} />

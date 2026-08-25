@@ -1,7 +1,15 @@
 import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button, Select, SkeletonLista, Tabs, Vazio, type Aba } from "../../components/ui";
+import {
+  Button,
+  SETA_PERIODO_CLASS,
+  Select,
+  SkeletonLista,
+  Tabs,
+  Vazio,
+  type Aba,
+} from "../../components/ui";
 import {
   AttendanceGroupHeader,
   AttendanceList,
@@ -11,7 +19,7 @@ import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { companyAttendances, scheduleDays, todayISO } from "../../services/attendances";
 import { rosterCaregivers } from "../../services/roster";
-import { intervaloCurto, rotuloDoDia } from "../../utils/date";
+import { intervaloCurto, rotuloDoDia, somarDias } from "../../utils/date";
 import { PAGE_LIST } from "../../components/layout/page";
 
 /*
@@ -22,6 +30,14 @@ import { PAGE_LIST } from "../../components/layout/page";
  *
  * Por isso aqui não há busca por texto, nem filtro de estado, nem campos De/Até — pedi-los é pedir
  * a tela de Atendimentos de novo. O que faltava não era filtro: era a escala **andar**.
+ *
+ * -------------------------------------------------------------------- só da empresa
+ *
+ * Esta tela era compartilhada com o cuidador, e deixou de ser. As duas perguntas divergiram:
+ * quem coordena varre dezenas de plantões por semana e precisa de lista longa com filtro por
+ * pessoa; o cuidador tem poucos plantões no mês e precisa enxergar a **forma do mês** para saber
+ * onde estão os buracos. A agenda dele virou calendário (`caregiver/SchedulePage`); a escala
+ * continua sendo lista, porque é o que serve a quem monta escala.
  */
 
 /** Recorte de leitura, não período fixo: um dia por vez, ou a semana rolante a partir da âncora. */
@@ -38,32 +54,7 @@ function meioDia(iso: string): Date {
   return new Date(`${iso}T12:00`);
 }
 
-function moverDias(iso: string, dias: number): string {
-  const d = meioDia(iso);
-  d.setDate(d.getDate() + dias);
-  return todayISO(d);
-}
-
-/**
- * Seta de período: **alvo de 44px, desenho de 24px.**
- *
- * É a técnica da seção 11 do design system, a mesma do fechar do `<Modal>` — `size-11` com
- * `-mx-2.5` devolvendo a folga ao layout. Sem ela o dilema é escolher entre uma seta discreta que
- * não se acerta com o polegar e um botão emoldurado que rouba a atenção da data; com ela, o ícone
- * encosta na data e continua com o alvo inteiro por baixo.
- *
- * Sem borda e sem fundo em repouso, ao contrário do `variant="ghost"`: dois retângulos brancos
- * cercando o rótulo transformariam o grupo em três caixas, que é o oposto do que ele deve ser.
- * O hover pinta o fundo e a tinta sobe para `--ink` — a resposta aparece quando é pedida.
- *
- * No ponteiro o alvo encolhe junto com a margem (`size-8` / `-mx-1`), e é preciso mexer nas duas:
- * a margem de 10px foi calculada contra uma caixa de 44px, e sobre uma de 32px ela comeria mais da
- * metade do botão — o ícone passaria a encostar no texto sem folga nenhuma.
- */
-const SETA_CLASSE =
-  "-mx-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded-control text-ink-subtle transition-colors duration-150 ease-out hover:bg-surface-sunken hover:text-ink active:text-accent pointer-fine:-mx-1 pointer-fine:size-8";
-
-export function SchedulePage() {
+export function CompanySchedulePage() {
   const { session } = useSession();
   const { state } = useAppState();
   const [searchParams] = useSearchParams();
@@ -97,17 +88,15 @@ export function SchedulePage() {
    * quem monta escala: serve para ver quem está sobrecarregado e, com os dias vazios à mostra,
    * quem está livre no sábado.
    *
-   * Só do lado empresa: o cuidador já enxerga apenas os próprios plantões.
+   * O recorte não existe do lado do cuidador — ele já enxerga só os próprios plantões, e foi um
+   * dos motivos de as duas telas terem se separado.
    */
   const [cuidadorId, setCuidadorId] = useState("");
-
-  const isCompany = session?.role === "company";
-  const titulo = isCompany ? "Escala" : "Minha agenda";
 
   if (!state) {
     return (
       <div className={PAGE_LIST}>
-        <h1 className="text-display">{titulo}</h1>
+        <h1 className="text-display">Escala</h1>
         <div className="mt-6">
           <SkeletonLista />
         </div>
@@ -115,9 +104,7 @@ export function SchedulePage() {
     );
   }
 
-  const list = isCompany
-    ? companyAttendances(state, session?.companyId)
-    : state.attendances.filter((a) => a.confirmedCaregiverId === session?.caregiverId);
+  const list = companyAttendances(state, session?.companyId);
 
   const recorte = cuidadorId ? list.filter((a) => a.confirmedCaregiverId === cuidadorId) : list;
 
@@ -125,9 +112,8 @@ export function SchedulePage() {
   const dias = Number(zoom);
   const days = scheduleDays(recorte, meioDia(ancora), dias);
   const total = days.reduce((sum, d) => sum + d.items.length, 0);
-  const base = isCompany ? "/empresa/atendimentos" : "/cuidador/atendimentos";
 
-  const quadro = isCompany ? rosterCaregivers(state, session?.companyId) : [];
+  const quadro = rosterCaregivers(state, session?.companyId);
   const nomeCuidador = cuidadorId
     ? state.caregivers.find((c) => c.id === cuidadorId)?.name
     : undefined;
@@ -159,7 +145,7 @@ export function SchedulePage() {
 
   return (
     <div className={PAGE_LIST}>
-      <h1 className="text-display">{titulo}</h1>
+      <h1 className="text-display">Escala</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">{resumo}</p>
 
       {/*
@@ -197,8 +183,8 @@ export function SchedulePage() {
             <button
               type="button"
               aria-label="Período anterior"
-              onClick={() => setAncora((a) => moverDias(a, -dias))}
-              className={SETA_CLASSE}
+              onClick={() => setAncora((a) => somarDias(a, -dias))}
+              className={SETA_PERIODO_CLASS}
             >
               <ChevronLeft size={16} aria-hidden="true" />
             </button>
@@ -220,8 +206,8 @@ export function SchedulePage() {
             <button
               type="button"
               aria-label="Próximo período"
-              onClick={() => setAncora((a) => moverDias(a, dias))}
-              className={SETA_CLASSE}
+              onClick={() => setAncora((a) => somarDias(a, dias))}
+              className={SETA_PERIODO_CLASS}
             >
               <ChevronRight size={16} aria-hidden="true" />
             </button>
@@ -243,29 +229,27 @@ export function SchedulePage() {
           </Button>
         </div>
 
-        {isCompany && (
-          /*
-            O filtro recua: `variant="filtro"` tira o branco e a borda de 1,5px do campo de
-            formulário. O rótulo visível saiu junto — ele empilhava 24px em cima do controle e
-            fazia um recorte de lista parecer um campo de cadastro no meio de uma faixa de
-            navegação. `aria-label` mantém o nome para quem lê por leitor de tela.
-          */
-          <div className="w-full sm:w-[13rem]">
-            <Select
-              variant="filtro"
-              aria-label="Filtrar a escala por cuidador"
-              value={cuidadorId}
-              onChange={(e) => setCuidadorId(e.target.value)}
-            >
-              <option value="">Todos do quadro</option>
-              {quadro.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        )}
+        {/*
+          O filtro recua: `variant="filtro"` tira o branco e a borda de 1,5px do campo de
+          formulário. O rótulo visível saiu junto — ele empilhava 24px em cima do controle e
+          fazia um recorte de lista parecer um campo de cadastro no meio de uma faixa de
+          navegação. `aria-label` mantém o nome para quem lê por leitor de tela.
+        */}
+        <div className="w-full sm:w-[13rem]">
+          <Select
+            variant="filtro"
+            aria-label="Filtrar a escala por cuidador"
+            value={cuidadorId}
+            onChange={(e) => setCuidadorId(e.target.value)}
+          >
+            <option value="">Todos do quadro</option>
+            {quadro.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
 
       <Tabs
@@ -309,11 +293,12 @@ export function SchedulePage() {
                   <AttendanceRow
                     key={a.id}
                     attendance={a}
-                    to={`${base}/${a.id}`}
+                    to={`/empresa/atendimentos/${a.id}`}
                     patientName={patient?.name ?? "Paciente"}
-                    /* A empresa precisa saber quem cobre o plantão; o cuidador é ele mesmo. */
-                    caregiverName={isCompany ? caregiver?.name : undefined}
-                    caregiverId={isCompany ? a.confirmedCaregiverId : undefined}
+                    /* Quem monta escala precisa saber quem cobre o plantão — é a coluna que
+                       responde se o dia está resolvido. */
+                    caregiverName={caregiver?.name}
+                    caregiverId={a.confirmedCaregiverId}
                     showDate={false}
                   />
                 );

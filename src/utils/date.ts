@@ -22,7 +22,66 @@ export function isoDateTime(days: number, time: string): string {
  * reler cada um. As funções abaixo são a única forma de escrever data neste produto.
  */
 
-const SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+/** Domingo primeiro, como a semana é impressa em calendário no Brasil. */
+export const DIAS_DA_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+/**
+ * Data local em ISO — `2026-08-25`.
+ *
+ * Nunca `toISOString()`: às 22h em Brasília o UTC já virou o dia seguinte, e a agenda passaria a
+ * chamar de "hoje" o plantão de amanhã. É a mesma conta que `todayISO()` faz em
+ * `services/attendances.ts`, e as duas precisam concordar.
+ */
+function local(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Soma (ou subtrai) dias a uma data ISO.
+ *
+ * **Ao meio-dia local, sempre.** `new Date("2026-08-25")` cai em 00:00Z, que em Brasília é 21:00
+ * do dia anterior; somar um dia a partir dali devolve o dia errado. Ao meio-dia sobram doze horas
+ * de folga para cada lado, e nenhum fuso do país chega perto disso.
+ */
+export function somarDias(iso: string, dias: number): string {
+  const d = new Date(`${iso}T12:00`);
+  d.setDate(d.getDate() + dias);
+  return local(d);
+}
+
+const MESES_LONGOS = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
+/** `2026-08` → `Agosto 2026`. O cabeçalho do calendário, onde o mês é o assunto e cabe por extenso. */
+export function rotuloMes(mes: string): string {
+  const [ano, m] = mes.split("-");
+  return `${MESES_LONGOS[Number(m) - 1]} ${ano}`;
+}
+
+/**
+ * Anda meses em `2026-08`, sem passar por data completa.
+ *
+ * `setMonth` sobre uma data qualquer do mês escorrega: 31 de março menos um mês vira 3 de março,
+ * porque fevereiro não tem 31. Ancorar no dia 1 é o que torna a conta previsível — e é por isso
+ * que o mês é representado como `AAAA-MM`, e não como uma data.
+ */
+export function moverMes(mes: string, meses: number): string {
+  const [ano, m] = mes.split("-").map(Number);
+  const d = new Date(ano, m - 1 + meses, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
 
 /** `2026-03-14` → `14/03`. A forma da coluna de registro, onde o ano é ruído. */
 export function diaMes(iso: string): string {
@@ -61,7 +120,7 @@ export function dataCompleta(iso: string): string {
 
 /** `2026-03-14` → `Ter`. Meio-dia fixo para a data não escorregar de fuso. */
 export function diaDaSemana(iso: string): string {
-  return SEMANA[new Date(`${iso}T12:00`).getDay()];
+  return DIAS_DA_SEMANA[new Date(`${iso}T12:00`).getDay()];
 }
 
 /**
@@ -72,11 +131,6 @@ export function diaDaSemana(iso: string): string {
  * calendário mental.
  */
 export function rotuloDoDia(iso: string, hoje = new Date()): string {
-  /* Data **local**, nunca `toISOString()`: às 22h em Brasília o UTC já virou o dia seguinte, e
-     "Hoje" apareceria em cima do plantão de amanhã. É a mesma conta que `todayISO()` faz em
-     `services/attendances.ts`, e as duas precisam concordar. */
-  const local = (d: Date) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   if (iso === local(hoje)) return "Hoje";
   if (iso === local(new Date(hoje.getTime() + DAY_MS))) return "Amanhã";
   return `${diaDaSemana(iso)}, ${diaMes(iso)}`;

@@ -929,9 +929,21 @@ Conferir agenda de empresa e cuidador após confirmar um atendimento de teste.
 ```text
 [x] Concluída
 ```
-> Nota de execução (pós-Revisão 4): `SchedulePage` (`src/pages/shared/`) serve os dois perfis —
+> Nota de execução (pós-Revisão 4): `SchedulePage` (`src/pages/shared/`) servia os dois perfis —
 > escala da empresa em `/empresa/agenda` e agenda do cuidador em `/cuidador/agenda` — com
 > alternância dia/semana sobre `scheduleDays` e o status real de cada atendimento no crachá.
+>
+> **Atualização (Revisão 6):** as duas telas se separaram, porque as perguntas divergiram. A
+> empresa varre dezenas de plantões por semana e precisa de lista longa com filtro por pessoa:
+> continua em `CompanySchedulePage` (`src/pages/company/SchedulePage.tsx`), sem mudança de
+> comportamento. O cuidador tem poucos plantões espalhados no mês e precisa enxergar a **forma do
+> mês** — onde estão os buracos — para marcar médico ou decidir sobre um convite; lista de sete
+> dias não responde isso. `CaregiverSchedulePage` (`src/pages/caregiver/SchedulePage.tsx`) virou
+> calendário: grade do mês (`<Calendario>`) com um ponto por plantão confirmado no dia, e os
+> registros do dia escolhido logo abaixo. O ponto marca **presença, não estado** — numa célula de
+> 44px não cabe rótulo ao lado, e cor sozinha é o que a regra 3 do design system proíbe; o estado
+> continua sendo lido por extenso no registro de baixo. Convite pendente não entra na grade:
+> compromisso e proposta não se misturam no mesmo calendário.
 > `AttendanceDetailPage` (`src/pages/shared/`) é a tela 11 e concentra o que as Etapas 12–15
 > acrescentam, adaptando-se ao perfil de quem abriu: a empresa vê tudo do atendimento; o cuidador
 > vê o mesmo mais os botões de check-in/out e o registro, e só enxerga o endereço completo se for
