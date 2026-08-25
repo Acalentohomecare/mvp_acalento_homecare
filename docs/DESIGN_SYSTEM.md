@@ -2533,8 +2533,10 @@ escala da semana que vem — que é, literalmente, o trabalho dela. No oitavo di
   com as setas. Passou a **Dia / Semana**, e as contagens acompanham a âncora — aba que promete o
   que existe noutra semana é pior do que aba sem contagem nenhuma.
 - **Nasceu o filtro por cuidador** (só do lado empresa; o cuidador já vê apenas o que é dele).
-  *"Qual é a escala da Sandra?"* não tinha resposta em tela nenhuma: a busca de Atendimentos casa
-  só nome de paciente, e o rótulo do campo diz isso. É pergunta de planejamento, não de registro.
+  Relatórios já filtrava por cuidador, mas responde outra pergunta — quantas horas ela fez e quanto
+  custou num período, retrospectivo e somado, sem dia. Atendimentos não filtra por cuidador de jeito
+  nenhum: a busca casa só nome de paciente. *"Em que dias a Sandra está escalada?"* é a pergunta de
+  quem monta escala, e não tinha tela.
 - **O dia vazio virou resultado.** Sob filtro, "Nenhum atendimento neste dia" lê como
   *"Sandra está livre neste dia"* — que é como se responde "quem eu escalo no sábado".
 

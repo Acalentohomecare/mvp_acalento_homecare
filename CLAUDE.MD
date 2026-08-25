@@ -397,9 +397,7 @@ realizar check-in/check-out simulado;
 
 registrar atendimento;
 
-visualizar histórico;
-
-visualizar as avaliações que recebeu.
+visualizar histórico.
 
 Cuidador profissional
 
@@ -477,8 +475,6 @@ Agenda;
 Atendimentos;
 
 Mensagens;
-
-Avaliações recebidas;
 
 Perfil;
 
@@ -1105,7 +1101,12 @@ Depois do check-out, o registro deve ser visualmente tratado como encerrado.
 Após um atendimento concluído, a Empresa pode avaliar o cuidador.
 
 A avaliação tem uma única direção: empresa → cuidador. O cuidador NÃO avalia a empresa — não existe
-esse fluxo, essa tela nem esse campo. Ao cuidador cabe visualizar as avaliações que recebeu.
+esse fluxo, essa tela nem esse campo.
+
+Também não existe "avaliações recebidas" como listagem: nem tela para o cuidador, nem seção de
+comentários na ficha que a empresa abre. A avaliação alimenta a média do cuidador, e é a média que
+aparece — na ficha e na busca, respeitando a regra das três avaliações. O comentário fica no
+atendimento que o originou, e não é reunido em lugar nenhum.
 
 Permitir:
 

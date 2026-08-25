@@ -599,7 +599,9 @@ Abrir cuidadores das três categorias e confirmar diferenças de campos exibidos
 > por nome/bairro/especialidade e filtro por categoria, estado vazio tratado. **Tela 07**
 > (`src/pages/company/CaregiverProfilePage.tsx`, rota `/empresa/cuidadores/:caregiverId`): perfil
 > completo — apresentação, experiência, valor, média, registro no conselho + status,
-> especialidades, região, disponibilidade, atividades e as avaliações recebidas com comentário.
+> especialidades, região, disponibilidade e atividades. *(A seção "Avaliações recebidas", com a
+> lista de comentários, existiu aqui e foi removida depois — ver CLAUDE.md §30: a avaliação alimenta
+> a média, e a média é o que a ficha mostra.)*
 > **Tela 17** (`src/pages/caregiver/ProfilePage.tsx`, rota `/cuidador/perfil`): o cuidador edita a
 > própria apresentação, experiência, cidade/bairros, valor, disponibilidade (dias/turnos) e
 > atividades; técnico/superior ganham também registro no conselho e especialidades.

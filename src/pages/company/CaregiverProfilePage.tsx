@@ -16,7 +16,6 @@ import {
 import {
   MIN_EVALUATIONS_FOR_PUBLIC_AVERAGE,
   activityNames,
-  caregiverEvaluations,
   caregiverRating,
   isFavorite,
   isVerified,
@@ -89,7 +88,6 @@ export function CompanyCaregiverProfilePage() {
   const status = rosterStatus(state, companyId, caregiver.id);
   const inRoster = status === "approved";
   const rating = caregiverRating(state.evaluations, caregiver.id);
-  const evaluations = caregiverEvaluations(state.evaluations, caregiver.id);
   const history = caregiverHistory(state, caregiver.id, session?.companyId ?? "");
   const favorite = isFavorite(state, session?.companyId, caregiver.id);
   const needsCouncil = requiresCouncil(caregiver.category);
@@ -300,31 +298,6 @@ export function CompanyCaregiverProfilePage() {
           )}
         </Section>
 
-        <Section title={`Avaliações recebidas (${evaluations.length})`}>
-          {evaluations.length === 0 ? (
-            <p className="text-note text-ink-subtle">Ainda sem avaliações.</p>
-          ) : (
-            <div className="flex flex-col gap-2.5">
-              {evaluations.map((e) => (
-                <Card key={e.id}>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <Star
-                        key={i}
-                        size={12}
-                        className={i < e.rating ? "fill-rating text-rating" : "text-linha"}
-                      />
-                    ))}
-                    <span className="ml-1 numero text-meta text-ink-subtle">
-                      {new Date(e.createdAt).toLocaleDateString("pt-BR")}
-                    </span>
-                  </div>
-                  <p className="prosa mt-1.5 text-body text-ink-muted">{e.comment}</p>
-                </Card>
-              ))}
-            </div>
-          )}
-        </Section>
         </div>
         </div>
       </div>

@@ -87,10 +87,15 @@ export function SchedulePage() {
   const [ancora, setAncora] = useState(() => todayISO());
 
   /*
-   * O filtro que nenhuma tela do produto tinha. A busca de Atendimentos casa só nome de paciente
-   * (o rótulo do campo diz "Paciente"), então "qual é a escala da Sandra?" não tinha resposta em
-   * lugar nenhum — e ela é pergunta de planejamento, não de registro: serve para ver quem está
-   * sobrecarregado e, com os dias vazios à mostra, quem está livre no sábado.
+   * O recorte por pessoa que faltava **do lado do planejamento**.
+   *
+   * Relatórios já filtra por cuidador, mas responde outra pergunta: quantas horas ela fez e quanto
+   * custou num período — retrospectivo, somado, sem dia. Atendimentos não filtra por cuidador de
+   * jeito nenhum: a busca casa só nome de paciente, e o rótulo do campo diz isso.
+   *
+   * O que nenhuma das duas responde é *em que dias a Sandra está escalada*, que é a pergunta de
+   * quem monta escala: serve para ver quem está sobrecarregado e, com os dias vazios à mostra,
+   * quem está livre no sábado.
    *
    * Só do lado empresa: o cuidador já enxerga apenas os próprios plantões.
    */
