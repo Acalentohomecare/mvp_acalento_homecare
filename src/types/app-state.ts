@@ -4,7 +4,6 @@ import type { Attendance } from "./attendance";
 import type { AuditLogEntry } from "./audit-log";
 import type { Caregiver } from "./caregiver";
 import type { Company } from "./company";
-import type { DashboardAlert } from "./dashboard";
 import type { Document } from "./document";
 import type { Evaluation } from "./evaluation";
 import type { Invitation } from "./invitation";
@@ -31,7 +30,6 @@ export interface AppState {
   messages: Message[];
   documents: Document[];
   auditLog: AuditLogEntry[];
-  dashboardAlerts: DashboardAlert[];
   records: AttendanceRecord[];
   /** Atividades que a empresa cadastrou além do catálogo padrão (`constants/activities.ts`). */
   customActivities: Activity[];

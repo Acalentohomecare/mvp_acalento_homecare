@@ -2,7 +2,7 @@ import type { Attendance } from "../types";
 import { isoDate, isoDateTime } from "../utils/date";
 
 /**
- * 15 atendimentos cobrindo todos os status do ciclo de vida (CLAUDE.md §13/§23), distribuídos
+ * 19 atendimentos cobrindo todos os status do ciclo de vida (CLAUDE.md §13/§23), distribuídos
  * entre as duas empresas para provar isolamento de dados (empresa só enxerga seus próprios dados).
  *
  * `requiredCategory` é escolhido por quem publica o atendimento — não é mais derivado de
@@ -319,5 +319,112 @@ export const ATTENDANCES: Attendance[] = [
     status: "open",
     openApplications: false,
     createdAt: isoDateTime(0, "07:48"),
+  },
+  /*
+   * at16–at19 — o histórico de Sandra (cg1), a conta de cuidador da demo.
+   *
+   * Ela tinha exatamente dois atendimentos: um amanhã e um de dez dias atrás. Qualquer tela de
+   * histórico ou de resumo abria com uma linha só e parecia uma conta recém-criada, não um
+   * profissional em atividade.
+   *
+   * Os quatro cobrem três coisas de propósito:
+   *   - `at16` fica em `completed` sem avaliação — dá à empresa um plantão para avaliar ao vivo
+   *     na apresentação, em vez de todos já vierem fechados.
+   *   - `at18` é da co2. Sandra está aprovada nas duas empresas (`caregiver-links`), então o
+   *     histórico dela cruza empresas — enquanto cada empresa continua vendo só o que é seu.
+   *   - `at19` é do mês anterior. É ele que prova que "concluído no mês", no Início do cuidador,
+   *     é um recorte de período e não a soma de tudo.
+   */
+  {
+    id: "at16",
+    companyId: "co1",
+    patientId: "pt1",
+    type: "shift12",
+    neighborhood: "Centro",
+    street: "Rua das Acácias",
+    number: "245",
+    startDate: isoDate(-3),
+    startTime: "07:00",
+    durationHours: 12,
+    recurring: false,
+    activityIds: ["higiene", "alimentacao", "companhia"],
+    requiredCategory: "informal",
+    value: 180,
+    status: "completed",
+    openApplications: false,
+    confirmedCaregiverId: "cg1",
+    checkinAt: isoDateTime(-3, "07:04"),
+    checkinLocation: "Centro (simulado)",
+    checkoutAt: isoDateTime(-3, "19:02"),
+    createdAt: isoDateTime(-6, "09:20"),
+  },
+  {
+    id: "at17",
+    companyId: "co1",
+    patientId: "pt3",
+    type: "shift12",
+    neighborhood: "Centro",
+    street: "Rua dos Ipês",
+    number: "102",
+    startDate: isoDate(-7),
+    startTime: "07:00",
+    durationHours: 12,
+    recurring: false,
+    activityIds: ["higiene", "alimentacao", "locomocao"],
+    requiredCategory: "informal",
+    value: 180,
+    status: "evaluated",
+    openApplications: false,
+    confirmedCaregiverId: "cg1",
+    checkinAt: isoDateTime(-7, "06:58"),
+    checkinLocation: "Centro (simulado)",
+    checkoutAt: isoDateTime(-7, "19:10"),
+    createdAt: isoDateTime(-11, "14:35"),
+  },
+  {
+    id: "at18",
+    companyId: "co2",
+    patientId: "pt7",
+    type: "shift12",
+    neighborhood: "Zona Norte",
+    street: "Rua das Camélias",
+    number: "300",
+    startDate: isoDate(-17),
+    startTime: "07:00",
+    durationHours: 12,
+    recurring: false,
+    activityIds: ["higiene", "alimentacao", "companhia"],
+    requiredCategory: "informal",
+    value: 190,
+    status: "evaluated",
+    openApplications: false,
+    confirmedCaregiverId: "cg1",
+    checkinAt: isoDateTime(-17, "07:06"),
+    checkinLocation: "Zona Norte (simulado)",
+    checkoutAt: isoDateTime(-17, "19:00"),
+    createdAt: isoDateTime(-21, "10:12"),
+  },
+  {
+    id: "at19",
+    companyId: "co1",
+    patientId: "pt1",
+    type: "shift12",
+    neighborhood: "Centro",
+    street: "Rua das Acácias",
+    number: "245",
+    startDate: isoDate(-38),
+    startTime: "07:00",
+    durationHours: 12,
+    recurring: false,
+    activityIds: ["higiene", "alimentacao", "companhia"],
+    requiredCategory: "informal",
+    value: 175,
+    status: "evaluated",
+    openApplications: false,
+    confirmedCaregiverId: "cg1",
+    checkinAt: isoDateTime(-38, "07:01"),
+    checkinLocation: "Centro (simulado)",
+    checkoutAt: isoDateTime(-38, "19:04"),
+    createdAt: isoDateTime(-42, "08:45"),
   },
 ];

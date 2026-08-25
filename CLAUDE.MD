@@ -399,7 +399,7 @@ registrar atendimento;
 
 visualizar histórico;
 
-avaliar a empresa.
+visualizar as avaliações que recebeu.
 
 Cuidador profissional
 
@@ -478,7 +478,7 @@ Atendimentos;
 
 Mensagens;
 
-Avaliações;
+Avaliações recebidas;
 
 Perfil;
 
@@ -561,7 +561,7 @@ vínculos de quadro (empresa ↔ cuidador) cobrindo aprovado, em análise, recus
 
 8 pacientes;
 
-15 atendimentos;
+19 atendimentos;
 
 10+ avaliações;
 
@@ -798,11 +798,16 @@ convites pendentes;
 
 agenda;
 
-horas realizadas;
-
-avaliação;
+ganhos: valor a receber (plantões confirmados) e valor concluído no mês;
 
 próximos compromissos.
+
+Não mostrar soma de horas nem a nota do cuidador. A soma de horas era vitalícia e sem período e,
+com plantões padronizados de 12h/24h, repetia a contagem de atendimentos em outra unidade. A nota
+é leitura de ficha e de perfil, não manchete de Início.
+
+O valor é relatório, não pagamento (§36): soma o valor acordado em cada plantão, sem cobrança,
+repasse nem status de pagamento.
 
 21. Pacientes
 
@@ -1097,11 +1102,10 @@ Depois do check-out, o registro deve ser visualmente tratado como encerrado.
 
 30. Avaliações
 
-Após um atendimento concluído:
+Após um atendimento concluído, a Empresa pode avaliar o cuidador.
 
-Empresa pode avaliar cuidador.
-
-Cuidador pode avaliar empresa.
+A avaliação tem uma única direção: empresa → cuidador. O cuidador NÃO avalia a empresa — não existe
+esse fluxo, essa tela nem esse campo. Ao cuidador cabe visualizar as avaliações que recebeu.
 
 Permitir:
 

@@ -89,11 +89,18 @@ A arte tem três tintas, e elas formam uma escala:
 | Cor da marca | Token | Hex | Onde |
 |---|---|---|---|
 | Teal profundo | `--brand` | `#175260` | Elos escuros e hastes. É também `--accent`. |
-| Teal médio | `--brand-mid` | `#236D77` | O núcleo do símbolo. |
-| Aqua | `--brand-aqua` | `#88C3C9` | Elos claros. Só preenche forma. |
+| Teal médio | — | `#236D77` | O núcleo do símbolo. **Não é token.** |
+| Aqua | — | `#88C3C9` | Elos claros. Só preenche forma. **Não é token.** |
 | Aqua de texto | `--brand-aqua-ink` | `#2A787F` | O aqua rebaixado até aguentar letra (5,1:1 sobre branco). |
 
 Os valores foram amostrados pixel a pixel do arquivo (mediana por região), não estimados.
+
+**Só dois dos quatro viram token, e é de propósito.** O teal médio e o aqua ficam nesta tabela
+como registro da amostragem e não descem para o `@theme`. O símbolo é um JPEG exibido direto:
+essas duas tintas saem do arquivo, nunca do CSS, então um token delas não pintaria nada. O que
+ele faria é gerar `bg-brand-mid` e `text-brand-aqua` como utilidades disponíveis para quem
+não leu esta página — e `text-brand-aqua` sobre branco é 1,96:1. Token que só existe para ser
+usado por engano é armadilha, não documentação.
 
 ### A matiz gira, e é isso que segura a escala
 
@@ -118,8 +125,16 @@ precisar manter duas versões da mesma cor:
   claro demais para qualquer papel de interface, e é justamente por isso que a marca se destaca de
   tudo o que está em volta dela.
 
-`--brand-aqua` **nunca carrega texto**. Onde ele precisa virar palavra — o "Gestão" do lockup —
-quem entra é `--brand-aqua-ink`.
+O aqua **nunca carrega texto**. Onde ele precisa virar palavra — o "Gestão" do lockup — quem entra
+é `--brand-aqua-ink`.
+
+> **A margem mais fina do produto está aqui.** `--brand-aqua-ink` sobre `--surface-nav` dá
+> 4,55:1, e o lockup `inline` renderiza o nome a 13,8px semibold — abaixo do limiar de texto
+> grande, então o piso exigido é 4,5:1. Passa por 0,05. Duas restrições saem disso: o lockup
+> `inline` **não encolhe abaixo de `size={30}`**, e a marca **não vai para fundo mais escuro que
+> `--surface-nav`**. Escurecer o token resolveria o número e estragaria o lockup: ele
+> aproximaria o aqua-ink do `--brand` (ΔL cairia de 0,121 para 0,104) e as duas palavras
+> deixariam de se separar, que é a única razão de a segunda ter cor própria.
 
 ### O símbolo vai sem fundo, em lugar nenhum
 
@@ -192,7 +207,7 @@ mesma família do ambiente em vez de um adesivo colado sobre cinza neutro.
 | `--color-surface-sunken` | `bg-surface-sunken` | `#E8EEEF` | Faixa de apoio, contador, cabeçalho de tabela. |
 | `--color-surface-nav` | `bg-surface-nav` | `#EDF2F3` | Cromo de navegação: barra lateral, cabeçalho do celular, barra inferior. |
 | `--color-linha` | `border-linha` | `#D9E1E2` | Divisor e borda de card. **Não serve para delimitar controle.** |
-| `--color-linha-strong` | `border-linha-strong` | `#838D8E` | Borda de campo e de controle — 3,4:1 sobre branco. |
+| `--color-linha-strong` | `border-linha-strong` | `#7F898A` | Borda de campo e de controle — 3,1:1 na pior superfície. |
 
 **Hierarquia de texto por token** — não invente cinzas, e **nunca** faça degrau com opacidade:
 
@@ -222,14 +237,15 @@ mesma família do ambiente em vez de um adesivo colado sobre cinza neutro.
 | `--color-accent-ink` | `text-accent-ink` | `#FFFFFF` | Texto e ícone **sobre** `--accent`. |
 | `--color-accent-ink-muted` | `text-accent-ink-muted` | `#B8D2D5` | Apoio **sobre** `--accent` (carimbo de hora na bolha de mensagem). |
 | `--color-accent-soft` | `bg-accent-soft` | `#DFF1F3` | Fundo tonal: nav ativa, avatar, botão `secondary`, véu da entrada. |
-| `--color-rating` | `fill-rating` `text-rating` | `#B1812C` | **Só** preenchimento de estrela de avaliação. |
+| `--color-rating` | `fill-rating` `text-rating` | `#AE7F29` | **Só** preenchimento de estrela de avaliação. |
 
 > **`--accent` é `--brand`, e é o único degrau da marca que a interface tem direito de usar.** O
 > teal médio e o aqua ficam reservados ao símbolo ([seção 1](#1-marca)). Se a interface também os
 > usasse, o logo perderia o que tem de próprio e viraria mais um elemento da tela.
 
 > `--rating` não carrega letra, mas **carrega informação**: estrela cheia é o que diz a nota. Por
-> isso ele responde pelos 3:1 da WCAG 1.4.11 e não pelos 4,5:1 de texto — 3,5:1 sobre branco.
+> isso ele responde pelos 3:1 da WCAG 1.4.11 e não pelos 4,5:1 de texto — e responde na **pior**
+> superfície clara do produto, não sobre branco: 3,6:1 no branco, 3,1:1 sobre `--surface-sunken`.
 > Estrela na cor da marca lia como botão; a saída é o ouro, não a marca. O ouro é também o único
 > complementar do sistema: contra um ambiente inteiro em teal frio, o âmbar quente é o par que
 > fecha a roda em vez de brigar com ela.
@@ -433,6 +449,12 @@ Todo par base/`-soft` acima fecha **4,5:1 ou mais** do texto base sobre o própr
 o mais apertado é `cat-informal`, em 4,85:1. Se você criar um par novo, confira antes: não é
 opcional. É por isso que os tons base são mais escuros do que "a cor pura": `#79520A` é o âmbar
 que sobrevive a essa conta, `#E8A33D` não era.
+
+**Cor que não é texto tem o mesmo rigor, com piso diferente.** `--linha-strong` e `--rating`
+respondem pelos 3:1 da WCAG 1.4.11, e são medidos como os tokens de texto: contra a **pior**
+superfície clara do produto (`--surface-sunken`), nunca contra o branco. Um token que passa só
+no branco fica correto por convenção — depende de ninguém colocar aquele elemento numa faixa de
+apoio — e convenção não sobrevive ao próximo call site.
 
 ### Onde as cores de estado moram
 
@@ -981,9 +1003,16 @@ formulário curto, um bloco de dados —, use `<Painel>`.
 **Toda seção de lista tem teto.** A seção não dobra nem esconde a si mesma — não existe `<Secao>`
 recolhível, porque esconder atrás de um clique o que a pessoa abriu a tela para ver é trabalho a
 mais, não densidade. O que ela tem é **limite de registros + saída**: N linhas no corpo e um link
-no cabeçalho para a tela onde a lista inteira mora, já filtrada. No Início são 4 em "Próximos" e
-**3 em "Em aberto"** — menos, porque a linha do plantão aberto tem cinco camadas contra três, e o
-teto é de altura de tela, não de contagem.
+no cabeçalho para a tela onde a lista inteira mora, já filtrada. No Início são 4 em "Atendimentos
+de hoje", 4 em "Próximos" e **3 em "Em aberto"** — menos na terceira, porque a linha do plantão
+aberto tem cinco camadas contra três, e o teto é de altura de tela, não de contagem.
+
+**Teto sem exceção, inclusive na seção mais importante.** "Atendimentos de hoje" nasceu sem limite
+na revisão 15, junto com o `<Secao>`, e a razão de ninguém notar é que o cenário de demonstração
+tem um plantão no dia. A seção
+que abre a tela é justamente a que não pode crescer sem limite: doze plantões num dia empurram
+"Em aberto" — onde estão as ações — para fora de qualquer relance. Se a seção merece estar no topo,
+ela merece um teto; o que não cabe vai para a tela dedicada, e a saída no cabeçalho diz para onde.
 
 Sem teto, a seção mais movimentada engole as outras e o resumo vira lista. A regra é: se existe
 uma tela dedicada àquele recorte, o excedente vai para lá (ali há busca, período e a linha densa);
@@ -1131,7 +1160,7 @@ Safari do iPhone dá zoom sozinho ao focar o campo**, o formulário sai do enqua
 precisa fechar o zoom com dois dedos a cada campo. A altura resultante do campo é ~44px, o que
 resolve o alvo de toque no mesmo movimento.
 
-A borda usa `--linha-strong` (`#838D8E`) e não `--linha`, e tem 1,5px. As duas coisas resolvem
+A borda usa `--linha-strong` (`#7F898A`) e não `--linha`, e tem 1,5px. As duas coisas resolvem
 problemas diferentes: a espessura é para a tela do celular sob luz ambiente forte; o token é para
 a WCAG 1.4.11, que cobra 3:1 de qualquer coisa que delimite um controle. Num campo vazio a borda
 é a única coisa que diz onde o campo começa — com `--linha` ela ficava em 1,27:1, e engrossar
@@ -2482,6 +2511,212 @@ todos os casos — `min-h-[60dvh]` e `min-h-[100dvh]` no `<TelaCarregando>`, `ma
 ---
 
 ## 14. Histórico de decisões
+
+### Revisão 21 — a escala passou a andar (agosto/2026)
+
+**O problema, e o que ele não era.** A Escala tinha dois recortes — "Hoje" e "7 dias" — e nenhum
+filtro. A leitura fácil disso é "faltam filtros e um histórico". É a leitura errada: histórico com
+busca, estado e intervalo de datas **já existe**, é a tela de Atendimentos, dos dois lados do
+produto, e repeti-lo aqui faria uma tela só tentar ser as duas — matando o cabeçalho de dia
+grudado, que é a única coisa que a Escala faz e a lista não.
+
+O defeito real era outro e maior: `scheduleDays(list, new Date(), N)`. A âncora era **hoje**,
+sempre, e a leitura ia só para frente. Isso significa que a coordenadora não conseguia montar a
+escala da semana que vem — que é, literalmente, o trabalho dela. No oitavo dia a tela acabava.
+
+**O que mudou.**
+
+- **A âncora virou estado.** `‹ Hoje ›` no cabeçalho; as setas andam pelo tamanho do recorte
+  corrente (um dia ou sete). Andar para trás vem de graça, e **andar não é filtrar**: a agenda
+  continua mostrando todos os dias do recorte, um a um, inclusive os vazios.
+- **As abas viraram zoom.** "Hoje / 7 dias" era um seletor de período que agora seria redundante
+  com as setas. Passou a **Dia / Semana**, e as contagens acompanham a âncora — aba que promete o
+  que existe noutra semana é pior do que aba sem contagem nenhuma.
+- **Nasceu o filtro por cuidador** (só do lado empresa; o cuidador já vê apenas o que é dele).
+  *"Qual é a escala da Sandra?"* não tinha resposta em tela nenhuma: a busca de Atendimentos casa
+  só nome de paciente, e o rótulo do campo diz isso. É pergunta de planejamento, não de registro.
+- **O dia vazio virou resultado.** Sob filtro, "Nenhum atendimento neste dia" lê como
+  *"Sandra está livre neste dia"* — que é como se responde "quem eu escalo no sábado".
+
+**Onde os controles ficam, e por quê.** Cuidador e navegação numa linha acima; `<Tabs>` colado na
+lista. As abas **não** entram naquela linha: `<Tabs>` é full-bleed no celular (`-mx-6 … px-6`) e a
+borda inferior corre até a margem da página — é ela que amarra a fila ao conteúdo abaixo. Como item
+de um flex ele encolhe para o próprio conteúdo e a borda vira um risco solto no meio da tela. A
+ordem é a mesma de Atendimentos: controles, abas, lista.
+
+**Dois detalhes que não são detalhe.**
+
+- **Meio-dia, nunca meia-noite.** `scheduleDays` deriva cada dia com `setDate`/`getDate`; uma data
+  criada à meia-noite escorrega de fuso e a semana inteira anda um dia. Mesma armadilha que
+  `rotuloDoDia` e `diaDaSemana` já evitavam do outro lado.
+- **O intervalo deixou de ser técnico.** `01/09 – 07/09` diz exatamente o mesmo que `1–7 Set` e lê
+  pior: dez algarismos e três barras para uma informação que o olho quer pegar de relance, com o mês
+  repetido obrigando a conferir se os dois números são iguais. Nasceu `intervaloCurto` em
+  `utils/date.ts` — mês uma vez só, no fim, dia sem zero à esquerda (zero à esquerda alinha coluna,
+  e rótulo solto não é coluna) e travessão que muda com o caso: `25–31 Ago` sem espaço dentro do mês
+  (o par lê como uma unidade), `29 Ago – 4 Set` com espaço entre meses (lê como duas datas, que é o
+  que são).
+- **`tabular-nums`, e não `.numero`.** O algarismo de mesma largura é o que impede o rótulo de
+  respirar quando "1–7 Set" vira "25–31 Ago". Mas o utilitário completo traz peso 500 e tracking
+  apertado, e aqui o peso é 600 — o rótulo é o foco do grupo — e metade do texto é palavra. Largura
+  mínima e `whitespace-nowrap` completam: sem as duas, as setas dançam quando o texto troca.
+
+**O grupo de período: alvo de 44px, desenho de 24px.** As setas usam `size-11` com `-mx-2.5` — a
+técnica da [seção 11](#11-mobile-first--regras-transversais), a mesma do fechar do `<Modal>`: **aumenta a área, não o
+desenho.** Sem ela a escolha é entre uma seta discreta que o polegar não acerta e um botão
+emoldurado que rouba a atenção da data. Nada de `variant="ghost"` aqui: dois retângulos brancos
+cercando o rótulo transformam o grupo em três caixas, que é o oposto do que ele deve ser. No
+ponteiro **as duas medidas encolhem juntas** (`size-8` / `-mx-1`) — a margem de 10px foi calculada
+contra 44px e sobre 32px comeria mais da metade do botão.
+
+O que agrupa os elementos não é moldura nem fundo: **é o vão, e ele conta a hierarquia.** Zero
+dentro do grupo de setas, 8px até o "Hoje" (outra ação, mesmo assunto), 20px até o filtro (outro
+assunto). Vão uniforme entre os três faria três controles soltos. A hierarquia dentro do grupo é só
+peso e tinta: data em 600 e `--ink`, setas em `--ink-subtle`, "Hoje" em `secondary`.
+
+**A largura mínima do rótulo acompanha o recorte.** Ela existe para as setas não dançarem quando o
+texto troca, mas dimensionada para o rótulo mais longo (`7rem`, o suficiente para "29 Ago – 4 Set")
+ela afastava as setas em mais de 20px no rótulo mais curto — as setas ficavam visivelmente soltas, e
+o piso que deveria estabilizar virou a causa. Agora são dois pisos: `5rem` na semana ("25–31 Ago"),
+`3.5rem` no dia ("Hoje"). Cada um fica logo abaixo do rótulo típico do seu recorte, então segura o
+pior caso sem inflar o comum.
+
+**"Hoje" não é `disabled`.** Nascia desabilitado — a tela abre com a âncora em hoje, ou seja, o
+estado normal do botão era o apagado, e `disabled:opacity-45` sobre um tom já claro lia como
+controle quebrado. Voltar para hoje estando em hoje não é erro nem operação inválida: é um clique
+que não muda nada. `disabled` é para o que **não pode** acontecer, não para o que não tem efeito.
+
+### `<Select variant="filtro">` — o recorte que não é campo
+
+O filtro de cuidador dividia a faixa com a navegação usando o visual do campo de formulário: branco,
+borda de 1,5px em `--linha-strong`, 44px em qualquer ponteiro, rótulo empilhado em cima. Numa faixa
+cujo assunto é *que período estou olhando*, ele chamava mais atenção que a data — e um recorte de
+lista parecia um campo de cadastro.
+
+| | `campo` | `filtro` |
+|---|---|---|
+| Borda | 1,5px `--linha-strong` | **1px `--linha`** |
+| Fundo | `--surface-raised` (branco) | **`--surface-sunken`** |
+| Altura | `min-h-11` sempre | `min-h-11`, **`pointer-fine:min-h-8`** (32px) |
+| Corpo | `text-body` (16px) sempre | `text-body`, **`pointer-fine:text-meta`** (13px) |
+| Respiro lateral | `px-3` | **`px-3.5`** |
+| Seta | 16px, `right-3` | **14px, `right-2.5`** |
+| Rótulo | visível | `aria-label` |
+
+Quatro coisas que a tabela não diz:
+
+- **A borda é a única decisão daqui que cobra um preço, e ele fica registrado.** `--linha` sobre
+  `--surface-sunken` fica perto de 1,1:1, abaixo dos 3:1 que a WCAG 1.4.11 pede para o limite de um
+  controle. O que sustenta a troca é que o argumento que fixou `--linha-strong` no campo é textual e
+  não se aplica: *"num campo vazio a borda é a única coisa que diz onde o campo começa"*. Este
+  select **nunca está vazio** — mostra "Todos do quadro" ou um nome, com a seta ao lado anunciando
+  que abre uma lista. A borda deixou de ser o único sinal, e por isso pode recuar a divisor. Sob a
+  leitura estrita do critério, a volta é uma palavra: `border-linha-strong`, e o resto da variante
+  fica de pé.
+- **13px, e não 14px.** A escala tem 12, 13, 15 e 16 — não tem 14. Inventar um degrau fora dela para
+  economizar um pixel é como escala vira sugestão. E `text-meta`, não `text-label`: os dois são
+  13px, mas o `label` traz peso 500, o mesmo do "Hoje" ao lado. Filtro com o peso do botão desfaz a
+  hierarquia que a faixa foi arrumada para ter.
+- **`text-body` fica no toque.** Abaixo de 16px o Safari do iPhone dá zoom sozinho ao focar o
+  controle. O encolhimento é todo do lado do ponteiro.
+- **A seta acompanha o porte.** É a proporção que mais denuncia um select encolhido: 16px dentro de
+  uma caixa de 32px ocupa metade da altura e devolve ao filtro o peso que a variante existe para
+  tirar. E encosta mais na borda, porque num controle baixo o recuo de 12px abre um vão que parece
+  esquecimento.
+
+O respiro horizontal **aumenta enquanto a caixa encolhe**. Aperto vertical com folga lateral lê como
+refinamento; aperto nos dois eixos lê como controle espremido.
+
+**A largura larga não é defeito.** No celular ela é quase total de propósito — área de toque —, e no
+ponteiro os 13rem dão espaço para o nome mais longo do quadro sem truncar. O que fazia o controle
+pesar era o interior, não a caixa.
+
+
+### Revisão 20 — Pendências parou de aceitar recado (agosto/2026)
+
+**O problema.** A coluna de Pendências do Início abria a demonstração com seis linhas, e duas
+delas eram avisos escritos à mão no mock: *"revisão trimestral de contratos de cuidadores vence
+nesta semana"* e *"Paulo Ricci está com o registro no conselho pendente de conferência"*. Não
+derivavam de dado nenhum, não tinham como sair da lista — não existe tela onde se resolva uma
+revisão trimestral de contratos — e levavam, as duas, para `/empresa/atendimentos`, que não é o
+lugar de nenhuma das duas coisas.
+
+**Por que isso custa caro justo aqui.** A revisão 14 fez a cor desta lista significar gravidade e
+fez a ordem acompanhar a cor. Uma coluna que mistura *"check-in pendente"* com lembrete
+administrativo desfaz as duas coisas de uma vez: metade das linhas nunca vai embora, e uma lista
+que não esvazia é uma lista que se aprende a não ler. No cenário inicial o efeito era literal —
+`pendingCheckins` volta vazio (os três plantões `confirmed` do seed começam amanhã e depois), então
+o nível crítico nunca acendia e os dois recados eram um terço da coluna.
+
+**A correção.** A coleção `DashboardAlert` saiu inteira: mock, tipo, campo do `AppState` e a
+leitura na tela. Pendências ficou só com o que nasce do estado e tem para onde levar — fila do
+quadro, check-in atrasado, candidatura sem resposta, rascunho parado. No cenário inicial a coluna
+caiu de seis linhas para quatro, e com isso some também o *"mais 1 pendência"*, que era um
+revelador escondendo uma única linha.
+
+**Não houve migração de `localStorage`.** `loadAppState` mescla o salvo por cima do seed, e um
+estado antigo que ainda carregue `dashboardAlerts` apenas traz uma chave que ninguém mais lê. Sem
+`STORAGE_KEY` novo: subir a versão descartaria o progresso de uma demonstração em andamento para
+resolver um campo inerte.
+
+**O que continua valendo.** O teto de cinco linhas com "mais N" ([seção 7](#7-componentes-base))
+fica: ele existe para o dia de operação carregada, não para o cenário inicial. E o `<Painel variant="quieto">`
+fica: a coluna encolheu, não mudou de papel.
+
+**Na mesma passagem, "Atendimentos de hoje" ganhou teto.** Foi a última das quatro seções do
+Início a ganhar um — `today.map()` sem corte e sem saída no cabeçalho desde a revisão 15. Ficou em
+4, o mesmo de "Próximos" (as duas param na camada 3 do `<AttendanceRow>`; a de hoje nem carrega a
+data), com um *"Ver o dia"* que leva à escala já na aba Hoje,
+via `?periodo=1`. A alternativa levantada era tornar "Em aberto" recolhível, e foi recusada pela
+regra da [seção 7](#7-componentes-base): a seção não dobra a si mesma. "Em aberto" já tinha teto e
+saída, e é a única região do Início onde a coordenadora **age** — recolher a fila de trabalho para
+revelar o histórico inverte a hierarquia que a revisão 18 acabou de acertar. O defeito não estava
+na seção que já tinha limite; estava na que não tinha.
+
+
+### Revisão 19 — os dois pisos de não-texto passaram a valer em toda superfície (agosto/2026)
+
+**O problema.** A página afirmava que `--linha-strong` e `--rating` cumpriam os 3:1 da WCAG
+1.4.11, e citava os números certos — 3,4:1 e 3,5:1 — **sobre branco**. Só que os tokens de texto
+já tinham sido corrigidos na revisão em que a hierarquia por opacidade caiu, e ali o critério
+adotado foi outro: medir contra a **pior** superfície do produto, não contra o branco. Os dois
+tokens de não-texto ficaram com o critério antigo. Sobre `--surface-sunken` eles davam 2,90:1 e
+2,96:1 — abaixo do piso que a própria página cobrava.
+
+**Por que ninguém tinha visto.** Porque na prática não acontecia. Todo campo usa
+`bg-surface-raised`, e a estrela só aparece sobre branco ou sobre o `hover:bg-surface-sunken/40`
+do card de cuidador, que ainda fica em ~3,3:1. Os dois estavam **corretos por convenção**: passavam
+porque ninguém ainda tinha posto borda de controle ou avaliação numa faixa de apoio. É exatamente
+o tipo de acerto que a primeira tela nova desfaz sem que ninguém perceba.
+
+**A correção, e o que ela custou.** Nada.
+
+| Token | Antes | Depois | Pior superfície | ΔL |
+|---|---|---|---|---|
+| `--rating` | `#B1812C` | `#AE7F29` | 2,96 → 3,05 | 0,008 |
+| `--linha-strong` | `#838D8E` | `#7F898A` | 2,90 → 3,06 | 0,012 |
+
+Matiz e croma preservados nos dois — o ouro continua o mesmo ouro (78°, C 0,115). A queda de
+luminosidade é menor que a diferença que um monitor descalibrado introduz, e o ganho é sair de
+"passa onde a gente usa hoje" para "passa onde quer que vá parar".
+
+**O que ficou de fora, e por quê.**
+
+- **`--brand-aqua-ink` não mudou.** Ele está em 4,55:1 no cabeçalho móvel, contra um piso de
+  4,5:1 — margem fina, mas **passa**. Escurecer resolveria o número e estragaria o lockup, porque
+  aproximaria o aqua-ink do `--brand` e as duas palavras deixariam de se separar. A saída foi
+  registrar a restrição na [seção 1](#1-marca) em vez de mexer na cor.
+- **O croma da estrela não mudou.** `--rating` (C 0,115) é quase tão saturado quanto
+  `--status-cancelado` (C 0,125): uma nota boa chama tanta atenção quanto um plantão que caiu.
+  Na área que cada um ocupa — 12–16px de estrela contra um chip inteiro — o equilíbrio se
+  sustenta. Só volta à mesa se a estrela crescer.
+
+**`--brand-mid` e `--brand-aqua` saíram do `@theme` na mesma passagem.** Tinham zero call
+sites, e não por esquecimento: o símbolo é um JPEG, então essas duas tintas nunca chegam a virar
+CSS. O que o token fazia era gerar `bg-brand-mid` e `text-brand-aqua` como utilidades
+disponíveis — e `text-brand-aqua` sobre branco é 1,96:1. Os hex continuam na tabela da marca,
+que é onde registro de amostragem deve morar.
+
 
 ### Revisão 18 — a coluna do Início recuperou hierarquia (sem recuperar a caixa) (agosto/2026)
 

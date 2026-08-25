@@ -63,9 +63,26 @@ interface Pendencia {
 const PENDENCIAS_VISIVEIS = 5;
 
 /**
+ * Quantos atendimentos do dia o Início mostra antes de mandar para a escala.
+ *
+ * Foi a última das quatro seções a ganhar teto: nasceu com `today.map()` direto, sem corte e sem
+ * saída no cabeçalho. No cenário inicial isso não aparece, porque só um plantão cai em
+ * `isoDate(0)`; numa empresa que roda doze plantões no dia, a seção sozinha ocupa a tela antes de
+ * "Em aberto" — a seção logo abaixo, onde estão as ações — chegar a aparecer. É a mesma falha que
+ * `EM_ABERTO_VISIVEIS` já resolvia lá embaixo, acontecendo aqui em cima.
+ *
+ * Quatro, o mesmo de "Próximos" e não os três de "Em aberto", porque o teto é de altura de tela e
+ * não de contagem. Nas camadas do `<AttendanceRow>`: aqui existem a 1 (hora · paciente · estado),
+ * a 2 (tipo · duração · bairro · valor) e a 3 (situação) — o plantão em aberto acrescenta a 4
+ * (recado de compatibilidade) e a 5 (barra de ações). A linha de hoje é ainda um degrau mais baixa
+ * que a de "Próximos", que carrega a data (`showDate`); quatro cabe nas duas.
+ */
+const HOJE_VISIVEIS = 4;
+
+/**
  * Quantos plantões em aberto o Início mostra antes de mandar para a tela de Atendimentos.
  *
- * "Em aberto" era a única seção sem teto, e é a que tem a linha mais alta do produto: cinco
+ * "Em aberto" foi a primeira seção a ganhar teto, e é a que tem a linha mais alta do produto: cinco
  * camadas (hora, paciente, situação, recado e duas ações) contra as três de "Próximos". Com seis
  * plantões abertos ela sozinha passava de 800px no celular e empurrava Próximos e Atividade
  * recente para fora de qualquer relance — o Início deixava de ser um resumo da operação e virava
@@ -122,7 +139,6 @@ export function CompanyDashboardPage() {
   const drafts = draftAttendances(all);
   const toReview = applicationsToReview(all);
   const lateCheckins = pendingCheckins(all);
-  const alerts = state.dashboardAlerts.filter((a) => a.companyId === session?.companyId);
   const activity = recentActivity(all, patients);
   const awaitingApproval = rosterQueue(state, session?.companyId);
   const activeCount = activeCaregiverIds(all).length;
@@ -131,7 +147,20 @@ export function CompanyDashboardPage() {
   const caregiverName = (id?: string) =>
     id ? state.caregivers.find((c) => c.id === id)?.name : undefined;
 
-  // O quadro é responsabilidade da empresa: cadastro parado na fila trava os plantões.
+  /*
+   * Só entra aqui o que espera uma decisão **sobre a operação**: fila do quadro, check-in que não
+   * veio, candidatura sem resposta, rascunho parado. Cada linha nasce de um dado do estado e leva
+   * à tela onde a decisão é tomada.
+   *
+   * O que saiu foi a coleção `dashboardAlerts` — avisos escritos à mão no mock ("revisão
+   * trimestral de contratos vence nesta semana", "nenhum cuidador favoritado ainda"). Eles não
+   * derivavam de nada, ninguém podia resolvê-los dentro do produto, e ocupavam duas das seis
+   * linhas da coluna no cenário inicial. Recado administrativo dividindo lista com check-in
+   * atrasado é o que faz o vermelho parar de significar alguma coisa: quando metade da coluna
+   * nunca vai sair de lá, a coordenadora aprende a não olhar para ela.
+   *
+   * O tipo, o mock e o campo do `AppState` saíram junto — nada mais os lia.
+   */
   const pendencias: Pendencia[] = [
     ...(awaitingApproval.length > 0
       ? [
@@ -162,13 +191,6 @@ export function CompanyDashboardPage() {
       texto: `Rascunho não publicado — ${patientName(a.patientId)}`,
       para: `/empresa/atendimentos/${a.id}`,
       nivel: "informacao" as const,
-    })),
-    // O aviso já vem com a sua gravidade do dado; a tela só a traduz para o nível.
-    ...alerts.map((a) => ({
-      id: a.id,
-      texto: a.text,
-      para: "/empresa/atendimentos",
-      nivel: (a.severity === "warning" ? "atencao" : "informacao") as Nivel,
     })),
   ].sort((a, b) => NIVEL_ORDEM[a.nivel] - NIVEL_ORDEM[b.nivel]);
 
@@ -352,9 +374,22 @@ export function CompanyDashboardPage() {
             produto. Vazio só se justifica quando o vazio é notícia; aqui a notícia já foi dada.
           */}
           {today.length > 0 && (
-            <Secao title="Atendimentos de hoje" count={today.length} variant="destaque">
+            <Secao
+              title="Atendimentos de hoje"
+              count={today.length}
+              variant="destaque"
+              /* A saída leva à escala já na aba "Hoje" (`?periodo=1`), e não à lista de
+                 Atendimentos: quem clica aqui quer o resto **do dia**, não o filtro de estado. */
+              actions={
+                today.length > HOJE_VISIVEIS && (
+                  <Link to="/empresa/agenda?periodo=1" className={SECAO_LINK_CLASS}>
+                    Ver o dia
+                  </Link>
+                )
+              }
+            >
               <AttendanceList variant="fluxo">
-                {today.map((a) => (
+                {today.slice(0, HOJE_VISIVEIS).map((a) => (
                   <AttendanceRow
                     key={a.id}
                     layout="empilhado"

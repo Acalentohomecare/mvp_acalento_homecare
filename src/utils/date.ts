@@ -30,6 +30,29 @@ export function diaMes(iso: string): string {
   return `${dia}/${mes}`;
 }
 
+const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+/**
+ * Intervalo de período: `25–31 Ago`, e `29 Ago – 4 Set` quando o recorte cruza o mês.
+ *
+ * `25/08 – 31/08` diz exatamente a mesma coisa e lê pior: são dez algarismos e três barras para
+ * uma informação que o olho quer pegar de relance, e o mês repetido obriga a conferir se os dois
+ * números são mesmo iguais. Aqui o mês aparece **uma vez**, no fim, e o dia perde o zero à
+ * esquerda — zero à esquerda existe para alinhar coluna, e um rótulo solto não é coluna.
+ *
+ * O travessão muda com o caso, e não é preciosismo: sem espaço dentro do mesmo mês (`25–31`) o par
+ * lê como uma unidade; com espaço entre meses (`29 Ago – 4 Set`) lê como duas datas, que é o que
+ * são. É a convenção de intervalo, e é ela que dispensa qualquer palavra ligando os dois lados.
+ */
+export function intervaloCurto(inicio: string, fim: string): string {
+  const [, mesInicio, diaInicio] = inicio.split("-");
+  const [, mesFim, diaFim] = fim.split("-");
+  const dia = (d: string) => String(Number(d));
+  return mesInicio === mesFim
+    ? `${dia(diaInicio)}–${dia(diaFim)} ${MESES[Number(mesFim) - 1]}`
+    : `${dia(diaInicio)} ${MESES[Number(mesInicio) - 1]} – ${dia(diaFim)} ${MESES[Number(mesFim) - 1]}`;
+}
+
 /** `2026-03-14` → `14/03/2026`. Onde o ano importa: ficha, relatório, histórico. */
 export function dataCompleta(iso: string): string {
   const [ano, mes, dia] = iso.split("-");

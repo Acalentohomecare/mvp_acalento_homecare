@@ -5,29 +5,31 @@ export function canEvaluate(attendance: Attendance): boolean {
   return attendance.status === "completed" || attendance.status === "evaluated";
 }
 
-export function evaluationFor(
-  state: AppState,
-  attendanceId: string,
-  from: "company" | "caregiver",
-): Evaluation | undefined {
-  return state.evaluations.find((e) => e.attendanceId === attendanceId && e.from === from);
+/** A avaliação do atendimento — no máximo uma, feita pela empresa. */
+export function evaluationFor(state: AppState, attendanceId: string): Evaluation | undefined {
+  return state.evaluations.find((e) => e.attendanceId === attendanceId);
 }
 
+/**
+ * Registra a avaliação da empresa e fecha o ciclo do atendimento.
+ *
+ * `status: "evaluated"` agora significa exatamente uma coisa — **a empresa avaliou**. Enquanto o
+ * cuidador também podia avaliar, quem chegasse primeiro virava o status: um atendimento aparecia
+ * como "Avaliado" nas listas da empresa sem que ela tivesse avaliado nada.
+ */
 export function createEvaluation(
   state: AppState,
   attendance: Attendance,
-  from: "company" | "caregiver",
   rating: 1 | 2 | 3 | 4 | 5,
   comment: string,
 ): AppState {
   if (!canEvaluate(attendance)) return state;
-  if (evaluationFor(state, attendance.id, from)) return state;
+  if (evaluationFor(state, attendance.id)) return state;
   if (!attendance.confirmedCaregiverId) return state;
 
   const evaluation: Evaluation = {
     id: `ev_${Date.now()}`,
     attendanceId: attendance.id,
-    from,
     caregiverId: attendance.confirmedCaregiverId,
     rating,
     comment,

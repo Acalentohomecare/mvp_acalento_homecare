@@ -11,4 +11,3 @@ export { NOTIFICATIONS } from "./notifications";
 export { MESSAGES } from "./messages";
 export { DOCUMENTS } from "./documents";
 export { AUDIT_LOG } from "./audit-log";
-export { DASHBOARD_ALERTS } from "./dashboard";

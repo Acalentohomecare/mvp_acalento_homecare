@@ -24,6 +24,7 @@ import { CompanyCaregiverProfilePage } from "./pages/company/CaregiverProfilePag
 import { CompanySettingsPage } from "./pages/company/SettingsPage";
 import { CaregiverDashboardPage } from "./pages/caregiver/DashboardPage";
 import { CaregiverProfilePage } from "./pages/caregiver/ProfilePage";
+import { CaregiverAttendancesPage } from "./pages/caregiver/AttendancesPage";
 import { CaregiverInvitationsPage } from "./pages/caregiver/InvitationsPage";
 
 function IndexRedirect() {
@@ -79,6 +80,7 @@ function AppRoutes() {
         <Route path="/cuidador/convites" element={<CaregiverInvitationsPage />} />
         <Route path="/cuidador/agenda" element={<SchedulePage />} />
         <Route path="/cuidador/notificacoes" element={<NotificationsPage />} />
+        <Route path="/cuidador/atendimentos" element={<CaregiverAttendancesPage />} />
         <Route path="/cuidador/atendimentos/:attendanceId" element={<AttendanceDetailPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

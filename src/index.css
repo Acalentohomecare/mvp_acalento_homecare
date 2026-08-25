@@ -19,7 +19,11 @@
      texto legível "quase em todo lugar".
 
   O que não é texto tem o seu próprio piso: `--linha-strong` e `--rating` passam dos 3:1 da
-  WCAG 1.4.11 porque delimitam controle e preenchem estrela — as duas coisas são informação.
+  WCAG 1.4.11 porque delimitam controle e preenchem estrela — as duas coisas são informação. E os
+  dois são medidos como os tokens de texto: contra a **pior** superfície clara do produto, não
+  contra o branco. Antes passavam só sobre branco e falhavam sobre `--surface-sunken` (2,90:1 e
+  2,96:1) — protegidos por convenção, já que nem borda de campo nem estrela tinham ido parar numa
+  faixa de apoio ainda. Agora o piso não depende de onde o próximo call site os colocar.
 */
 @theme {
   /* ------------------------------------------------------------------ marca */
@@ -49,11 +53,16 @@
 
     O aqua **nunca carrega texto**. Onde ele precisa virar palavra — o "Gestão" do lockup — quem
     entra é `--brand-aqua-ink`, o mesmo aqua rebaixado até 5,1:1 sobre branco.
+
+    **Por que só dois dos quatro viram token.** O teal médio e o aqua da arte são registro da
+    amostragem e ficam nos números acima — não descem para o `@theme`. O símbolo é um JPEG
+    exibido direto: essas duas tintas saem do arquivo, nunca do CSS, então um token delas não
+    pintaria nada em lugar nenhum. O que ele faria é gerar `bg-brand-mid` e `text-brand-aqua`
+    como utilidades disponíveis — e `text-brand-aqua` sobre branco é 1,96:1. Token que só existe
+    para ser usado por engano é armadilha, não documentação.
   */
   --color-brand: #175260; /* teal profundo — elos escuros e hastes. É também `--accent` */
-  --color-brand-mid: #236d77; /* teal médio — o núcleo do símbolo */
-  --color-brand-aqua: #88c3c9; /* aqua — elos claros. Só preenche forma, nunca carrega texto */
-  --color-brand-aqua-ink: #2a787f; /* o mesmo aqua rebaixado até aguentar letra (5,1:1) */
+  --color-brand-aqua-ink: #2a787f; /* o aqua rebaixado até aguentar letra (5,1:1) */
 
   /* ------------------------------------------ neutros (grafite frio, teal) */
   /*
@@ -82,7 +91,7 @@
     começa, e a WCAG 1.4.11 cobra 3:1 disso.
   */
   --color-linha: #d9e1e2; /* divisor e borda de card */
-  --color-linha-strong: #838d8e; /* borda de campo e de controle — 3,4:1 sobre branco */
+  --color-linha-strong: #7f898a; /* borda de campo e de controle — 3,1:1 na pior superfície */
 
   /* ------------------------------------------------------------------ ação */
   /*
@@ -98,11 +107,12 @@
 
   /*
     Ouro de avaliação. Estrela cheia é informação, não enfeite, então ele responde pelos 3:1 da
-    WCAG 1.4.11 — 3,5:1 sobre branco. O ouro é também o único complementar do sistema: contra um
-    ambiente inteiro em teal frio, o âmbar quente é o par que fecha a roda em vez de brigar com
-    ela. Estrela na cor da marca leria como botão.
+    WCAG 1.4.11 — 3,6:1 sobre branco e 3,1:1 sobre `--surface-sunken`, a pior superfície. O
+    ouro é também o único complementar do sistema: contra um ambiente inteiro em teal frio, o
+    âmbar quente é o par que fecha a roda em vez de brigar com ela. Estrela na cor da marca leria
+    como botão.
   */
-  --color-rating: #b1812c;
+  --color-rating: #ae7f29;
 
   /* --------------------------------------- categoria de cuidador (credencial) */
   /*

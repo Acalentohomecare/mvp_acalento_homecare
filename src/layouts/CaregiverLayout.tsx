@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Bell, CalendarCheck, Ellipsis, Home, LogOut, Mail, UserRound } from "lucide-react";
+import { Bell, CalendarCheck, ClipboardList, Ellipsis, Home, LogOut, Mail, UserRound } from "lucide-react";
 import { Button, Logo, Modal, PRODUTO_NOME } from "../components/ui";
 import {
   HEADER_ICON_CLASS,
@@ -30,6 +30,13 @@ const NAV_ITEMS = [
   { to: "/cuidador/convites", label: "Convites", icon: Mail, end: false, mobile: true },
   { to: "/cuidador/agenda", label: "Agenda", icon: CalendarCheck, end: false, mobile: true },
   { to: "/cuidador/perfil", label: "Perfil", icon: UserRound, end: false, mobile: true },
+  /*
+   * Atendimentos e Avisos ficam fora da barra de abas, não por serem menos importantes, mas
+   * porque a barra tem quatro lugares e eles não são o que se abre **entre um plantão e outro**.
+   * Histórico se consulta sentado; convite e agenda se consultam na rua. Os dois continuam a um
+   * toque, na folha "Mais", e no desktop aparecem inteiros na lateral.
+   */
+  { to: "/cuidador/atendimentos", label: "Atendimentos", icon: ClipboardList, end: true, mobile: false },
   { to: "/cuidador/notificacoes", label: "Avisos", icon: Bell, end: false, mobile: false },
 ];
 
@@ -151,6 +158,13 @@ export function CaregiverLayout() {
             <p className="mb-3 truncate text-note text-ink-subtle">{nomeConta}</p>
           )}
           <div className="flex flex-col gap-0.5">
+            <Link
+              to="/cuidador/atendimentos"
+              onClick={() => setMenuAberto(false)}
+              className={SHEET_ITEM_CLASS}
+            >
+              <ClipboardList size={17} strokeWidth={1.9} className="text-ink-subtle" /> Atendimentos
+            </Link>
             <Link
               to="/cuidador/notificacoes"
               onClick={() => setMenuAberto(false)}

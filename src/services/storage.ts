@@ -1,8 +1,18 @@
 import type { AppState, Session } from "../types";
 import { seedAppState } from "../mocks/seed";
 
-// v3: identidade da empresa atualizada; dados persistidos anteriormente não migram.
-const STORAGE_KEY = "acalento:app-state:v3";
+/*
+ * v4: a avaliação passou a ter uma direção só (empresa → cuidador) e o campo `from` saiu do tipo.
+ *
+ * A subida de versão aqui não é formalidade. `loadAppState` mescla o estado salvo **por cima** do
+ * seed, e a mesclagem é por coleção: um `evaluations` persistido substitui o novo inteiro. Como
+ * `caregiverEvaluations` deixou de filtrar por direção — não há mais o que filtrar —, as duas
+ * avaliações `from: "caregiver"` que ficaram em navegadores com a v3 passariam a contar como
+ * avaliações **recebidas** pelo cuidador, inflando a média dele e disparando a R10 cedo demais.
+ *
+ * Dados persistidos anteriormente não migram.
+ */
+const STORAGE_KEY = "acalento:app-state:v4";
 const SESSION_KEY = "acalento:session:v1";
 
 /**

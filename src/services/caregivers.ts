@@ -17,10 +17,16 @@ export interface CaregiverRating {
   average: number | null;
 }
 
-/** Só avaliações feitas pela empresa contam para a reputação do cuidador. */
+/**
+ * As avaliações que o cuidador recebeu, da mais recente para a mais antiga.
+ *
+ * Não há mais o que filtrar por direção: toda avaliação é da empresa sobre o cuidador. O filtro
+ * `from === "company"` que existia aqui era a única coisa impedindo que a avaliação escrita pelo
+ * próprio cuidador entrasse na média dele.
+ */
 export function caregiverEvaluations(evaluations: Evaluation[], caregiverId: string): Evaluation[] {
   return evaluations
-    .filter((e) => e.caregiverId === caregiverId && e.from === "company")
+    .filter((e) => e.caregiverId === caregiverId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 

@@ -159,7 +159,7 @@ export function AttendanceDetailPage() {
   const showAddress = role === "company" || canSeeFullAddress(attendance, session?.caregiverId);
   const showVitals = caregiver ? caregiver.category !== "informal" : false;
   const messages = attendanceMessages(state, attendance.id);
-  const myEvaluation = evaluationFor(state, attendance.id, role);
+  const avaliacao = evaluationFor(state, attendance.id);
   const catalog = allActivities(state);
   const cancelado = attendance.status === "cancelled";
 
@@ -511,22 +511,31 @@ export function AttendanceDetailPage() {
             <LinhaDoTempo eventos={eventos} className="mx-2" />
           </Painel>
 
-          {/* ---------- Etapa 14: avaliação ---------- */}
+          {/*
+            ---------- Etapa 14: avaliação ----------
+
+            Uma direção só: a empresa avalia o cuidador. O painel é o mesmo para os dois perfis, e
+            o que muda é quem escreve — a empresa vê o formulário, o cuidador vê o resultado.
+
+            Para o cuidador isso é informação nova, não uma tela a menos. Enquanto ele também
+            avaliava, este painel mostrava a ele **o texto que ele mesmo tinha escrito** sobre a
+            empresa; a nota que a empresa deu a ele não aparecia em lugar nenhum da ficha.
+          */}
           <Painel title="Avaliação">
             {!canEvaluate(attendance) ? (
               <p className="text-note text-ink-subtle">
                 Liberada depois que o atendimento for concluído.
               </p>
-            ) : myEvaluation ? (
+            ) : avaliacao ? (
               <>
-                <Stars value={myEvaluation.rating} />
-                <p className="prosa mt-2 text-note text-ink-muted">{myEvaluation.comment}</p>
+                <Stars value={avaliacao.rating} />
+                <p className="prosa mt-2 text-note text-ink-muted">{avaliacao.comment}</p>
               </>
+            ) : role === "caregiver" ? (
+              <p className="text-note text-ink-subtle">Aguardando a avaliação da empresa.</p>
             ) : (
               <div className="flex flex-col gap-2.5">
-                <p className="text-note text-ink-muted">
-                  {role === "company" ? "Avalie o cuidador" : "Avalie a empresa"}
-                </p>
+                <p className="text-note text-ink-muted">Avalie o cuidador</p>
                 <Stars value={rating} onChange={setRating} />
                 <Textarea
                   rows={2}
@@ -539,7 +548,7 @@ export function AttendanceDetailPage() {
                   variant="primary"
                   className="self-start"
                   onClick={() => {
-                    setState((s) => createEvaluation(s, attendance, role, rating, comment.trim()));
+                    setState((s) => createEvaluation(s, attendance, rating, comment.trim()));
                     setComment("");
                   }}
                 >

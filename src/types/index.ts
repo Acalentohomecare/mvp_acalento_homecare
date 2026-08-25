@@ -14,6 +14,5 @@ export type * from "./message";
 export type * from "./document";
 export type * from "./record";
 export type * from "./audit-log";
-export type * from "./dashboard";
 export type * from "./app-state";
 export type * from "./session";

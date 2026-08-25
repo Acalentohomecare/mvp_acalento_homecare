@@ -29,6 +29,74 @@ export function companyAttendances(state: AppState, companyId: string | undefine
   return state.attendances.filter((a) => a.companyId === companyId);
 }
 
+/**
+ * Isolamento pelo outro lado: o cuidador só enxerga os plantões que ele assumiu.
+ *
+ * Note que **não** há recorte por empresa. O vínculo é por empresa (o mesmo cuidador pode estar
+ * aprovado numa e em análise noutra), mas o histórico de trabalho é dele: Sandra atende pela
+ * Acalento e pela Cuidar Bem, e as duas aparecem juntas na lista dela. Cada empresa continua
+ * vendo só o que é seu — a assimetria é proposital, não um furo.
+ */
+export function caregiverAttendances(
+  state: AppState,
+  caregiverId: string | undefined,
+): Attendance[] {
+  if (!caregiverId) return [];
+  return state.attendances.filter((a) => a.confirmedCaregiverId === caregiverId);
+}
+
+/** Plantão encerrado — o trabalho que já foi feito, avaliado ou não. */
+export function isConcluded(attendance: Attendance): boolean {
+  return attendance.status === "completed" || attendance.status === "evaluated";
+}
+
+export interface CaregiverEarnings {
+  /** Plantões confirmados à frente: o que já está garantido. */
+  aReceberValor: number;
+  aReceberCount: number;
+  /** Plantões encerrados dentro do mês corrente. */
+  mesValor: number;
+  mesCount: number;
+}
+
+/**
+ * O que o cuidador ganha — a pergunta que a tela dele não respondia.
+ *
+ * Substituiu "horas realizadas" no Início, e a troca não é de rótulo. A soma de horas era
+ * vitalícia e sem período ("12h" desde quando?) e, com plantões padronizados de 12h e 24h,
+ * repetia a contagem de atendimentos em outra unidade: 1 plantão concluído *era* 12h realizadas.
+ * O valor é o que aquelas horas estavam tentando dizer, e é o número que quem trabalha por
+ * plantão realmente acompanha.
+ *
+ * O recorte do mês é o que dá sentido ao número. Total vitalício não responde "como foi este
+ * mês", que é a pergunta que se faz olhando para o próprio trabalho.
+ *
+ * Isto é relatório, não pagamento (CLAUDE.md §36): soma o `value` acordado em cada plantão, do
+ * mesmo jeito que o relatório da empresa (§33) mostra "valor estimado". Não há cobrança, repasse
+ * nem status de pagamento em lugar nenhum.
+ */
+export function caregiverEarnings(list: Attendance[], now = new Date()): CaregiverEarnings {
+  const hoje = todayISO(now);
+  /* `YYYY-MM` do mês corrente. Comparar prefixo de string evita construir Date por atendimento e
+     usa o mesmo fuso local que `todayISO` — as duas contas precisam concordar. */
+  const mes = hoje.slice(0, 7);
+
+  return list.reduce<CaregiverEarnings>(
+    (acc, a) => {
+      if (a.status === "confirmed" && a.startDate >= hoje) {
+        acc.aReceberValor += a.value;
+        acc.aReceberCount += 1;
+      }
+      if (isConcluded(a) && a.startDate.startsWith(mes)) {
+        acc.mesValor += a.value;
+        acc.mesCount += 1;
+      }
+      return acc;
+    },
+    { aReceberValor: 0, aReceberCount: 0, mesValor: 0, mesCount: 0 },
+  );
+}
+
 /** Atendimento publicado e ainda sem cuidador confirmado. */
 export function isAwaitingCaregiver(attendance: Attendance): boolean {
   return OPEN_STATUSES.includes(attendance.status);
