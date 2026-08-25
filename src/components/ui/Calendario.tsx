@@ -15,13 +15,28 @@ import { DIAS_DA_SEMANA, moverMes, rotuloMes, somarDias } from "../../utils/date
  *
  * -------------------------------------------------------------- a marca é presença, não estado
  *
- * O ponto embaixo do número diz **que existe plantão ali**, e mais nada. Não é a cor do estado.
+ * O dia que tem plantão recebe **duas** marcas, e cada uma faz um trabalho:
  *
- * Isso não é economia de escopo, é a regra 3 do design system: estado nunca é comunicado só por
- * cor. Numa célula de 44px não cabe rótulo de texto ao lado do ponto, então a cor seria o único
- * canal — exatamente a construção que o produto decidiu não ter, por causa de daltonismo. O estado
- * continua sendo lido onde há espaço para escrevê-lo por extenso: no registro de baixo, onde o
- * `<StatusAtendimento>` já traz forma e palavra.
+ *   o tom de fundo  → *tem alguma coisa aqui?*   lido de relance, no mês inteiro de uma vez
+ *   os pontos       → *quantas?*                 lido quando o olho para na célula
+ *   o `aria-label`  → as duas, por extenso       para quem não vê nenhuma das duas
+ *
+ * **O tom sozinho não bastaria, e isso é medido, não suposto:** `--accent-soft` sobre
+ * `--surface-raised` dá 1,17:1. É bonito e é exatamente o que se quer de um tom de calendário —
+ * suave, sem transformar o mês num mosaico —, mas está muito abaixo dos 3:1 que a WCAG 1.4.11
+ * pede de um elemento não textual que carrega informação. Como *reforço* de varredura ele é ótimo;
+ * como único canal, ele apagaria o dado para quem tem baixa visão, para quem enxerga cor de outro
+ * jeito e para quem está no sol com o telefone na mão — que é o cuidador, no contexto real de uso.
+ *
+ * Há um segundo motivo, mais concreto: `--accent-soft` e `--surface-sunken` ficam a 1,01:1 um do
+ * outro, ou seja, são visualmente a mesma coisa. `--surface-sunken` é o fundo de hover da célula
+ * vazia — então, no ponteiro, um dia sem plantão sob o cursor fica idêntico a um dia com plantão.
+ * O ponto é o que desempata. Sem ele, o tom seria ambíguo justamente onde o mouse está parado.
+ *
+ * O que **nenhuma** das duas marcas diz é o estado do plantão. Não é economia de escopo, é a
+ * regra 3 do design system: numa célula de 44px não cabe rótulo ao lado do ponto, então a cor
+ * seria o único canal. O estado continua sendo lido onde há espaço para escrevê-lo por extenso —
+ * no registro de baixo, onde o `<StatusAtendimento>` já traz forma e palavra.
  *
  * Três pontos é o teto. Além disso eles deixam de ser contáveis de relance e viram textura; quem
  * precisa do número exato lê a contagem no cabeçalho da seção de baixo.
@@ -220,8 +235,34 @@ export function Calendario({
           const dia = i + 1;
           const iso = `${mes}-${String(dia).padStart(2, "0")}`;
           const quantidade = marcas[iso] ?? 0;
+          const temPlantao = quantidade > 0;
           const estaSelecionado = iso === selecionado;
           const ehHoje = iso === hoje;
+
+          /*
+            Fundo, tinta e anel são decididos **em separado**, e não numa cadeia de ternários com
+            um vencedor só. Os três estados se acumulam no mesmo dia — hoje pode ter plantão, e
+            hoje com plantão precisa do anel *e* do tom ao mesmo tempo. Com cadeia única, o
+            primeiro caso que casasse apagaria os outros, e o dia mais importante do calendário
+            (hoje, com trabalho marcado) seria justamente o que perderia uma das marcas.
+
+            O hover muda de técnica conforme o fundo: sobre o tom, `brightness` o escurece um
+            degrau — a mesma solução do `variant="secondary"` em `button-classes.ts`; sobre a
+            célula limpa, o cinza de superfície. Pintar `--surface-sunken` por cima do tom seria
+            trocar um teal claro por um cinza de contraste idêntico (1,01:1): nada aconteceria.
+          */
+          const fundo = estaSelecionado
+            ? "bg-accent"
+            : temPlantao
+              ? "bg-accent-soft hover:brightness-[0.97] active:brightness-[0.94]"
+              : "hover:bg-surface-sunken active:bg-surface-sunken";
+
+          const tinta = estaSelecionado ? "text-accent-ink" : ehHoje ? "text-accent" : "text-ink";
+
+          /* O anel some quando o dia está aberto: ali o fundo cheio já o distingue de todos os
+             outros, e "hoje" continua dito pelo `aria-current` e pelo cabeçalho da seção logo
+             abaixo, que escreve "Hoje" por extenso. */
+          const anel = ehHoje && !estaSelecionado ? "ring-1 ring-accent/55 ring-inset" : "";
 
           return (
             <button
@@ -233,13 +274,7 @@ export function Calendario({
               aria-current={ehHoje ? "date" : undefined}
               aria-label={rotuloDoBotao(dia, quantidade)}
               onClick={() => onSelecionar(iso)}
-              className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-control transition-colors duration-150 ease-out ${
-                estaSelecionado
-                  ? "bg-accent text-accent-ink"
-                  : ehHoje
-                    ? "text-accent ring-1 ring-accent/40 ring-inset hover:bg-accent-soft"
-                    : "text-ink hover:bg-surface-sunken active:bg-surface-sunken"
-              }`}
+              className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-control transition-[background-color,filter] duration-150 ease-out ${fundo} ${tinta} ${anel}`}
             >
               <span className={`numero text-note leading-none ${ehHoje ? "font-semibold" : ""}`}>
                 {dia}
