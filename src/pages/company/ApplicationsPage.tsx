@@ -25,7 +25,9 @@ import {
   attendanceInvitations,
   cancelAttendance,
   confirmApplication,
+  seriesMembers,
 } from "../../services/invitations";
+import { resumoDaSerie, rotuloDaSerie } from "../../services/attendances";
 import { formatRating } from "../../utils/format";
 import { rotuloDoDia } from "../../utils/date";
 import { PAGE_LIST } from "../../components/layout/page";
@@ -72,6 +74,9 @@ export function ApplicationsPage() {
 
   const patient = state.patients.find((p) => p.id === attendance.patientId);
   const applications = attendanceApplications(state, attendance.id);
+  /* Confirmar aqui fecha a contratação inteira quando o atendimento faz parte de uma escala. */
+  const membrosDaSerie = seriesMembers(state, attendance);
+  const serie = membrosDaSerie.length > 1 ? resumoDaSerie(membrosDaSerie) : null;
   const pendingInvites = attendanceInvitations(state, attendance.id).filter((i) => i.status === "sent");
   const isClosed = attendance.status === "cancelled" || Boolean(attendance.confirmedCaregiverId);
 
@@ -91,6 +96,12 @@ export function ApplicationsPage() {
         </div>
         <StatusAtendimento status={attendance.status} variant="bloco" className="mt-1" />
       </div>
+
+      {serie && (
+        <p className="prosa mt-2 text-note text-ink-muted">
+          {rotuloDaSerie(serie)} — confirmar um cuidador vale para a escala inteira.
+        </p>
+      )}
 
       {attendance.cancellation && (
         <Aviso className="mt-4">

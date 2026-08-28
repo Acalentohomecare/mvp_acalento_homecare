@@ -20,6 +20,18 @@ export interface Attendance {
   durationHours: number;
   recurring: boolean;
   recurrenceDescription?: string;
+  /**
+   * Escala fixa: o id que amarra os dias gerados por uma mesma publicação.
+   *
+   * Não existe entidade "escala" — a série é a coleção de atendimentos que compartilham este id,
+   * e tudo que a interface mostra sobre ela (período, dias da semana, quantidade) é derivado dos
+   * membros. Um atendimento avulso simplesmente não tem `seriesId`.
+   *
+   * O dia continua sendo a unidade de operação: cada membro tem o próprio check-in, o próprio
+   * registro e a própria avaliação. O que vale para a escala inteira é a **contratação** —
+   * convite, aceite e confirmação acontecem de uma vez para todos os dias.
+   */
+  seriesId?: string;
   activityIds: string[];
   /** Escolhido por quem publica o atendimento — não é derivado das atividades marcadas. */
   requiredCategory: CaregiverCategory;

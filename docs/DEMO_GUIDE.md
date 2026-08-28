@@ -48,27 +48,35 @@ a demo conte a mesma história que convenceu o time a validar o MVP.
 6. **Repita rapidamente para um atendimento que exige formação** — use o atendimento de
    fisioterapia já existente no dataset (`at2`) e mostre que só o Marcos (fisioterapeuta) aparece
    como compatível; nenhum cuidador informal consegue nem se candidatar (R2).
-7. **Ponto forte de roteiro:** abra o atendimento `at3` (visita de enfermagem + medicação
+7. **Escala fixa (o arranjo mais comum do home care).** Em "Novo atendimento", marque **"Repete
+   em dias fixos da semana"**, escolha Seg–Sex e uma data de término (ex.: um mês à frente). A
+   prévia diz quantos atendimentos serão publicados antes de você confirmar. Publique e mostre:
+   na lista de Atendimentos a escala é **uma linha** ("Escala fixa · Seg a Sex · 22 dias"), que
+   abre dia a dia em "Ver os 22 dias"; na agenda, os dias aparecem separados. Convide uma
+   cuidadora e, do lado dela, mostre que o convite é da **escala inteira** (valor por dia e total)
+   e que aceitar preenche a agenda de segunda a sexta. É a diferença entre vender um plantão e
+   vender uma operação contínua.
+8. **Ponto forte de roteiro:** abra o atendimento `at3` (visita de enfermagem + medicação
    prescrita) em Cuidadores compatíveis — a lista aparece **vazia**, porque o único enfermeiro
    cadastrado (Paulo Ricci) ainda não foi aprovado no quadro desta empresa. Isso é intencional:
    mostra R1 e R3 funcionando juntos.
-8. **Vá para Cuidadores → Em análise.** Abra o perfil do Paulo, confira os dados e clique em
+9. **Vá para Cuidadores → Em análise.** Abra o perfil do Paulo, confira os dados e clique em
    **"Aprovar para o quadro"**. Volte ao `at3` — agora ele aparece e pode ser convidado. Esta é a
    mensagem central: **a empresa decide quem entra no seu quadro e, portanto, quem pode assumir
    os seus plantões.**
-9. **Troque para o perfil de um cuidador com atendimento confirmado para hoje** (ou avance a data
+10. **Troque para o perfil de um cuidador com atendimento confirmado para hoje** (ou avance a data
    do `at1`, já confirmado com a Sandra). Faça o check-in, marque tarefas no registro do
    atendimento, adicione uma observação e faça o check-out. Mostre que o registro trava depois do
    check-out (R7) e que uma nova observação ainda pode ser adicionada.
-10. **Como Empresa, avalie o cuidador** no atendimento concluído. Mostre um cuidador com menos de
+11. **Como Empresa, avalie o cuidador** no atendimento concluído. Mostre um cuidador com menos de
     3 avaliações (ex.: Beatriz) para demonstrar que a média ainda não aparece (R10), e um com 3+
     (ex.: Sandra) para mostrar a média já calculada.
-11. **Abra o Relatório de horas.** Mostre os números fechados a partir dos check-ins/check-outs já
+12. **Abra o Relatório de horas.** Mostre os números fechados a partir dos check-ins/check-outs já
     no dataset e exporte o CSV.
-12. **Feche em Configurações**, mostrando o registro de atividade da empresa (toda aprovação,
+13. **Feche em Configurações**, mostrando o registro de atividade da empresa (toda aprovação,
     recusa, bloqueio e cancelamento ficam rastreados — R12) e o botão de reset da demo.
 
-Tempo estimado do roteiro completo: 8–10 minutos.
+Tempo estimado do roteiro completo: 10–12 minutos.
 
 ---
 
@@ -99,6 +107,9 @@ Tempo estimado do roteiro completo: 8–10 minutos.
 - Funcionamento offline do check-in (mencionado no documento para o produto real) **não foi
   implementado** — fica documentado aqui como comportamento esperado do produto real, fora do
   escopo da demo.
+- A **escala fixa** publica no máximo 70 atendimentos (≈3 meses de dias úteis) por vez, e a data
+  de término é obrigatória: quem precisa de mais tempo publica outra escala. Cancelar vale para um
+  dia; não existe "cancelar a escala inteira".
 - Consulta automática ao conselho de classe não existe: a conferência do registro é feita pela
   empresa, junto com a aprovação do cadastro.
 - Cadastro de nova Empresa pela tela de Cadastro é simulado com uma mensagem — o fluxo completo

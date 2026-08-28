@@ -201,7 +201,7 @@ export function CompanyCaregiverProfilePage() {
             <div className="mt-1 numero text-body">{caregiver.experienceYears} anos</div>
           </Card>
           <Card>
-            <div className="text-dado text-ink-muted uppercase">Por plantão</div>
+            <div className="text-dado text-ink-muted uppercase">Por atendimento</div>
             <div className="mt-1 numero text-body">{formatCurrency(caregiver.shiftRate)}</div>
           </Card>
           <Card>

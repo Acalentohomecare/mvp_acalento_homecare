@@ -1,10 +1,16 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Input, SkeletonLista, Tabs, Vazio, type Aba } from "../../components/ui";
 import { AttendanceList, AttendanceRow } from "../../components/shared/AttendanceRow";
+import { VerDiasDaEscala } from "../../components/shared/SerieDias";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
-import { caregiverAttendances, isConcluded } from "../../services/attendances";
+import {
+  agruparPorSerie,
+  caregiverAttendances,
+  isConcluded,
+  rotuloDaSerie,
+} from "../../services/attendances";
 import type { Attendance } from "../../types";
 import { PAGE_LIST } from "../../components/layout/page";
 import { DE_ATENDIMENTOS } from "../../constants/origem";
@@ -64,6 +70,8 @@ export function CaregiverAttendancesPage() {
   const [dateTo, setDateTo] = useState("");
   /* Só governa o celular: a partir de `md` a busca e o período ficam sempre visíveis. */
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  /* Mesma regra da lista da empresa: escala é um item só até alguém querer ver dia a dia. */
+  const [escalasAbertas, setEscalasAbertas] = useState<string[]>([]);
 
   /* Do mais recente para o mais antigo: aqui a pergunta é "o que eu fiz", e a resposta começa
      pelo último plantão. É o inverso da agenda, onde a pergunta é "o que vem". */
@@ -121,7 +129,7 @@ export function CaregiverAttendancesPage() {
         <div>
           <h1 className="text-display">Atendimentos</h1>
           <p className="prosa mt-1 text-body text-ink-subtle">
-            Todos os plantões que você assumiu.
+            Todos os atendimentos que você assumiu.
           </p>
         </div>
         <button
@@ -199,27 +207,67 @@ export function CaregiverAttendancesPage() {
               }
             >
               {filtro === "todos" && filtrosAtivos === 0
-                ? "Você ainda não assumiu nenhum plantão. Os convites que receber aparecem em Convites."
+                ? "Você ainda não assumiu nenhum atendimento. Os convites que receber aparecem em Convites."
                 : filtrosAtivos > 0
-                  ? "Nenhum plantão neste recorte. Os outros continuam na lista — é o filtro que está estreito."
-                  : "Nenhum plantão neste recorte."}
+                  ? "Nenhum atendimento neste recorte. Os outros continuam na lista — é o filtro que está estreito."
+                  : "Nenhum atendimento neste recorte."}
             </Vazio>
           </li>
         ) : (
-          visiveis.map((a) => (
-            <AttendanceRow
-              key={a.id}
-              attendance={a}
-              to={`/cuidador/atendimentos/${a.id}`}
-              state={DE_ATENDIMENTOS}
-              patientName={patientName(a.patientId)}
-              /* Camada 4 — por qual empresa foi o plantão. O cuidador pode estar aprovado em mais
-                 de uma (Sandra está nas duas), e no histórico é isso que diz com quem falar sobre
-                 um atendimento antigo. Na lista da empresa esta camada não existe: lá a empresa é
-                 sempre a mesma, e repeti-la em toda linha seria ruído. */
-              note={companyName(a.companyId)}
-            />
-          ))
+          agruparPorSerie(visiveis).map((linha) =>
+            linha.tipo === "atendimento" ? (
+              <AttendanceRow
+                key={linha.atendimento.id}
+                attendance={linha.atendimento}
+                to={`/cuidador/atendimentos/${linha.atendimento.id}`}
+                state={DE_ATENDIMENTOS}
+                patientName={patientName(linha.atendimento.patientId)}
+                /* Camada 4 — por qual empresa foi o atendimento. O cuidador pode estar aprovado em
+                   mais de uma (Sandra está nas duas), e no histórico é isso que diz com quem falar
+                   sobre um atendimento antigo. Na lista da empresa esta camada não existe: lá a
+                   empresa é sempre a mesma, e repeti-la em toda linha seria ruído. */
+                note={companyName(linha.atendimento.companyId)}
+              />
+            ) : (
+              /* A escala que ele assumiu é uma contratação, não sessenta registros: entra como uma
+                 linha e abre no lugar. O histórico dele tem meses de trabalho — sem agrupar, uma
+                 escala apagaria todo o resto da lista. */
+              <Fragment key={linha.serie.seriesId}>
+                <AttendanceRow
+                  attendance={linha.serie.representante}
+                  to={`/cuidador/atendimentos/${linha.serie.representante.id}`}
+                  state={DE_ATENDIMENTOS}
+                  patientName={patientName(linha.serie.representante.patientId)}
+                  note={`${companyName(linha.serie.representante.companyId)} · ${rotuloDaSerie(linha.serie)}`}
+                  actions={
+                    <VerDiasDaEscala
+                      total={linha.serie.membros.length}
+                      aberta={escalasAbertas.includes(linha.serie.seriesId)}
+                      onToggle={() =>
+                        setEscalasAbertas((prev) =>
+                          prev.includes(linha.serie.seriesId)
+                            ? prev.filter((id) => id !== linha.serie.seriesId)
+                            : [...prev, linha.serie.seriesId],
+                        )
+                      }
+                    />
+                  }
+                />
+                {escalasAbertas.includes(linha.serie.seriesId) &&
+                  linha.serie.membros
+                    .filter((m) => m.id !== linha.serie.representante.id)
+                    .map((m) => (
+                      <AttendanceRow
+                        key={m.id}
+                        attendance={m}
+                        to={`/cuidador/atendimentos/${m.id}`}
+                        state={DE_ATENDIMENTOS}
+                        patientName={patientName(m.patientId)}
+                      />
+                    ))}
+              </Fragment>
+            ),
+          )
         )}
       </AttendanceList>
     </div>

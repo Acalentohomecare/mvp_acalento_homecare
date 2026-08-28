@@ -246,26 +246,26 @@ export function CaregiverDashboardPage() {
           <ListaDeDados>
             <Dado termo="A receber">
               {ganhos.aReceberCount === 0 ? (
-                <span className="text-ink-subtle">Nenhum plantão confirmado</span>
+                <span className="text-ink-subtle">Nenhum atendimento confirmado</span>
               ) : (
                 <Link to="/cuidador/agenda" className={GANHO_LINK_CLASS}>
                   <span className="numero">{formatCurrency(ganhos.aReceberValor)}</span>
                   <span className="text-meta text-ink-subtle">
                     <span className="numero">{ganhos.aReceberCount}</span>{" "}
-                    {ganhos.aReceberCount === 1 ? "plantão" : "plantões"}
+                    {ganhos.aReceberCount === 1 ? "atendimento" : "atendimentos"}
                   </span>
                 </Link>
               )}
             </Dado>
             <Dado termo="Concluído no mês">
               {ganhos.mesCount === 0 ? (
-                <span className="text-ink-subtle">Nenhum plantão encerrado</span>
+                <span className="text-ink-subtle">Nenhum atendimento encerrado</span>
               ) : (
                 <Link to="/cuidador/atendimentos" className={GANHO_LINK_CLASS}>
                   <span className="numero">{formatCurrency(ganhos.mesValor)}</span>
                   <span className="text-meta text-ink-subtle">
                     <span className="numero">{ganhos.mesCount}</span>{" "}
-                    {ganhos.mesCount === 1 ? "plantão" : "plantões"}
+                    {ganhos.mesCount === 1 ? "atendimento" : "atendimentos"}
                   </span>
                 </Link>
               )}

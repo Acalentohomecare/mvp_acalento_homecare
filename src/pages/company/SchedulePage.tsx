@@ -137,8 +137,8 @@ export function CompanySchedulePage() {
 
   const resumo = nomeCuidador
     ? total === 0
-      ? `${nomeCuidador} não tem plantão neste período.`
-      : `${nomeCuidador} tem ${total} ${total === 1 ? "plantão" : "plantões"} neste período.`
+      ? `${nomeCuidador} não tem atendimento neste período.`
+      : `${nomeCuidador} tem ${total} ${total === 1 ? "atendimento" : "atendimentos"} neste período.`
     : total === 0
       ? "Nenhum atendimento no período."
       : `${total} ${total === 1 ? "atendimento" : "atendimentos"} no período.`;

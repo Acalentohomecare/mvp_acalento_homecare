@@ -32,6 +32,62 @@ function patchAttendance(state: AppState, id: string, patch: Partial<Attendance>
   };
 }
 
+/**
+ * Os dias que uma contratação cobre.
+ *
+ * Atendimento avulso é ele mesmo. Escala fixa são todos os dias vivos da série — cancelado fica
+ * de fora, porque um dia derrubado não volta junto com o resto, e dia já confirmado com outra
+ * pessoa também: a escala pode ter sido remendada no meio.
+ *
+ * É este recorte que faz convite, aceite e confirmação valerem para a escala inteira. A alternativa
+ * seria sessenta convites para a mesma cuidadora pelo mesmo trabalho.
+ */
+export function seriesMembers(state: AppState, attendance: Attendance): Attendance[] {
+  if (!attendance.seriesId) return [attendance];
+  return state.attendances
+    .filter(
+      (a) =>
+        a.seriesId === attendance.seriesId &&
+        a.status !== "cancelled" &&
+        (!a.confirmedCaregiverId || a.id === attendance.id),
+    )
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+}
+
+function patchSeries(state: AppState, membros: Attendance[], patch: Partial<Attendance>): AppState {
+  const ids = new Set(membros.map((a) => a.id));
+  return {
+    ...state,
+    attendances: state.attendances.map((a) => (ids.has(a.id) ? { ...a, ...patch } : a)),
+  };
+}
+
+/** "a escala de 42 atendimentos" / "o atendimento" — o objeto da frase muda com o tamanho. */
+function nomeDaContratacao(membros: Attendance[]): string {
+  return membros.length > 1 ? `a escala de ${membros.length} atendimentos` : "o atendimento";
+}
+
+/**
+ * R4 aplicada à contratação inteira: basta um dia sobreposto para a escala não caber na agenda de
+ * quem aceita. Devolve o primeiro conflito, que é o que a mensagem precisa citar.
+ */
+function conflitoNaSerie(
+  state: AppState,
+  caregiverId: string,
+  membros: Attendance[],
+): Attendance | undefined {
+  for (const membro of membros) {
+    const conflito = conflictingAttendance(state, caregiverId, membro);
+    if (conflito) return conflito;
+  }
+  return undefined;
+}
+
+function erroDeConflito(conflito: Attendance): string {
+  const data = conflito.startDate.split("-").reverse().join("/");
+  return `Você já tem um atendimento em ${data} às ${conflito.startTime} que se sobrepõe a este.`;
+}
+
 export function attendanceById(state: AppState, id: string | undefined): Attendance | undefined {
   return state.attendances.find((a) => a.id === id);
 }
@@ -90,6 +146,8 @@ export function sendInvitation(state: AppState, attendanceId: string, caregiverI
   );
   if (already) return state;
 
+  const membros = seriesMembers(state, target);
+
   const invitation: Invitation = {
     id: `iv_${Date.now()}`,
     attendanceId,
@@ -99,10 +157,24 @@ export function sendInvitation(state: AppState, attendanceId: string, caregiverI
   };
 
   const next: AppState = { ...state, invitations: [...state.invitations, invitation] };
-  const withStatus =
-    target.status === "open" ? patchAttendance(next, attendanceId, { status: "invited" }) : next;
+  /* O convite é um só, mas ele compromete todos os dias da escala: os que ainda estavam "em busca"
+     passam a "convidado" juntos, senão a lista da empresa mostraria a mesma escala metade
+     convidada e metade em aberto. */
+  const withStatus = patchSeries(
+    next,
+    membros.filter((a) => a.status === "open"),
+    { status: "invited" },
+  );
 
-  return notify(withStatus, "caregiver", caregiverId, "invitation", "Você recebeu um convite para um atendimento.");
+  return notify(
+    withStatus,
+    "caregiver",
+    caregiverId,
+    "invitation",
+    membros.length > 1
+      ? `Você recebeu um convite para uma escala de ${membros.length} atendimentos.`
+      : "Você recebeu um convite para um atendimento.",
+  );
 }
 
 export function setOpenApplications(state: AppState, attendanceId: string, open: boolean): AppState {
@@ -126,7 +198,7 @@ export function openOpportunities(state: AppState, caregiverId: string | undefin
     .filter((ap) => ap.caregiverId === caregiverId)
     .map((ap) => ap.attendanceId);
 
-  return state.attendances.filter(
+  const abertos = state.attendances.filter(
     (a) =>
       a.openApplications &&
       a.status !== "cancelled" &&
@@ -134,6 +206,16 @@ export function openOpportunities(state: AppState, caregiverId: string | undefin
       !appliedTo.includes(a.id) &&
       isInRoster(state, a.companyId, caregiverId),
   );
+
+  /* Uma escala é uma oportunidade, não sessenta: o cuidador se candidata à contratação inteira,
+     então só o primeiro dia de cada série entra na lista. */
+  const seriesVistas = new Set<string>();
+  return abertos.filter((a) => {
+    if (!a.seriesId) return true;
+    if (seriesVistas.has(a.seriesId)) return false;
+    seriesVistas.add(a.seriesId);
+    return true;
+  });
 }
 
 export function caregiverConfirmedAttendances(state: AppState, caregiverId: string | undefined): Attendance[] {
@@ -152,7 +234,11 @@ function addApplication(state: AppState, attendanceId: string, caregiverId: stri
     createdAt: new Date().toISOString(),
   };
   const next: AppState = { ...state, applications: [...state.applications, application] };
-  return patchAttendance(next, attendanceId, { status: "applications_received" });
+  const alvo = attendanceById(next, attendanceId);
+  if (!alvo) return next;
+
+  // Uma candidatura por contratação, e o estado acompanha a escala inteira.
+  return patchSeries(next, seriesMembers(next, alvo), { status: "applications_received" });
 }
 
 export interface ActionResult {
@@ -166,12 +252,10 @@ export function acceptInvitation(state: AppState, invitationId: string): ActionR
   const attendance = attendanceById(state, invitation?.attendanceId);
   if (!invitation || !attendance) return { nextState: state };
 
-  const conflict = conflictingAttendance(state, invitation.caregiverId, attendance);
+  const membros = seriesMembers(state, attendance);
+  const conflict = conflitoNaSerie(state, invitation.caregiverId, membros);
   if (conflict) {
-    return {
-      nextState: state,
-      error: `Você já tem um atendimento em ${conflict.startDate.split("-").reverse().join("/")} às ${conflict.startTime} que se sobrepõe a este.`,
-    };
+    return { nextState: state, error: erroDeConflito(conflict) };
   }
 
   const withInvitation: AppState = {
@@ -182,7 +266,13 @@ export function acceptInvitation(state: AppState, invitationId: string): ActionR
   };
   const next = addApplication(withInvitation, attendance.id, invitation.caregiverId);
   return {
-    nextState: notify(next, "company", attendance.companyId, "application", "Um cuidador aceitou o convite e aguarda confirmação."),
+    nextState: notify(
+      next,
+      "company",
+      attendance.companyId,
+      "application",
+      `Um cuidador aceitou o convite para ${nomeDaContratacao(membros)} e aguarda confirmação.`,
+    ),
   };
 }
 
@@ -205,7 +295,7 @@ export function rejectInvitation(state: AppState, invitationId: string): AppStat
   const hasApplications = attendanceApplications(next, attendance.id).length > 0;
   const restored =
     !stillPending && !hasApplications && attendance.status === "invited"
-      ? patchAttendance(next, attendance.id, { status: "open" })
+      ? patchSeries(next, seriesMembers(next, attendance), { status: "open" })
       : next;
 
   return notify(restored, "company", attendance.companyId, "application", "Um cuidador recusou o convite.");
@@ -224,12 +314,9 @@ export function applyToOpenAttendance(
     return { nextState: state, error: "Esta empresa ainda não aprovou seu cadastro." };
   }
 
-  const conflict = conflictingAttendance(state, caregiverId, attendance);
+  const conflict = conflitoNaSerie(state, caregiverId, seriesMembers(state, attendance));
   if (conflict) {
-    return {
-      nextState: state,
-      error: `Você já tem um atendimento em ${conflict.startDate.split("-").reverse().join("/")} às ${conflict.startTime} que se sobrepõe a este.`,
-    };
+    return { nextState: state, error: erroDeConflito(conflict) };
   }
 
   const next = addApplication(state, attendanceId, caregiverId);
@@ -257,7 +344,10 @@ export function confirmApplication(state: AppState, applicationId: string): AppS
     }),
   };
 
-  next = patchAttendance(next, attendance.id, {
+  /* A confirmação é da contratação, não do dia: a escala inteira passa a ter dono, e é isso que
+     enche a agenda da cuidadora de segunda a sexta. Cada dia segue com o próprio check-in. */
+  const membros = seriesMembers(next, attendance);
+  next = patchSeries(next, membros, {
     status: "confirmed",
     confirmedCaregiverId: application.caregiverId,
   });
@@ -267,7 +357,9 @@ export function confirmApplication(state: AppState, applicationId: string): AppS
     "caregiver",
     application.caregiverId,
     "confirmation",
-    "Você foi confirmado! O endereço completo já está disponível.",
+    membros.length > 1
+      ? `Você foi confirmado para a escala de ${membros.length} atendimentos! O endereço completo já está disponível.`
+      : "Você foi confirmado! O endereço completo já está disponível.",
   );
 
   for (const other of others) {

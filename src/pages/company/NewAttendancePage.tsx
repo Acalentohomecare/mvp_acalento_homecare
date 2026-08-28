@@ -26,11 +26,18 @@ import {
   ATTENDANCE_TYPE_LABEL,
   ATTENDANCE_TYPE_ORDER,
 } from "../../constants/attendance";
-import { companyAttendances, createAttendance, todayISO } from "../../services/attendances";
+import {
+  ESCALA_MAX_ATENDIMENTOS,
+  companyAttendances,
+  createAttendance,
+  createAttendanceSeries,
+  datasDaEscala,
+  todayISO,
+} from "../../services/attendances";
 import { allActivities, createCustomActivity } from "../../services/activities";
 import { companyPatients, createPatient, splitAddress } from "../../services/patients";
 import { formatCurrency } from "../../utils/format";
-import { dataCompleta } from "../../utils/date";
+import { DIAS_DA_SEMANA, dataCompleta, rotuloDosDias } from "../../utils/date";
 import type { AttendanceType, CaregiverCategory } from "../../types";
 import { MOBILE_ACTION_BAR, MOBILE_ACTION_SPACER, PAGE_WORK } from "../../components/layout/page";
 
@@ -61,7 +68,9 @@ export function NewAttendancePage() {
   const [startTime, setStartTime] = useState("07:00");
   const [durationHours, setDurationHours] = useState("12");
   const [recurring, setRecurring] = useState(false);
-  const [recurrenceDescription, setRecurrenceDescription] = useState("");
+  /* Dias da semana no índice de `Date.getDay()` — 0 é domingo, como em `DIAS_DA_SEMANA`. */
+  const [diasDaEscala, setDiasDaEscala] = useState<number[]>([]);
+  const [escalaAte, setEscalaAte] = useState("");
   const [activityIds, setActivityIds] = useState<string[]>([]);
   const [requiredCategory, setRequiredCategory] = useState<CaregiverCategory | "">("");
   const [value, setValue] = useState("180");
@@ -93,6 +102,10 @@ export function NewAttendancePage() {
     .filter((a) => a.status !== "draft")
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 5);
+
+  /* A prévia da escala é a mesma conta que a publicação vai fazer — não uma estimativa paralela.
+     Enquanto faltar dia ou data de término ela devolve lista vazia, e a prévia some sozinha. */
+  const datasDaSerie = recurring ? datasDaEscala(startDate, escalaAte, diasDaEscala) : [];
 
   const isNewPatient = patientId === NEW_PATIENT;
   const selectedPatient = patients.find((p) => p.id === patientId);
@@ -144,8 +157,19 @@ export function NewAttendancePage() {
     setNumber(source.number);
     setStartTime(source.startTime);
     setDurationHours(String(source.durationHours));
-    setRecurring(source.recurring);
-    setRecurrenceDescription(source.recurrenceDescription ?? "");
+    /* Reaproveitar uma escala reaproveita o formato dela — os dias da semana que ela ocupa —,
+       nunca o período: repetir a data de término de uma escala que já acabou publicaria zero
+       atendimentos. Quem repete uma escala está começando outra. */
+    const daSerie = source.seriesId
+      ? state.attendances.filter((a) => a.seriesId === source.seriesId)
+      : [];
+    setRecurring(daSerie.length > 1);
+    setDiasDaEscala(
+      daSerie.length > 1
+        ? [...new Set(daSerie.map((a) => new Date(`${a.startDate}T12:00`).getDay()))]
+        : [],
+    );
+    setEscalaAte("");
     setActivityIds(source.activityIds);
     setRequiredCategory(source.requiredCategory);
     setValue(String(source.value));
@@ -158,6 +182,14 @@ export function NewAttendancePage() {
     if (isNewPatient && (!pName.trim() || !pAge)) return setError("Informe nome e idade do paciente.");
     if (!neighborhood.trim() || !street.trim()) return setError("Informe o endereço do atendimento.");
     if (!startDate || !startTime) return setError("Informe data e horário.");
+    if (recurring) {
+      if (diasDaEscala.length === 0) return setError("Escolha os dias da semana da escala.");
+      if (!escalaAte) return setError("Informe até quando a escala vai.");
+      if (escalaAte < startDate) return setError("A escala não pode terminar antes de começar.");
+      if (datasDaSerie.length === 0) {
+        return setError("Nenhum dia da semana escolhido cai dentro desse período.");
+      }
+    }
     if (!requiredCategory) return setError("Escolha o perfil necessário para o atendimento.");
     if (activityIds.length === 0) return setError("Marque pelo menos uma atividade.");
     if (!Number(value)) return setError("Informe o valor oferecido.");
@@ -186,34 +218,44 @@ export function NewAttendancePage() {
         finalPatientId = created.patient.id;
       }
 
-      return createAttendance(
-        next,
-        {
-          companyId: company!.id,
-          patientId: finalPatientId,
-          type,
-          neighborhood: neighborhood.trim(),
-          street: street.trim(),
-          number: number.trim(),
-          startDate,
-          startTime,
-          durationHours: Number(durationHours) || 1,
-          recurring,
-          recurrenceDescription: recurrenceDescription.trim() || undefined,
-          activityIds,
-          requiredCategory: requiredCategory as CaregiverCategory,
-          value: Number(value),
-        },
-        publish,
-      ).nextState;
+      const dados = {
+        companyId: company!.id,
+        patientId: finalPatientId,
+        type,
+        neighborhood: neighborhood.trim(),
+        street: street.trim(),
+        number: number.trim(),
+        startDate,
+        startTime,
+        durationHours: Number(durationHours) || 1,
+        recurring,
+        activityIds,
+        requiredCategory: requiredCategory as CaregiverCategory,
+        value: Number(value),
+      };
+
+      return recurring
+        ? createAttendanceSeries(next, dados, publish, {
+            diasDaSemana: diasDaEscala,
+            ate: escalaAte,
+          }).nextState
+        : createAttendance(next, dados, publish).nextState;
     });
 
     // A ação leva para outra tela: sem o aviso, quem publica não vê confirmação nenhuma do que
     // acabou de fazer (DESIGN_SYSTEM.md, seção 8.4).
+    /* O aviso conta o que foi criado. Publicar uma escala cria dezenas de atendimentos de uma vez
+       e a tela seguinte é outra: sem o número aqui, a pessoa só descobre o tamanho do que fez
+       rolando a lista. */
+    const quantos = datasDaSerie.length;
     avisar(
       publish
-        ? "Atendimento publicado. Já aparece para os cuidadores compatíveis."
-        : "Rascunho salvo.",
+        ? recurring
+          ? `Escala publicada: ${quantos} ${quantos === 1 ? "atendimento" : "atendimentos"} até ${dataCompleta(escalaAte)}.`
+          : "Atendimento publicado. Já aparece para os cuidadores compatíveis."
+        : recurring
+          ? `Rascunho da escala salvo: ${quantos} ${quantos === 1 ? "atendimento" : "atendimentos"}.`
+          : "Rascunho salvo.",
     );
     navigate(publish ? "/empresa" : "/empresa/atendimentos");
   };
@@ -390,19 +432,81 @@ export function NewAttendancePage() {
           />
         </div>
 
+        {/*
+          Escala fixa — "12h de segunda a sexta, até dezembro".
+
+          Era um campo de texto livre ("Ex.: Seg/Qua/Sex às 15h por 30 dias") que o sistema não
+          lia: a agenda continuava com um dia só e o check-in, um só para meses de trabalho. Os
+          dois campos abaixo são o que a publicação usa para **gerar** os dias, e por isso a
+          prévia conta exatamente quantos atendimentos vão nascer daqui.
+
+          A data de término é obrigatória de propósito. Escala sem fim geraria uma série que
+          ninguém consegue encerrar depois; quem precisa de mais tempo publica de novo.
+        */}
         <div>
           <Check
-            label="Repete (não é atendimento único)"
+            label="Repete em dias fixos da semana (escala)"
             checked={recurring}
             onChange={() => setRecurring((v) => !v)}
           />
           {recurring && (
-            <div className="mt-2">
+            /* Mesma moldura quieta do bloco de "nova atividade": fundo rebaixado e fio de
+               1px. É o recurso que este formulário já usa para dizer "estes campos são
+               deste controle", e repeti-lo evita inventar um segundo idioma para a
+               mesma ideia. */
+            <div className="mt-3 flex flex-col gap-3 rounded-card border border-linha bg-surface-sunken/60 p-3.5">
+              <Field label="Dias da semana">
+                <div className="flex flex-wrap gap-1.5">
+                  {DIAS_DA_SEMANA.map((nome, indice) => (
+                    <Chip
+                      key={nome}
+                      modo="multiplo"
+                      selecionado={diasDaEscala.includes(indice)}
+                      onClick={() =>
+                        setDiasDaEscala((prev) =>
+                          prev.includes(indice)
+                            ? prev.filter((d) => d !== indice)
+                            : [...prev, indice],
+                        )
+                      }
+                    >
+                      {nome}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
+
               <Input
-                value={recurrenceDescription}
-                onChange={(e) => setRecurrenceDescription(e.target.value)}
-                placeholder="Ex.: Seg/Qua/Sex às 15h por 30 dias"
+                label="Repete até"
+                type="date"
+                min={startDate}
+                value={escalaAte}
+                onChange={(e) => setEscalaAte(e.target.value)}
+                className="sm:max-w-56"
               />
+
+              <p className="text-meta text-ink-subtle">
+                {datasDaSerie.length > 0 ? (
+                  <>
+                    Serão publicados{" "}
+                    <span className="numero font-semibold text-ink">{datasDaSerie.length}</span>{" "}
+                    {datasDaSerie.length === 1 ? "atendimento" : "atendimentos"} ·{" "}
+                    {rotuloDosDias(diasDaEscala)} às <span className="numero">{startTime}</span> ·{" "}
+                    <span className="numero">
+                      {dataCompleta(datasDaSerie[0])} → {dataCompleta(datasDaSerie[datasDaSerie.length - 1])}
+                    </span>
+                    {datasDaSerie.length === ESCALA_MAX_ATENDIMENTOS && (
+                      <>
+                        {" "}
+                        — teto de {ESCALA_MAX_ATENDIMENTOS} por publicação; o resto do período
+                        entra numa próxima escala.
+                      </>
+                    )}
+                  </>
+                ) : (
+                  "Escolha os dias da semana e até quando a escala vai."
+                )}
+              </p>
             </div>
           )}
         </div>
@@ -540,6 +644,19 @@ export function NewAttendancePage() {
             <Dado termo="Duração">
               <span className="numero">{durationHours}h</span>
             </Dado>
+            {recurring && (
+              <Dado termo="Escala">
+                {datasDaSerie.length > 0 ? (
+                  <>
+                    {rotuloDosDias(diasDaEscala)} ·{" "}
+                    <span className="numero">{datasDaSerie.length}</span>{" "}
+                    {datasDaSerie.length === 1 ? "dia" : "dias"}
+                  </>
+                ) : (
+                  <span className="text-ink-subtle">sem período definido</span>
+                )}
+              </Dado>
+            )}
             <Dado termo="Bairro">{neighborhood.trim() || "—"}</Dado>
             <Dado termo="Atividades">
               {activityIds.length === 0 ? (

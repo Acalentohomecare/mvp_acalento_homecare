@@ -124,6 +124,28 @@ export function diaDaSemana(iso: string): string {
 }
 
 /**
+ * Os dias de uma escala em uma frase: `Seg a Sex`, `Seg, Qua e Sex`, `Todos os dias`.
+ *
+ * A forma de intervalo só entra a partir de três dias corridos, que é onde ela ganha da lista:
+ * "Seg a Sex" cabe onde "Seg, Ter, Qua, Qui e Sex" quebra a linha da tabela. Com dois dias, o
+ * intervalo economizaria nada e ainda esconderia que são exatamente dois.
+ */
+export function rotuloDosDias(dias: number[]): string {
+  const ordenados = [...new Set(dias)].sort((a, b) => a - b);
+  if (ordenados.length === 0) return "";
+  if (ordenados.length === 7) return "Todos os dias";
+
+  const corrido = ordenados.every((d, i) => i === 0 || d === ordenados[i - 1] + 1);
+  if (corrido && ordenados.length >= 3) {
+    return `${DIAS_DA_SEMANA[ordenados[0]]} a ${DIAS_DA_SEMANA[ordenados[ordenados.length - 1]]}`;
+  }
+
+  const nomes = ordenados.map((d) => DIAS_DA_SEMANA[d]);
+  if (nomes.length === 1) return nomes[0];
+  return `${nomes.slice(0, -1).join(", ")} e ${nomes[nomes.length - 1]}`;
+}
+
+/**
  * Cabeçalho de grupo da agenda: `Hoje`, `Amanhã` ou `Ter, 14/03`.
  *
  * "Hoje" e "amanhã" não são enfeite: numa escala, os dois primeiros dias são os que a pessoa

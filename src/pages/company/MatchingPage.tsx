@@ -23,7 +23,9 @@ import {
   attendanceInvitations,
   sendInvitation,
   setOpenApplications,
+  seriesMembers,
 } from "../../services/invitations";
+import { resumoDaSerie, rotuloDaSerie } from "../../services/attendances";
 import { formatCurrency, formatRating } from "../../utils/format";
 import { rotuloDoDia } from "../../utils/date";
 import type { Shift } from "../../types";
@@ -56,6 +58,10 @@ export function MatchingPage() {
 
   const patient = state.patients.find((p) => p.id === attendance.patientId);
   const required = attendance.requiredCategory;
+  /* O que está sendo oferecido aqui pode não ser um dia: convidar para uma escala compromete a
+     contratação inteira, e quem envia o convite precisa ler isso antes de clicar. */
+  const membrosDaSerie = seriesMembers(state, attendance);
+  const serie = membrosDaSerie.length > 1 ? resumoDaSerie(membrosDaSerie) : null;
   const invitations = attendanceInvitations(state, attendance.id);
   const invitedIds = invitations.filter((i) => i.status !== "rejected").map((i) => i.caregiverId);
   const todos = compatibleCaregivers(state, attendance);
@@ -73,6 +79,11 @@ export function MatchingPage() {
         </span>{" "}
         · {attendance.neighborhood}
       </p>
+      {serie && (
+        <p className="prosa mt-1.5 text-note text-ink-muted">
+          {rotuloDaSerie(serie)} — o convite vale para a escala inteira.
+        </p>
+      )}
 
       {/*
         Contexto do recorte, numa faixa só. Eram dois cards empilhados — um para o perfil exigido,

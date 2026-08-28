@@ -83,8 +83,8 @@ export function CaregiverSchedulePage() {
   const noMes = plantoes.filter((a) => a.startDate.startsWith(mes)).length;
   const resumo =
     noMes === 0
-      ? `Nenhum plantão em ${rotuloMes(mes)}.`
-      : `${noMes} ${noMes === 1 ? "plantão" : "plantões"} em ${rotuloMes(mes)}.`;
+      ? `Nenhum atendimento em ${rotuloMes(mes)}.`
+      : `${noMes} ${noMes === 1 ? "atendimento" : "atendimentos"} em ${rotuloMes(mes)}.`;
 
   return (
     <div className={PAGE_LIST}>
@@ -97,7 +97,7 @@ export function CaregiverSchedulePage() {
         selecionado={selecionado}
         hoje={hoje}
         marcas={marcas}
-        nomeMarca={["plantão", "plantões"]}
+        nomeMarca={["atendimento", "atendimentos"]}
         onSelecionar={setSelecionado}
         onMudarMes={setMes}
       />
@@ -112,8 +112,8 @@ export function CaregiverSchedulePage() {
         {doDia.length === 0 ? (
           <Vazio porte="solto">
             {selecionado === hoje
-              ? "Você não tem plantão hoje."
-              : "Você não tem plantão neste dia."}
+              ? "Você não tem atendimento hoje."
+              : "Você não tem atendimento neste dia."}
           </Vazio>
         ) : (
           <AttendanceList variant="fluxo">

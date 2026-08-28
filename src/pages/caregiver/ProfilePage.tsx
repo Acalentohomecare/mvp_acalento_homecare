@@ -176,7 +176,7 @@ export function CaregiverProfilePage() {
               onChange={(e) => setExperienceYears(e.target.value)}
             />
             <Input
-              label="Valor por plantão (R$)"
+              label="Valor por atendimento (R$)"
               type="number"
               min={0}
               value={shiftRate}

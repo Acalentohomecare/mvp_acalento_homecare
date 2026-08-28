@@ -45,6 +45,7 @@ import { formatCurrency } from "../../utils/format";
 import { carimbo, dataCompleta, rotuloDoDia } from "../../utils/date";
 import { MOBILE_ACTION_BAR, MOBILE_ACTION_SPACER, PAGE_WORK } from "../../components/layout/page";
 import { voltarPara } from "../../constants/origem";
+import { resumoDaSerie } from "../../services/attendances";
 
 /**
  * Nota de 1 a 5 (docs/DESIGN_SYSTEM.md, seção 11).
@@ -158,6 +159,14 @@ export function AttendanceDetailPage() {
 
   const patient = state.patients.find((p) => p.id === attendance.patientId);
   const caregiver = state.caregivers.find((c) => c.id === attendance.confirmedCaregiverId);
+
+  /* A escala vista de dentro de um dos seus dias. Aqui entram todos os membros, inclusive os
+     cancelados: "dia 3 de 42" precisa contar o contrato inteiro, não o que sobrou dele. */
+  const membrosDaSerie = attendance.seriesId
+    ? state.attendances.filter((a) => a.seriesId === attendance.seriesId)
+    : [];
+  const serie = membrosDaSerie.length > 1 ? resumoDaSerie(membrosDaSerie) : null;
+  const diaNaSerie = serie ? serie.membros.findIndex((m) => m.id === attendance.id) + 1 : 0;
   const record = attendanceRecord(state, attendance.id);
   const locked = isRecordLocked(record);
   const showAddress = role === "company" || canSeeFullAddress(attendance, session?.caregiverId);
@@ -322,8 +331,19 @@ export function AttendanceDetailPage() {
               <Dado termo="Valor">
                 <span className="numero">{formatCurrency(attendance.value)}</span>
               </Dado>
-              {attendance.recurring && (
-                <Dado termo="Repetição">{attendance.recurrenceDescription ?? "Recorrente"}</Dado>
+              {/* Numa escala, o dado que falta na ficha não é "repete": é **qual** dia deste
+                  contrato é este. Sem o "dia 3 de 42", quem abre a ficha não sabe se está no
+                  começo ou no fim da contratação, e o check-in de hoje parece solto. */}
+              {serie ? (
+                <Dado termo="Escala">
+                  {serie.rotuloDias} · dia <span className="numero">{diaNaSerie}</span> de{" "}
+                  <span className="numero">{serie.membros.length}</span> · até{" "}
+                  <span className="numero">{dataCompleta(serie.ate)}</span>
+                </Dado>
+              ) : (
+                attendance.recurring && (
+                  <Dado termo="Repetição">{attendance.recurrenceDescription ?? "Recorrente"}</Dado>
+                )
               )}
             </ListaDeDados>
           </Painel>

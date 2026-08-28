@@ -24,10 +24,12 @@ import {
   caregiverInvitations,
   openOpportunities,
   rejectInvitation,
+  seriesMembers,
 } from "../../services/invitations";
+import { resumoDaSerie } from "../../services/attendances";
 import { compatibleCaregivers } from "../../services/matching";
 import { formatCurrency } from "../../utils/format";
-import { rotuloDoDia } from "../../utils/date";
+import { dataCompleta, rotuloDoDia } from "../../utils/date";
 import type { Attendance } from "../../types";
 import { PAGE_LIST } from "../../components/layout/page";
 
@@ -51,6 +53,13 @@ export function CaregiverInvitationsPage() {
 
   const patientName = (id: string) => state.patients.find((p) => p.id === id)?.name ?? "Paciente";
 
+  /* O botão precisa dizer o tamanho do compromisso. "Aceitar atendimento" numa escala de 42 dias
+     seria a mesma frase para duas decisões muito diferentes. */
+  const aceitarRotulo = (a: Attendance) => {
+    const membros = seriesMembers(state, a);
+    return membros.length > 1 ? `Aceitar a escala (${membros.length} dias)` : "Aceitar atendimento";
+  };
+
   /*
     A proposta — o que o cuidador precisa saber antes de aceitar um plantão.
 
@@ -61,7 +70,14 @@ export function CaregiverInvitationsPage() {
     O endereço trancado continua com cadeado — ali o ícone **carrega significado** ("isto abre
     quando você aceitar"), que é o único caso em que ícone entrou de volta nesta revisão.
   */
-  const proposta = (a: Attendance): ReactNode => (
+  const serieDe = (a: Attendance) => {
+    const membros = seriesMembers(state, a);
+    return membros.length > 1 ? resumoDaSerie(membros) : null;
+  };
+
+  const proposta = (a: Attendance): ReactNode => {
+    const serie = serieDe(a);
+    return (
     <>
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
         <div className="min-w-0">
@@ -79,6 +95,15 @@ export function CaregiverInvitationsPage() {
             {rotuloDoDia(a.startDate)} · {a.startTime}
           </span>
         </Dado>
+        {/* A linha mais importante do convite de uma escala: aceitar não compromete uma terça,
+            compromete todas elas até dezembro. Sem isto na proposta, a decisão é tomada às
+            cegas. */}
+        {serie && (
+          <Dado termo="Escala">
+            {serie.rotuloDias} · <span className="numero">{serie.membros.length}</span> atendimentos
+            · até <span className="numero">{dataCompleta(serie.ate)}</span>
+          </Dado>
+        )}
         <Dado termo="Onde">
           {canSeeFullAddress(a, caregiverId) ? (
             <>
@@ -93,10 +118,19 @@ export function CaregiverInvitationsPage() {
         </Dado>
         <Dado termo="Valor">
           <span className="numero font-medium">{formatCurrency(a.value)}</span>
+          {serie && (
+            <span className="text-ink-subtle">
+              {" "}
+              por dia ·{" "}
+              <span className="numero">{formatCurrency(a.value * serie.membros.length)}</span> na
+              escala
+            </span>
+          )}
         </Dado>
       </ListaDeDados>
     </>
-  );
+    );
+  };
 
   return (
     <div className={PAGE_LIST}>
@@ -134,7 +168,7 @@ export function CaregiverInvitationsPage() {
                           setState(result.nextState);
                         }}
                       >
-                        Aceitar plantão
+                        {aceitarRotulo(attendance)}
                       </Button>
                       <Button
                         size="sm"

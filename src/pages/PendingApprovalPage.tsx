@@ -44,7 +44,7 @@ export function PendingApprovalPage() {
       <p className="mt-2 prosa text-body text-ink-muted">
         {decision
           ? `${decision.companyName}: ${decision.reason ?? "documento não aprovado."}`
-          : "As empresas estão conferindo seus documentos. Assim que uma delas aprovar seu cadastro, você passa a receber convites para os plantões."}
+          : "As empresas estão conferindo seus documentos. Assim que uma delas aprovar seu cadastro, você passa a receber convites para os atendimentos."}
       </p>
       <Button variant="ghost" className="mt-6" onClick={handleBack}>
         Voltar à entrada

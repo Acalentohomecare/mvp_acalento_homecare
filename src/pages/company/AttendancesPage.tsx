@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Plus, SlidersHorizontal, X } from "lucide-react";
 import {
@@ -11,9 +11,15 @@ import {
 } from "../../components/ui";
 import { AttendanceList, AttendanceRow } from "../../components/shared/AttendanceRow";
 import { AttendanceOpenActions } from "../../components/shared/AttendanceOpenActions";
+import { VerDiasDaEscala } from "../../components/shared/SerieDias";
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
-import { companyAttendances, isAwaitingCaregiver } from "../../services/attendances";
+import {
+  agruparPorSerie,
+  companyAttendances,
+  isAwaitingCaregiver,
+  rotuloDaSerie,
+} from "../../services/attendances";
 import { companyPatients } from "../../services/patients";
 import type { Attendance } from "../../types";
 import { PAGE_LIST } from "../../components/layout/page";
@@ -48,6 +54,67 @@ function matches(attendance: Attendance, filter: Filter): boolean {
   }
 }
 
+/**
+ * A linha da lista de Atendimentos.
+ *
+ * Existe para que três coisas sejam **a mesma linha**: o atendimento avulso, o resumo de uma
+ * escala e um dia aberto dentro dela. Eram três chamadas de `<AttendanceRow>` com os mesmos oito
+ * argumentos, e a primeira mudança em uma delas já teria divergido das outras.
+ */
+function Linha({
+  atendimento,
+  patientName,
+  caregiverName,
+  applicationsCount,
+  nota,
+  extra,
+  dentroDaEscala = false,
+}: {
+  atendimento: Attendance;
+  patientName: string;
+  caregiverName?: string;
+  applicationsCount: number;
+  /** Camada 4 — usada pelo resumo da escala para dizer formato, tamanho e período. */
+  nota?: string;
+  /** Ação a mais na camada 5, hoje o botão que abre os dias da escala. */
+  extra?: ReactNode;
+  dentroDaEscala?: boolean;
+}) {
+  /* Ação rápida só onde existe ação: o atendimento que ainda espera cuidador. Antes ela aparecia
+     em quase toda linha — inclusive nas concluídas, onde "Candidaturas" é arquivo e não próximo
+     passo — e cada linha ganhava 30px de altura por um link que ninguém ia clicar. Dentro da
+     escala aberta ela também não entra: quem decide é a contratação, não o dia. */
+  const acoes =
+    !dentroDaEscala && isAwaitingCaregiver(atendimento) ? (
+      <AttendanceOpenActions attendance={atendimento} applicationsCount={applicationsCount} />
+    ) : null;
+
+  return (
+    <AttendanceRow
+      attendance={atendimento}
+      to={`/empresa/atendimentos/${atendimento.id}`}
+      state={DE_ATENDIMENTOS}
+      patientName={patientName}
+      caregiverName={caregiverName}
+      caregiverId={atendimento.confirmedCaregiverId}
+      note={nota}
+      actions={
+        acoes || extra ? (
+          <>
+            {acoes}
+            {acoes && extra && (
+              <span aria-hidden="true" className="text-ink-subtle/70 select-none">
+                ·
+              </span>
+            )}
+            {extra}
+          </>
+        ) : null
+      }
+    />
+  );
+}
+
 export function CompanyAttendancesPage() {
   const { session } = useSession();
   const { state } = useAppState();
@@ -62,6 +129,9 @@ export function CompanyAttendancesPage() {
   const [dateTo, setDateTo] = useState("");
   /* Só governa o celular: a partir de `md` a busca e o período ficam sempre visíveis. */
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  /* Escalas abertas na lista. Fechadas por padrão: a lista responde "o que está em pé", e uma
+     escala é um item só até alguém querer olhar dia a dia. */
+  const [escalasAbertas, setEscalasAbertas] = useState<string[]>([]);
 
   const all = useMemo(
     () =>
@@ -109,6 +179,14 @@ export function CompanyAttendancesPage() {
     label: f.label,
     count: noRecorte.filter((a) => matches(a, f.key)).length,
   }));
+
+  const contarCandidaturas = (attendanceId: string) =>
+    state.applications.filter((ap) => ap.attendanceId === attendanceId).length;
+
+  const alternarEscala = (seriesId: string) =>
+    setEscalasAbertas((prev) =>
+      prev.includes(seriesId) ? prev.filter((id) => id !== seriesId) : [...prev, seriesId],
+    );
 
   const limparFiltros = () => {
     setQuery("");
@@ -218,30 +296,50 @@ export function CompanyAttendancesPage() {
             </Vazio>
           </li>
         ) : (
-          visible.map((a) => {
-            const applications = state.applications.filter((ap) => ap.attendanceId === a.id).length;
-            return (
-              <AttendanceRow
-                key={a.id}
-                attendance={a}
-                to={`/empresa/atendimentos/${a.id}`}
-                state={DE_ATENDIMENTOS}
-                patientName={patientName(a.patientId)}
-                caregiverName={caregiverName(a.confirmedCaregiverId)}
-                caregiverId={a.confirmedCaregiverId}
-                /* Ação rápida só onde existe ação: o plantão que ainda espera cuidador.
-                   Antes ela aparecia em quase toda linha — inclusive nas concluídas, onde
-                   "Candidaturas" é arquivo e não próximo passo — e cada linha ganhava 30px de
-                   altura por um link que ninguém ia clicar. Com o recorte, a lista volta a ter
-                   56px por registro e a linha mais alta passa a significar alguma coisa. */
-                actions={
-                  isAwaitingCaregiver(a) ? (
-                    <AttendanceOpenActions attendance={a} applicationsCount={applications} />
-                  ) : null
-                }
+          agruparPorSerie(visible).map((linha) =>
+            linha.tipo === "atendimento" ? (
+              <Linha
+                key={linha.atendimento.id}
+                atendimento={linha.atendimento}
+                patientName={patientName(linha.atendimento.patientId)}
+                caregiverName={caregiverName(linha.atendimento.confirmedCaregiverId)}
+                applicationsCount={contarCandidaturas(linha.atendimento.id)}
               />
-            );
-          })
+            ) : (
+              /* A escala ocupa uma linha só — a do próximo dia — e abre no lugar. Sem isso, uma
+                 escala de sessenta dias seria a lista inteira, e a pergunta que a tela responde
+                 ("o que está em pé?") não teria mais onde caber. */
+              <Fragment key={linha.serie.seriesId}>
+                <Linha
+                  atendimento={linha.serie.representante}
+                  patientName={patientName(linha.serie.representante.patientId)}
+                  caregiverName={caregiverName(linha.serie.representante.confirmedCaregiverId)}
+                  applicationsCount={contarCandidaturas(linha.serie.representante.id)}
+                  nota={rotuloDaSerie(linha.serie)}
+                  extra={
+                    <VerDiasDaEscala
+                      total={linha.serie.membros.length}
+                      aberta={escalasAbertas.includes(linha.serie.seriesId)}
+                      onToggle={() => alternarEscala(linha.serie.seriesId)}
+                    />
+                  }
+                />
+                {escalasAbertas.includes(linha.serie.seriesId) &&
+                  linha.serie.membros
+                    .filter((m) => m.id !== linha.serie.representante.id)
+                    .map((m) => (
+                      <Linha
+                        key={m.id}
+                        atendimento={m}
+                        patientName={patientName(m.patientId)}
+                        caregiverName={caregiverName(m.confirmedCaregiverId)}
+                        applicationsCount={contarCandidaturas(m.id)}
+                        dentroDaEscala
+                      />
+                    ))}
+              </Fragment>
+            ),
+          )
         )}
       </AttendanceList>
     </div>

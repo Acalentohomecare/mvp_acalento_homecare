@@ -22,6 +22,7 @@ import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import {
   activeCaregiverIds,
+  agruparPorSerie,
   applicationsToReview,
   awaitingCaregiverAttendances,
   companyAttendances,
@@ -29,6 +30,7 @@ import {
   draftAttendances,
   pendingCheckins,
   recentActivity,
+  rotuloDaSerie,
   todayAttendances,
   upcomingAttendances,
   type RecentActivityKind,
@@ -255,12 +257,12 @@ export function CompanyDashboardPage() {
               to="/empresa/atendimentos?filtro=awaiting"
               className="font-semibold text-status-aberto underline decoration-status-aberto/30 underline-offset-2 transition-colors duration-150 ease-out hover:decoration-status-aberto"
             >
-              {awaiting.length} {awaiting.length === 1 ? "plantão em aberto" : "plantões em aberto"}
+              {awaiting.length} em aberto
             </Link>{" "}
             aguardando cuidador
           </>
         ) : (
-          " — nenhum plantão em aberto no momento"
+          " — nenhum atendimento em aberto no momento"
         )}
         .
       </p>
@@ -424,10 +426,17 @@ export function CompanyDashboardPage() {
             }
           >
             {awaiting.length === 0 ? (
-              <Vazio porte="solto">Nenhum plantão aguardando cuidador.</Vazio>
+              <Vazio porte="solto">Nenhum atendimento aguardando cuidador.</Vazio>
             ) : (
               <AttendanceList variant="fluxo">
-                {awaiting.slice(0, EM_ABERTO_VISIVEIS).map((a) => {
+                {/* Agrupado por escala: a fila do Início é de **decisões**, e uma escala de
+                    sessenta dias é uma decisão só. Sem isso, as três linhas visíveis da seção
+                    seriam três dias da mesma contratação e o resto da operação sumiria. */}
+                {agruparPorSerie(awaiting)
+                  .slice(0, EM_ABERTO_VISIVEIS)
+                  .map((linha) => {
+                  const serie = linha.tipo === "serie" ? linha.serie : null;
+                  const a = linha.tipo === "serie" ? linha.serie.representante : linha.atendimento;
                   const compatible = compatibleCaregivers(state, a).length;
                   const applications = state.applications.filter(
                     (ap) => ap.attendanceId === a.id,
@@ -455,17 +464,23 @@ export function CompanyDashboardPage() {
                         cuidadores não vai resolver, aprovar alguém para o quadro vai.
                       */
                       note={
-                        compatible === 0 ? (
-                          <span className="text-status-cancelado">
-                            Nenhum cuidador compatível no quadro
-                          </span>
-                        ) : (
-                          <>
-                            <span className="numero">{compatible}</span>{" "}
-                            {compatible === 1 ? "cuidador compatível" : "cuidadores compatíveis"} no
-                            quadro
-                          </>
-                        )
+                        <>
+                          {compatible === 0 ? (
+                            <span className="text-status-cancelado">
+                              Nenhum cuidador compatível no quadro
+                            </span>
+                          ) : (
+                            <>
+                              <span className="numero">{compatible}</span>{" "}
+                              {compatible === 1 ? "cuidador compatível" : "cuidadores compatíveis"}{" "}
+                              no quadro
+                            </>
+                          )}
+                          {/* Na escala, o que está em aberto não é este dia — é a contratação
+                              inteira. Sem dizer isso, a linha promete um plantão de terça e
+                              esconde os outros quarenta e um. */}
+                          {serie && <> · {rotuloDaSerie(serie, true)}</>}
+                        </>
                       }
                       actions={
                         <AttendanceOpenActions attendance={a} applicationsCount={applications} />

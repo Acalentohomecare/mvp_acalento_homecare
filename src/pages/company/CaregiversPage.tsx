@@ -100,7 +100,7 @@ export function CompanyCaregiversPage() {
     <div className={PAGE_LIST}>
       <h1 className="text-display">Cuidadores</h1>
       <p className="prosa mt-1 text-body text-ink-subtle">
-        Só quem está no seu quadro aparece na busca e pode ser convidado para um plantão.
+        Só quem está no seu quadro aparece na busca e pode ser convidado para um atendimento.
       </p>
 
       <FilterRow className="mt-5">

@@ -6,6 +6,8 @@ import type {
   CaregiverCategory,
   Patient,
 } from "../types";
+import { dataCompleta, rotuloDosDias, somarDias } from "../utils/date";
+
 /** Tolerância antes de considerar o check-in atrasado (mesma regra da Etapa 12). */
 export const CHECKIN_TOLERANCE_MINUTES = 15;
 
@@ -246,35 +248,200 @@ export interface NewAttendanceInput {
   value: number;
 }
 
-export function createAttendance(
-  state: AppState,
+/** Campos que variam entre os dias de uma escala; o resto do atendimento é igual em todos. */
+interface DiaDaEscala {
+  id: string;
+  startDate: string;
+  seriesId?: string;
+  recurrenceDescription?: string;
+}
+
+function montarAtendimento(
   input: NewAttendanceInput,
   publish: boolean,
-): { attendance: Attendance; nextState: AppState } {
-  const attendance: Attendance = {
-    id: `at_${Date.now()}`,
+  dia: DiaDaEscala,
+  criadoEm: string,
+): Attendance {
+  return {
+    id: dia.id,
     companyId: input.companyId,
     patientId: input.patientId,
     type: input.type,
     neighborhood: input.neighborhood,
     street: input.street,
     number: input.number,
-    startDate: input.startDate,
+    startDate: dia.startDate,
     startTime: input.startTime,
     durationHours: input.durationHours,
-    recurring: input.recurring,
-    recurrenceDescription: input.recurring ? input.recurrenceDescription : undefined,
+    recurring: Boolean(dia.seriesId) || input.recurring,
+    recurrenceDescription: dia.recurrenceDescription,
+    seriesId: dia.seriesId,
     activityIds: input.activityIds,
     requiredCategory: input.requiredCategory,
     value: input.value,
     status: publish ? "open" : "draft",
     // A escolha entre convite direto e publicação aberta acontece na Etapa 9.
     openApplications: false,
-    createdAt: new Date().toISOString(),
+    createdAt: criadoEm,
   };
+}
+
+export function createAttendance(
+  state: AppState,
+  input: NewAttendanceInput,
+  publish: boolean,
+): { attendance: Attendance; nextState: AppState } {
+  const attendance = montarAtendimento(
+    input,
+    publish,
+    {
+      id: `at_${Date.now()}`,
+      startDate: input.startDate,
+      recurrenceDescription: input.recurring ? input.recurrenceDescription : undefined,
+    },
+    new Date().toISOString(),
+  );
 
   return {
     attendance,
     nextState: { ...state, attendances: [...state.attendances, attendance] },
   };
+}
+
+/* --------------------------------------------------------------- escala fixa
+
+   O arranjo mais comum do home care — "12h de segunda a sexta com a Dona Maria, por três meses"
+   — não é um atendimento longo: são sessenta atendimentos iguais. Tratá-lo como um registro só
+   quebraria tudo que é diário (check-in, registro, avaliação) e mentiria na agenda, que mostraria
+   um dia onde há três meses de trabalho.
+
+   Por isso a escala **gera** os dias na publicação. O que continua sendo evento único é a
+   contratação: convite, aceite e confirmação valem para a série inteira (ver
+   `services/invitations.ts`), porque ninguém contrata a mesma cuidadora sessenta vezes.
+*/
+
+/** Teto por publicação. Três meses de dias úteis cabem folgados, e a escala se renova publicando. */
+export const ESCALA_MAX_DIAS = 92;
+export const ESCALA_MAX_ATENDIMENTOS = 70;
+
+/** As datas que a escala ocupa: os dias da semana marcados, de `inicio` a `fim`, inclusive. */
+export function datasDaEscala(inicio: string, fim: string, diasDaSemana: number[]): string[] {
+  if (!inicio || !fim || fim < inicio || diasDaSemana.length === 0) return [];
+
+  const datas: string[] = [];
+  let dia = inicio;
+  for (let i = 0; i <= ESCALA_MAX_DIAS && dia <= fim; i += 1) {
+    if (diasDaSemana.includes(new Date(`${dia}T12:00`).getDay())) datas.push(dia);
+    if (datas.length === ESCALA_MAX_ATENDIMENTOS) break;
+    dia = somarDias(dia, 1);
+  }
+  return datas;
+}
+
+export interface EscalaInput {
+  /** 0 = domingo, como em `Date.getDay()` e em `DIAS_DA_SEMANA`. */
+  diasDaSemana: number[];
+  /** Última data que a escala pode ocupar — a "data de saída" da contratação. */
+  ate: string;
+}
+
+export function createAttendanceSeries(
+  state: AppState,
+  input: NewAttendanceInput,
+  publish: boolean,
+  escala: EscalaInput,
+): { attendances: Attendance[]; nextState: AppState } {
+  const datas = datasDaEscala(input.startDate, escala.ate, escala.diasDaSemana);
+  const criadoEm = new Date().toISOString();
+  const seriesId = `se_${Date.now()}`;
+  const descricao = `${rotuloDosDias(escala.diasDaSemana)}, até ${dataCompleta(escala.ate)}`;
+
+  const attendances = datas.map((data, i) =>
+    montarAtendimento(
+      input,
+      publish,
+      {
+        id: `at_${Date.now()}_${i}`,
+        startDate: data,
+        seriesId,
+        recurrenceDescription: descricao,
+      },
+      criadoEm,
+    ),
+  );
+
+  return {
+    attendances,
+    nextState: { ...state, attendances: [...state.attendances, ...attendances] },
+  };
+}
+
+export interface SerieResumo {
+  seriesId: string;
+  /** Todos os dias da escala presentes no recorte, em ordem de data. */
+  membros: Attendance[];
+  /** O dia que representa a escala na lista: o primeiro que ainda não passou. */
+  representante: Attendance;
+  de: string;
+  ate: string;
+  /** `Seg a Sex`, derivado dos dias que a série realmente ocupa. */
+  rotuloDias: string;
+}
+
+export function resumoDaSerie(membros: Attendance[], hoje = todayISO()): SerieResumo {
+  const ordenados = [...membros].sort(byStart);
+  const diasDaSemana = ordenados.map((a) => new Date(`${a.startDate}T12:00`).getDay());
+
+  return {
+    seriesId: ordenados[0].seriesId ?? "",
+    membros: ordenados,
+    representante: ordenados.find((a) => a.startDate >= hoje) ?? ordenados[ordenados.length - 1],
+    de: ordenados[0].startDate,
+    ate: ordenados[ordenados.length - 1].startDate,
+    rotuloDias: rotuloDosDias(diasDaSemana),
+  };
+}
+
+/**
+ * A escala em uma linha de apoio (camada 4 do registro): `Escala fixa · Seg a Sex · 42 dias · até
+ * 31/10/2026`. É o que substitui os 41 registros que a lista deixou de mostrar, então precisa
+ * dizer as três coisas que eles diziam juntos: o formato, o tamanho e até quando vai.
+ */
+export function rotuloDaSerie(serie: SerieResumo, curto = false): string {
+  const base = `Escala fixa · ${serie.rotuloDias} · ${serie.membros.length} dias`;
+  return curto ? base : `${base} · até ${dataCompleta(serie.ate)}`;
+}
+
+export type LinhaDeLista =
+  | { tipo: "atendimento"; atendimento: Attendance }
+  | { tipo: "serie"; serie: SerieResumo };
+
+/**
+ * Agrupa os dias de cada escala numa linha só, preservando a ordem da lista recebida: a série
+ * ocupa o lugar do seu primeiro membro. Sem isso, uma escala de sessenta dias empurraria todo o
+ * resto da tela para fora — e a lista de Atendimentos deixaria de responder "o que está em pé".
+ *
+ * A agenda **não** usa isto de propósito: lá a pergunta é o dia, e cada dia é uma linha.
+ */
+export function agruparPorSerie(list: Attendance[], hoje = todayISO()): LinhaDeLista[] {
+  const linhas: LinhaDeLista[] = [];
+  const vistas = new Set<string>();
+
+  for (const atendimento of list) {
+    if (!atendimento.seriesId) {
+      linhas.push({ tipo: "atendimento", atendimento });
+      continue;
+    }
+    if (vistas.has(atendimento.seriesId)) continue;
+    vistas.add(atendimento.seriesId);
+
+    const membros = list.filter((a) => a.seriesId === atendimento.seriesId);
+    linhas.push(
+      membros.length === 1
+        ? { tipo: "atendimento", atendimento: membros[0] }
+        : { tipo: "serie", serie: resumoDaSerie(membros, hoje) },
+    );
+  }
+
+  return linhas;
 }
