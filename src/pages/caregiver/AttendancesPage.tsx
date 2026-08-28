@@ -7,6 +7,7 @@ import { useSession } from "../../hooks/useSession";
 import { caregiverAttendances, isConcluded } from "../../services/attendances";
 import type { Attendance } from "../../types";
 import { PAGE_LIST } from "../../components/layout/page";
+import { DE_ATENDIMENTOS } from "../../constants/origem";
 
 /*
  * O histórico de trabalho do cuidador (CLAUDE.md §9 e §11).
@@ -210,6 +211,7 @@ export function CaregiverAttendancesPage() {
               key={a.id}
               attendance={a}
               to={`/cuidador/atendimentos/${a.id}`}
+              state={DE_ATENDIMENTOS}
               patientName={patientName(a.patientId)}
               /* Camada 4 — por qual empresa foi o plantão. O cuidador pode estar aprovado em mais
                  de uma (Sandra está nas duas), e no histórico é isso que diz com quem falar sobre

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { Camera, Lock, LogIn, LogOut, Send, Star } from "lucide-react";
 import {
   Aviso,
@@ -44,6 +44,7 @@ import { canEvaluate, createEvaluation, evaluationFor } from "../../services/eva
 import { formatCurrency } from "../../utils/format";
 import { carimbo, dataCompleta, rotuloDoDia } from "../../utils/date";
 import { MOBILE_ACTION_BAR, MOBILE_ACTION_SPACER, PAGE_WORK } from "../../components/layout/page";
+import { voltarPara } from "../../constants/origem";
 
 /**
  * Nota de 1 a 5 (docs/DESIGN_SYSTEM.md, seção 11).
@@ -110,6 +111,7 @@ function Bloco({ titulo, children }: { titulo: string; children: React.ReactNode
 
 export function AttendanceDetailPage() {
   const { attendanceId } = useParams();
+  const { state: origem } = useLocation();
   const { session } = useSession();
   const { state, setState } = useAppState();
 
@@ -131,21 +133,23 @@ export function AttendanceDetailPage() {
       ? attendance.companyId === session?.companyId
       : attendance.confirmedCaregiverId === session?.caregiverId);
 
-  const backTo = role === "company" ? "/empresa/agenda" : "/cuidador/agenda";
+  /* O "voltar" leva de volta a quem abriu a ficha — a lista, o Início ou a Agenda —, e não
+     sempre à Agenda. A origem chega no `state` do link; sem ela, a Agenda segue o padrão. */
+  const voltar = voltarPara(role, origem);
 
   /* Estado de erro com saída. Era uma frase centralizada no vazio, sem link nenhum: quem caísse
      aqui por um link velho ficava preso e só saía pelo botão do navegador. */
   if (!attendance || !belongs) {
     return (
       <div className={PAGE_WORK}>
-        <VoltarLink to={backTo}>Agenda</VoltarLink>
+        <VoltarLink to={voltar.to}>{voltar.rotulo}</VoltarLink>
         <Painel title="Atendimento não encontrado" className="mt-4">
           <p className="prosa text-note text-ink-muted">
-            Ele pode ter sido cancelado, ou não pertence a esta conta. Volte para a agenda para ver
+            Ele pode ter sido cancelado, ou não pertence a esta conta. Volte para a lista para ver
             os que estão em andamento.
           </p>
-          <ButtonLink to={backTo} size="sm" variant="ghost" className="mt-3">
-            Ir para a agenda
+          <ButtonLink to={voltar.to} size="sm" variant="ghost" className="mt-3">
+            Ir para {voltar.rotulo}
           </ButtonLink>
         </Painel>
       </div>
@@ -236,7 +240,7 @@ export function AttendanceDetailPage() {
 
   return (
     <div className={PAGE_WORK}>
-      <VoltarLink to={backTo}>Agenda</VoltarLink>
+      <VoltarLink to={voltar.to}>{voltar.rotulo}</VoltarLink>
 
       {/* ---------------------------------------------------------- cabeçalho */}
       <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">

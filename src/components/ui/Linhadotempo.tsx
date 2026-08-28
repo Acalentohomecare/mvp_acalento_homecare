@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { EstadoDeOrigem } from "../../constants/origem";
 import { Link } from "react-router-dom";
 
 /*
@@ -91,9 +92,12 @@ const FIO = "absolute left-[11.5px] w-px bg-linha";
 export function LinhaDoTempo({
   eventos,
   className = "",
+  state,
 }: {
   eventos: EventoLinhaDoTempo[];
   className?: string;
+  /** A tela onde a linha do tempo está, para o "voltar" do destino saber por onde voltar. */
+  state?: EstadoDeOrigem;
 }) {
   return (
     <ol className={className}>
@@ -141,6 +145,7 @@ export function LinhaDoTempo({
                  vem da regra global de `:focus-visible` e acompanha o `rounded-control`. */
               <Link
                 to={e.para}
+                state={state}
                 className={`${base} transition-colors duration-150 ease-out hover:bg-surface-sunken/60 active:bg-surface-sunken`}
               >
                 {conteudo}

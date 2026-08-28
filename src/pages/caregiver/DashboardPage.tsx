@@ -15,6 +15,7 @@ import { AttendanceList, AttendanceRow } from "../../components/shared/Attendanc
 import { useAppState } from "../../hooks/useAppState";
 import { useSession } from "../../hooks/useSession";
 import { ATTENDANCE_TYPE_LABEL } from "../../constants/attendance";
+import { DE_INICIO } from "../../constants/origem";
 import { caregiverEarnings, todayISO } from "../../services/attendances";
 import { caregiverInvitations } from "../../services/invitations";
 import { formatCurrency } from "../../utils/format";
@@ -127,6 +128,7 @@ export function CaregiverDashboardPage() {
                   <div className="min-w-0">
                     <Link
                       to={`/cuidador/atendimentos/${next.id}`}
+                      state={DE_INICIO}
                       className="text-title text-ink transition-colors duration-150 ease-out hover:text-accent"
                     >
                       {patientName(next.patientId)}
@@ -165,6 +167,7 @@ export function CaregiverDashboardPage() {
                 */}
                 <ButtonLink
                   to={`/cuidador/atendimentos/${next.id}`}
+                  state={DE_INICIO}
                   variant="secondary"
                   size="sm"
                   className="mt-3.5 w-full sm:w-auto"
@@ -207,6 +210,7 @@ export function CaregiverDashboardPage() {
                     layout="empilhado"
                     attendance={a}
                     to={`/cuidador/atendimentos/${a.id}`}
+                    state={DE_INICIO}
                     patientName={patientName(a.patientId)}
                   />
                 ))}

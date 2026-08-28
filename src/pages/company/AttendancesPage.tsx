@@ -17,6 +17,7 @@ import { companyAttendances, isAwaitingCaregiver } from "../../services/attendan
 import { companyPatients } from "../../services/patients";
 import type { Attendance } from "../../types";
 import { PAGE_LIST } from "../../components/layout/page";
+import { DE_ATENDIMENTOS } from "../../constants/origem";
 
 type Filter = "all" | "awaiting" | "scheduled" | "done" | "draft";
 
@@ -85,7 +86,6 @@ export function CompanyAttendancesPage() {
     );
   }
 
-  const company = state.companies.find((c) => c.id === session?.companyId);
   const patients = companyPatients(state, session?.companyId);
 
   const patientName = (id: string) => patients.find((p) => p.id === id)?.name ?? "Paciente";
@@ -122,7 +122,7 @@ export function CompanyAttendancesPage() {
         <div>
           <h1 className="text-display">Atendimentos</h1>
           <p className="prosa mt-1 text-body text-ink-subtle">
-            Todo o histórico da {company?.name ?? "empresa"}.
+            Todos os atendimentos, do rascunho ao encerramento.
           </p>
         </div>
         {/* No celular "Filtros" divide a linha com "Novo atendimento"; no desktop o botão some
@@ -225,6 +225,7 @@ export function CompanyAttendancesPage() {
                 key={a.id}
                 attendance={a}
                 to={`/empresa/atendimentos/${a.id}`}
+                state={DE_ATENDIMENTOS}
                 patientName={patientName(a.patientId)}
                 caregiverName={caregiverName(a.confirmedCaregiverId)}
                 caregiverId={a.confirmedCaregiverId}

@@ -15,6 +15,7 @@ import {
 } from "../../components/ui";
 import { AttendanceList, AttendanceRow } from "../../components/shared/AttendanceRow";
 import { AttendanceOpenActions } from "../../components/shared/AttendanceOpenActions";
+import { DE_INICIO } from "../../constants/origem";
 import { rosterQueue } from "../../services/roster";
 import { awaitingByUrgency, compatibleCaregivers } from "../../services/matching";
 import { useAppState } from "../../hooks/useAppState";
@@ -309,6 +310,7 @@ export function CompanyDashboardPage() {
                   <li key={p.id}>
                     <Link
                       to={p.para}
+                      state={DE_INICIO}
                       className="flex min-h-11 items-start gap-2 rounded-control px-2 py-2 text-note text-ink-muted transition-colors duration-150 ease-out hover:bg-surface-sunken/60 hover:text-ink pointer-fine:min-h-0 pointer-fine:py-1.5"
                     >
                       <PontoNivel nivel={p.nivel} className="mt-2" />
@@ -395,6 +397,7 @@ export function CompanyDashboardPage() {
                     layout="empilhado"
                     attendance={a}
                     to={`/empresa/atendimentos/${a.id}`}
+                    state={DE_INICIO}
                     patientName={patientName(a.patientId)}
                     caregiverName={caregiverName(a.confirmedCaregiverId)}
                     caregiverId={a.confirmedCaregiverId}
@@ -435,6 +438,7 @@ export function CompanyDashboardPage() {
                       layout="empilhado"
                       attendance={a}
                       to={`/empresa/atendimentos/${a.id}`}
+                      state={DE_INICIO}
                       patientName={patientName(a.patientId)}
                       caregiverName={caregiverName(a.confirmedCaregiverId)}
                       caregiverId={a.confirmedCaregiverId}
@@ -497,6 +501,7 @@ export function CompanyDashboardPage() {
                     layout="empilhado"
                     attendance={a}
                     to={`/empresa/atendimentos/${a.id}`}
+                    state={DE_INICIO}
                     patientName={patientName(a.patientId)}
                     caregiverName={caregiverName(a.confirmedCaregiverId)}
                     caregiverId={a.confirmedCaregiverId}
@@ -519,7 +524,7 @@ export function CompanyDashboardPage() {
             {eventos.length === 0 ? (
               <Vazio porte="solto">Sem movimentação registrada.</Vazio>
             ) : (
-              <LinhaDoTempo eventos={eventos} />
+              <LinhaDoTempo eventos={eventos} state={DE_INICIO} />
             )}
           </Secao>
         </div>

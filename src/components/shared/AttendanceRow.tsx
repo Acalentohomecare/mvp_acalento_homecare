@@ -9,6 +9,7 @@ import {
 import { formatCurrency } from "../../utils/format";
 import { diaMes } from "../../utils/date";
 import type { Attendance } from "../../types";
+import type { EstadoDeOrigem } from "../../constants/origem";
 
 /*
  * A linha de registro do atendimento (docs/DESIGN_SYSTEM.md, seção 9.0).
@@ -173,6 +174,8 @@ interface AttendanceRowProps {
   patientName: string;
   /** Para onde a linha inteira navega. */
   to: string;
+  /** A tela de onde a linha foi aberta, para o "voltar" da ficha saber por onde voltar. */
+  state?: EstadoDeOrigem;
   caregiverName?: string;
   /** Quando presente junto de `caregiverName`, o nome vira link para o perfil do cuidador. */
   caregiverId?: string;
@@ -193,6 +196,7 @@ export function AttendanceRow({
   attendance,
   patientName,
   to,
+  state,
   caregiverName,
   caregiverId,
   note,
@@ -221,19 +225,35 @@ export function AttendanceRow({
          foco aparece só em volta do nome do paciente e não fica claro que a **linha** é o destino. */
       className={`relative grid transition-colors duration-150 ease-out hover:bg-surface-sunken/60 active:bg-surface-sunken has-[a:focus-visible]:bg-surface-sunken/60 ${GRADE[layout]}`}
     >
-      {/* Camada 1 — quando. A âncora operacional da linha. */}
+      {/*
+        Camada 1 — quando. A âncora operacional da linha.
+
+        Quem lidera depende de quem está sozinho. Na Agenda e nos plantões de hoje só a hora
+        aparece: o dia já é o do grupo, e a hora é a pergunta que sobra. Nas listas que atravessam
+        semanas — Atendimentos, "Em aberto", "Próximos" — a data volta, e é ela que passa a
+        carregar o peso: primeiro que dia, depois que horas.
+
+        Antes a hora vencia nos três eixos ao mesmo tempo (dois pontos maior, semibold e na tinta
+        cheia) enquanto a data ficava em 13px terciários por cima. Além de inverter a leitura,
+        isso jogava o elemento mais forte da coluna para a segunda linha, desencontrado do nome do
+        paciente ao lado — a linha inteira parecia torta. Com a troca, o item forte da coluna
+        divide a primeira linha de base com o nome, e a hora desce para o apoio.
+
+        `leading-tight` só quando as duas aparecem: ali elas precisam ler como um bloco só.
+        Sozinha, a hora volta à entrelinha normal para cair na mesma linha de base do nome.
+      */}
       <div className={celula.quando}>
         {showDate && (
-          <div className="numero text-meta leading-tight text-ink-subtle">
+          <div className="numero text-note font-semibold leading-tight text-ink">
             {diaMes(attendance.startDate)}
           </div>
         )}
-        {/* `leading-tight` só quando a data está por cima: ali as duas linhas precisam ler como
-            um bloco só. Sozinha, a hora volta à entrelinha normal para o seu texto cair na mesma
-            linha de base do nome do paciente ao lado — com a entrelinha apertada ela subia 2px e
-            a primeira linha do registro ficava torta. */}
         <div
-          className={`numero text-note font-semibold text-ink ${showDate ? "leading-tight" : ""}`}
+          className={
+            showDate
+              ? "numero text-meta leading-tight text-ink-muted"
+              : "numero text-note font-semibold text-ink"
+          }
         >
           {attendance.startTime}
         </div>
@@ -244,6 +264,7 @@ export function AttendanceRow({
       <div className={`min-w-0 ${celula.paciente}`}>
         <Link
           to={to}
+          state={state}
           className="block truncate text-note font-semibold text-ink after:absolute after:inset-0 hover:text-accent"
         >
           {patientName}
